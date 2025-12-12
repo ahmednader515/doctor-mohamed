@@ -26,7 +26,7 @@ const playpenSansArabic = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "منصة الدكتور محمد",
+  title: "منصة الدكتور",
   description: "منصة تعليمية متكاملة",
 };
 
