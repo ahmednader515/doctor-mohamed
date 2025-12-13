@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star, Users, BookOpen, Award, ChevronDown, Facebook, Youtube } from "lucide-react";
+import { ArrowRight, Star, Users, BookOpen, Award, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Navbar } from "@/components/navbar";
@@ -75,7 +75,7 @@ export default function HomePage() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const { data: session } = useSession();
   const router = useRouter();
-  const { t, language, isRTL } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -583,60 +583,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Fixed Social Media Icons */}
-      <div className={`fixed ${isRTL ? 'right-4' : 'left-4'} bottom-8 z-40 flex flex-col gap-4`}>
-        <motion.div
-          initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Link
-            href="https://wa.me/201104365170"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-12 h-12 bg-green-500 hover:bg-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 overflow-hidden"
-            aria-label="WhatsApp"
-          >
-            <Image
-              src="/whatsapp.png"
-              alt="WhatsApp"
-              width={24}
-              height={24}
-              className="object-contain"
-            />
-          </Link>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <Link
-            href="https://www.facebook.com/share/19zPN6zppS/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-            aria-label="Facebook"
-          >
-            <Facebook className="h-6 w-6" />
-          </Link>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <Link
-            href="https://www.youtube.com/@drmohamedmahmoud3m"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-            aria-label="YouTube"
-          >
-            <Youtube className="h-6 w-6" />
-          </Link>
-        </motion.div>
-      </div>
     </div>
   );
 } 

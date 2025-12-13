@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/contexts/language-context";
-import { Facebook, Youtube } from "lucide-react";
+import { Facebook, Youtube, Instagram } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -65,7 +65,7 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-brand transition-colors"
                 aria-label="Facebook"
               >
-                <Facebook className="h-6 w-6" />
+                <Facebook className="h-8 w-8" />
               </Link>
               <Link
                 href="https://www.youtube.com/@drmohamedmahmoud3m"
@@ -74,7 +74,16 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-brand transition-colors"
                 aria-label="YouTube"
               >
-                <Youtube className="h-6 w-6" />
+                <Youtube className="h-8 w-8" />
+              </Link>
+              <Link
+                href="https://www.instagram.com/mohamed__.mahmoud?igsh=NTJ1ZGM1enZldjEx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-brand transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram className="h-8 w-8" />
               </Link>
             </div>
             
