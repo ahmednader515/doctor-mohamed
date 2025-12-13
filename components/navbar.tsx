@@ -11,7 +11,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 
 export const Navbar = () => {
   const { data: session } = useSession();
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   const handleLogout = () => {
     signOut({ callbackUrl: "/" });
@@ -28,7 +28,7 @@ export const Navbar = () => {
               alt="Logo"
               width={100}
               height={100}
-              className="ml-2"
+              className="w-[100px] h-[100px] object-contain ml-2"
               unoptimized
             />
           </Link>
@@ -38,14 +38,17 @@ export const Navbar = () => {
             <LanguageSwitcher />
             {!session ? (
               <>
-                <Button className="bg-brand hover:bg-brand/90 text-white" asChild>
+                <Button 
+                  className={`bg-brand hover:bg-brand/90 text-white ${isRTL ? 'text-xs sm:text-sm px-2 sm:px-4' : ''}`} 
+                  asChild
+                >
                   <Link href="/sign-up">{t("navigation.signUp")}</Link>
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   asChild
-                  className="border-brand text-brand hover:bg-brand/10"
+                  className={`border-brand text-brand hover:bg-brand/10 ${isRTL ? 'text-xs sm:text-sm px-2 sm:px-4' : ''}`}
                 >
                   <Link href="/sign-in">{t("navigation.signIn")}</Link>
                 </Button>

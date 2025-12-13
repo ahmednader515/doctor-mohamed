@@ -53,7 +53,7 @@
   },
   "homepage": {
     "teacherName": "Dr. Mohamed Mahmoud",
-    "successStartsHere": "From atom to galaxy... understanding is the foundation",
+    "successStartsHere": "success starts here",
     "startNow": "Start Now",
     "availableCourses": "Available Courses",
     "discoverCourses": "Discover a variety of premium educational courses",
@@ -67,6 +67,23 @@
     "viewCourse": "View Course",
     "testimonials": "Student Testimonials",
     "testimonialsSubtitle": "What our students say about their experience with us",
+    "testimonialsList": [
+      {
+        "name": "Essam Osama",
+        "grade": "First Secondary Grade",
+        "testimonial": "An amazing experience with Dr. Mohamed, excellent explanation and an easy way to deliver information"
+      },
+      {
+        "name": "Seif Tarek",
+        "grade": "Second Secondary Grade",
+        "testimonial": "The curriculum is very organized and the explanation is clear, it helped me understand the subjects better"
+      },
+      {
+        "name": "Omar Mohamed",
+        "grade": "Third Secondary Grade",
+        "testimonial": "The best educational platform I've used, rich content and simplified explanation"
+      }
+    ],
     "platformFeatures": "Platform Features",
     "discoverFeatures": "Discover what makes our platform special",
     "highQuality": "High Quality",

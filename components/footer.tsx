@@ -16,13 +16,13 @@ export const Footer = () => {
   return (
     <footer className="py-6 border-t">
       <div className="container mx-auto px-4">
-        <div className={`flex flex-col md:flex-row items-center gap-6 ${
+        <div className={`flex flex-col md:flex-row items-center justify-center gap-6 ${
           hasSidebar 
             ? 'md:rtl:pr-56 md:ltr:pl-56 lg:rtl:pr-80 lg:ltr:pl-80' 
             : ''
         }`}>
-          {/* QR Code Section - Left Side */}
-          <div className="flex flex-col items-center md:items-start">
+          {/* QR Code Section */}
+          <div className="flex flex-col items-center">
             <Link
               href="https://www.youtube.com/@drmohamedmahmoud3m"
               target="_blank"
@@ -38,18 +38,23 @@ export const Footer = () => {
                 className="rounded-lg border-2 border-brand/20"
               />
             </Link>
-            <p className="text-sm text-muted-foreground text-center md:text-right max-w-[150px]">
+            <p className="text-sm text-muted-foreground text-center max-w-[150px]">
               {t("footer.scanToSubscribe")}
             </p>
           </div>
 
           {/* Main Content - Centered */}
-          <div className="flex-1 text-center text-muted-foreground">
-            <div className="inline-block bg-brand/10 border-2 border-brand/20 rounded-lg px-6 py-3 mb-4">
+          <div className="text-center text-muted-foreground">
+            <Link
+              href="https://wa.me/201104365170"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-brand/10 border-2 border-brand/20 rounded-lg px-6 py-3 mb-4 hover:bg-brand/20 transition-colors cursor-pointer"
+            >
               <p className="font-semibold text-lg text-brand">
                 {t("footer.whatsapp")} : 01104365170
               </p>
-            </div>
+            </Link>
             
             {/* Social Media Links */}
             <div className="flex items-center justify-center gap-4 mb-4">

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star, Users, BookOpen, Award, ChevronDown } from "lucide-react";
+import { ArrowRight, Star, Users, BookOpen, Award, ChevronDown, Facebook, Youtube } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Navbar } from "@/components/navbar";
@@ -12,6 +12,8 @@ import { db } from "@/lib/db"; // Import db client
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/contexts/language-context";
+import enTranslations from "@/lib/translations/en.json";
+import arTranslations from "@/lib/translations/ar.json";
 
 // Define types based on Prisma schema
 type Course = {
@@ -73,7 +75,7 @@ export default function HomePage() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const { data: session } = useSession();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language, isRTL } = useLanguage();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -449,23 +451,7 @@ export default function HomePage() {
             <p className="text-muted-foreground">{t("homepage.testimonialsSubtitle")}</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                name: "عصام اسامة",
-                grade: "الصف الأول الثانوي",
-                testimonial: "تجربة رائعة مع الدكتور محمد شرح مميز وطريقة سهلة في توصيل المعلومة"
-              },
-              {
-                name: "سيف طارق",
-                grade: "الصف الثاني الثانوي",
-                testimonial: "المنهج منظم جداً والشرح واضح، ساعدني في فهم المواد بشكل أفضل"
-              },
-              {
-                name: "عمر محمد",
-                grade: "الصف الأول الثانوي",
-                testimonial: "أفضل منصة تعليمية استخدمتها، المحتوى غني والشرح مبسط"
-              }
-            ].map((testimonial, index) => (
+            {((language === "en" ? enTranslations : arTranslations).homepage.testimonialsList as Array<{ name: string; grade: string; testimonial: string }>).map((testimonial, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -596,6 +582,61 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Fixed Social Media Icons */}
+      <div className={`fixed ${isRTL ? 'right-4' : 'left-4'} bottom-8 z-40 flex flex-col gap-4`}>
+        <motion.div
+          initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Link
+            href="https://wa.me/201104365170"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-12 h-12 bg-green-500 hover:bg-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 overflow-hidden"
+            aria-label="WhatsApp"
+          >
+            <Image
+              src="/whatsapp.png"
+              alt="WhatsApp"
+              width={24}
+              height={24}
+              className="object-contain"
+            />
+          </Link>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Link
+            href="https://www.facebook.com/share/19zPN6zppS/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+            aria-label="Facebook"
+          >
+            <Facebook className="h-6 w-6" />
+          </Link>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Link
+            href="https://www.youtube.com/@drmohamedmahmoud3m"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+            aria-label="YouTube"
+          >
+            <Youtube className="h-6 w-6" />
+          </Link>
+        </motion.div>
+      </div>
     </div>
   );
 } 
