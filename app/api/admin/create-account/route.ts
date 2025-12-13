@@ -17,9 +17,9 @@ export async function POST(req: Request) {
       return new NextResponse("Forbidden - Admin access required", { status: 403 });
     }
 
-    const { fullName, phoneNumber, parentPhoneNumber, password, confirmPassword, subject } = await req.json();
+    const { fullName, phoneNumber, parentPhoneNumber, password, confirmPassword, subject, grade, semester } = await req.json();
 
-    if (!fullName || !phoneNumber || !parentPhoneNumber || !password || !confirmPassword || !subject) {
+    if (!fullName || !phoneNumber || !parentPhoneNumber || !password || !confirmPassword || !subject || !grade || !semester) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -63,6 +63,8 @@ export async function POST(req: Request) {
         hashedPassword,
         role: "USER", // Always create as student
         subject,
+        grade,
+        semester,
       },
     });
 

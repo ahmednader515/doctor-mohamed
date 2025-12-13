@@ -19,6 +19,8 @@ model User {
   role                    String    @default("USER")
   balance                 Float     @default(0)
   subject                 String?   // كيمياء, فيزياء, علوم متكاملة
+  grade                   String?   // الصف الاول الثانوي, الصف الثاني الثانوي, الصف الثالث الثانوي
+  semester                String?   // الترم الاول, الترم الثاني
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
   courses                 Course[]
@@ -39,6 +41,8 @@ model Course {
   price Float?
   isPublished Boolean @default(false)
   subject String? // كيمياء, فيزياء, علوم متكاملة
+  grade String? // الصف الاول الثانوي, الصف الثاني الثانوي, الصف الثالث الثانوي
+  semester String? // الترم الاول, الترم الثاني
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -52,6 +56,8 @@ model Course {
   updatedAt DateTime @updatedAt
 
   @@index([subject])
+  @@index([grade])
+  @@index([semester])
 }
 
 model Attachment {

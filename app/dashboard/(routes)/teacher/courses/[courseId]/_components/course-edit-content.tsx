@@ -7,6 +7,8 @@ import { DescriptionForm } from "./description-form";
 import { ImageForm } from "./image-form";
 import { PriceForm } from "./price-form";
 import { SubjectForm } from "./subject-form";
+import { GradeForm } from "./grade-form";
+import { SemesterForm } from "./semester-form";
 import { CourseContentForm } from "./course-content-form";
 import { Banner } from "@/components/banner";
 import { Actions } from "./actions";
@@ -19,6 +21,8 @@ interface Course {
     imageUrl: string | null;
     price: number | null;
     subject: string | null;
+    grade: string | null;
+    semester: string | null;
     isPublished: boolean;
     chapters: Array<{ isPublished: boolean }>;
 }
@@ -117,6 +121,14 @@ export const CourseEditContent = ({
                             courseId={course.id}
                         />
                         <SubjectForm
+                            initialData={course}
+                            courseId={course.id}
+                        />
+                        <GradeForm
+                            initialData={course}
+                            courseId={course.id}
+                        />
+                        <SemesterForm
                             initialData={course}
                             courseId={course.id}
                         />

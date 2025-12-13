@@ -25,13 +25,15 @@ export default async function SearchPage({
     const resolvedParams = await searchParams;
     const title = typeof resolvedParams.title === 'string' ? resolvedParams.title : '';
 
-    // Get the user's subject
+    // Get the user's subject, grade, and semester
     const user = await db.user.findUnique({
         where: {
             id: session.user.id,
         },
         select: {
             subject: true,
+            grade: true,
+            semester: true,
         },
     });
 
@@ -44,6 +46,14 @@ export default async function SearchPage({
             // Filter by student's subject if they have one
             ...(user?.subject ? {
                 subject: user.subject,
+            } : {}),
+            // Filter by student's grade if they have one
+            ...(user?.grade ? {
+                grade: user.grade,
+            } : {}),
+            // Filter by student's semester if they have one
+            ...(user?.semester ? {
+                semester: user.semester,
             } : {}),
         },
         include: {

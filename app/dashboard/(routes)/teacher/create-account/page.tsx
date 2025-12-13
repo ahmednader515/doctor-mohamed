@@ -34,6 +34,8 @@ export default function CreateAccountPage() {
     password: "",
     confirmPassword: "",
     subject: "",
+    grade: "",
+    semester: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,6 +79,8 @@ export default function CreateAccountPage() {
           password: "",
           confirmPassword: "",
           subject: "",
+          grade: "",
+          semester: "",
         });
       }
     } catch (error) {
@@ -226,6 +230,41 @@ export default function CreateAccountPage() {
                       <SelectItem value="كيمياء">كيمياء</SelectItem>
                       <SelectItem value="فيزياء">فيزياء</SelectItem>
                       <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="grade">{t("auth.grade")}</Label>
+                  <Select
+                    value={formData.grade}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, grade: value }))}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("auth.gradePlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="الصف الاول الثانوي">الصف الاول الثانوي</SelectItem>
+                      <SelectItem value="الصف الثاني الثانوي">الصف الثاني الثانوي</SelectItem>
+                      <SelectItem value="الصف الثالث الثانوي">الصف الثالث الثانوي</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="semester">{t("auth.semester")}</Label>
+                  <Select
+                    value={formData.semester}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, semester: value }))}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("auth.semesterPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="الترم الاول">الترم الاول</SelectItem>
+                      <SelectItem value="الترم الثاني">الترم الثاني</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
