@@ -113,11 +113,11 @@
     "enterAmount": "Enter Amount",
     "adding": "Adding...",
     "addBalanceButton": "Add Balance",
-    "addViaVodafone": "Add balance via Vodafone Cash or InstaPay",
+    "addViaVodafone": "Add balance via InstaPay",
     "transferInstructions": "Transfer the amount to the following number and send a receipt photo",
-    "vodafoneNumber": "Vodafone Cash / InstaPay Number",
+    "vodafoneNumber": "InstaPay Number",
     "depositSteps": "Deposit Steps:",
-    "step1": "Transfer the required amount to the number above (Vodafone Cash or InstaPay)",
+    "step1": "Transfer the required amount to the number above (InstaPay)",
     "step2": "Save the transfer receipt photo from the app",
     "step3": "Click the \"Send Receipt Photo\" button below",
     "step4": "Your request will be reviewed and balance will be added to your account within 24 hours",
@@ -138,7 +138,8 @@
   },
   "footer": {
     "whatsapp": "WhatsApp",
-    "copyright": "© {year} Mordesu Studio. All rights reserved"
+    "copyright": "© {year} Mordesu Studio. All rights reserved",
+    "scanToSubscribe": "Scan to subscribe to our YouTube channel"
   },
   "sidebar": {
     "dashboard": "Dashboard",
