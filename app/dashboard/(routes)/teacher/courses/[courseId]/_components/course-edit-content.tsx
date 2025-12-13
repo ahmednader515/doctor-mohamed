@@ -6,6 +6,7 @@ import { TitleForm } from "./title-form";
 import { DescriptionForm } from "./description-form";
 import { ImageForm } from "./image-form";
 import { PriceForm } from "./price-form";
+import { SubjectForm } from "./subject-form";
 import { CourseContentForm } from "./course-content-form";
 import { Banner } from "@/components/banner";
 import { Actions } from "./actions";
@@ -17,6 +18,7 @@ interface Course {
     description: string | null;
     imageUrl: string | null;
     price: number | null;
+    subject: string | null;
     isPublished: boolean;
     chapters: Array<{ isPublished: boolean }>;
 }
@@ -111,6 +113,10 @@ export const CourseEditContent = ({
                             courseId={course.id}
                         />
                         <PriceForm
+                            initialData={course}
+                            courseId={course.id}
+                        />
+                        <SubjectForm
                             initialData={course}
                             courseId={course.id}
                         />

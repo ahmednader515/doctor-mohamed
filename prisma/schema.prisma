@@ -18,6 +18,7 @@ model User {
   image                   String?
   role                    String    @default("USER")
   balance                 Float     @default(0)
+  subject                 String?   // كيمياء, فيزياء, علوم متكاملة
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
   courses                 Course[]
@@ -37,6 +38,7 @@ model Course {
   imageUrl String? @db.Text
   price Float?
   isPublished Boolean @default(false)
+  subject String? // كيمياء, فيزياء, علوم متكاملة
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -48,6 +50,8 @@ model Course {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([subject])
 }
 
 model Attachment {

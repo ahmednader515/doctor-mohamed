@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import Link from "next/link";
 import axios, { AxiosError } from "axios";
@@ -24,6 +25,7 @@ export default function SignUpPage() {
     parentPhoneNumber: "",
     password: "",
     confirmPassword: "",
+    subject: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,6 +178,24 @@ export default function SignUpPage() {
                 onChange={handleInputChange}
                 placeholder="+20XXXXXXXXXX"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="subject">{t("auth.subject")}</Label>
+              <Select
+                value={formData.subject}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, subject: value }))}
+                disabled={isLoading}
+                required
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="كيمياء">كيمياء</SelectItem>
+                  <SelectItem value="فيزياء">فيزياء</SelectItem>
+                  <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t("auth.password")}</Label>

@@ -25,12 +25,26 @@ export default async function SearchPage({
     const resolvedParams = await searchParams;
     const title = typeof resolvedParams.title === 'string' ? resolvedParams.title : '';
 
+    // Get the user's subject
+    const user = await db.user.findUnique({
+        where: {
+            id: session.user.id,
+        },
+        select: {
+            subject: true,
+        },
+    });
+
     const courses = await db.course.findMany({
         where: {
             isPublished: true,
             title: {
                 contains: title,
-            }
+            },
+            // Filter by student's subject if they have one
+            ...(user?.subject ? {
+                subject: user.subject,
+            } : {}),
         },
         include: {
             chapters: {
