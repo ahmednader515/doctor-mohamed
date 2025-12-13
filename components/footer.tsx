@@ -77,7 +77,7 @@ export const Footer = () => {
                 <Youtube className="h-8 w-8" />
               </Link>
               <Link
-                href="https://www.instagram.com/mohamed__.mahmoud?igsh=NTJ1ZGM1enZldjEx"
+                href="https://www.instagram.com/drmohamedmahmoudmb?igsh=MWwweThyZzNsNHdmNA=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-brand transition-colors"

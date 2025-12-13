@@ -26,11 +26,13 @@ export default function BalancePage() {
   const [transactions, setTransactions] = useState<BalanceTransaction[]>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
   const [copiedNumber, setCopiedNumber] = useState(false);
+  const [copiedEtisalatNumber, setCopiedEtisalatNumber] = useState(false);
 
   // Check if user is a student (USER role)
   const isStudent = session?.user?.role === "USER";
   
   const paymentNumber = "01007380218";
+  const etisalatNumber = "01104365170";
   const whatsappLink = `https://wa.me/201104365170`;
 
   useEffect(() => {
@@ -208,6 +210,68 @@ export default function BalancePage() {
                   className="h-10 w-10"
                 >
                   {copiedNumber ? (
+                    <Check className="h-4 w-4 text-brand" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+              <p className="font-semibold text-sm">{t("balance.depositSteps")}</p>
+              <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+                <li>{t("balance.step1")}</li>
+                <li>{t("balance.step2")}</li>
+                <li>{t("balance.step3")}</li>
+                <li>{t("balance.step4")}</li>
+              </ol>
+            </div>
+
+            <Button
+              asChild
+              className="w-full bg-brand hover:bg-brand/90 text-white"
+              size="lg"
+            >
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="h-5 w-5 ml-2" />
+                {t("balance.sendReceipt")}
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Etisalat Cash Payment Section - Only for students */}
+      {isStudent && (
+        <Card className="border-brand/20 bg-brand/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-brand" />
+              {t("balance.addViaEtisalat")}
+            </CardTitle>
+            <CardDescription>
+              {t("balance.transferInstructions")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-card rounded-lg p-4 border-2 border-brand/30">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">{t("balance.etisalatNumber")}</p>
+                  <p className="text-2xl font-bold text-brand">{etisalatNumber}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => copyToClipboard(etisalatNumber, setCopiedEtisalatNumber)}
+                  className="h-10 w-10"
+                >
+                  {copiedEtisalatNumber ? (
                     <Check className="h-4 w-4 text-brand" />
                   ) : (
                     <Copy className="h-4 w-4" />
