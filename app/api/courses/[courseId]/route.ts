@@ -73,16 +73,28 @@ export async function PATCH(
             ? { id: resolvedParams.courseId }
             : { id: resolvedParams.courseId, userId };
 
+        // Filter out undefined values and only include fields that are being updated
+        const updateData: any = {};
+        if (values.grade !== undefined) updateData.grade = values.grade;
+        if (values.subject !== undefined) updateData.subject = values.subject;
+        if (values.semester !== undefined) updateData.semester = values.semester;
+        if (values.title !== undefined) updateData.title = values.title;
+        if (values.description !== undefined) updateData.description = values.description;
+        if (values.imageUrl !== undefined) updateData.imageUrl = values.imageUrl;
+        if (values.price !== undefined) updateData.price = values.price;
+        if (values.isPublished !== undefined) updateData.isPublished = values.isPublished;
+
         const course = await db.course.update({
             where: whereClause,
-            data: {
-                ...values,
-            }
+            data: updateData
         });
 
         return NextResponse.json(course);
     } catch (error) {
-        console.log("[COURSE_ID]", error);
+        console.error("[COURSE_ID]", error);
+        if (error instanceof Error) {
+            return new NextResponse(`Internal Error: ${error.message}`, { status: 500 });
+        }
         return new NextResponse("Internal Error", { status: 500 });
     }
 }

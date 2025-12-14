@@ -67,44 +67,32 @@ export const GradeForm = ({
     }, [initialData.subject, initialData.grade, isEditing]);
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        // If subject is set, validate it against the new grade
-        if (currentSubject) {
-            if (values.grade === "الصف الاول الثانوي" && currentSubject !== "علوم متكاملة") {
-                // Reset subject if incompatible
-                try {
-                    await axios.patch(`/api/courses/${courseId}`, { grade: values.grade, subject: null });
-                    toast.success(t("teacher.courseEdit.forms.updateSuccess"));
-                    toast.info(t("teacher.courseEdit.forms.subjectReset") || "تم إعادة تعيين المادة الدراسية لأنها غير متوافقة مع الصف المحدد");
-                    toggleEdit();
-                    router.refresh();
-                    return;
-                } catch {
-                    toast.error(t("teacher.courseEdit.forms.updateError"));
-                    return;
-                }
-            } else if (values.grade !== "الصف الاول الثانوي" && currentSubject === "علوم متكاملة") {
-                // Reset subject if incompatible
-                try {
-                    await axios.patch(`/api/courses/${courseId}`, { grade: values.grade, subject: null });
-                    toast.success(t("teacher.courseEdit.forms.updateSuccess"));
-                    toast.info(t("teacher.courseEdit.forms.subjectReset") || "تم إعادة تعيين المادة الدراسية لأنها غير متوافقة مع الصف المحدد");
-                    toggleEdit();
-                    router.refresh();
-                    return;
-                } catch {
-                    toast.error(t("teacher.courseEdit.forms.updateError"));
-                    return;
-                }
-            }
+        // Check if grade is actually changing
+        const gradeChanged = values.grade !== initialData.grade;
+        
+        const updateData: { grade: string; subject?: string | null; semester?: string | null } = {
+            grade: values.grade,
+        };
+
+        // Always reset subject when grade changes
+        if (gradeChanged) {
+            updateData.subject = null;
+        }
+
+        // Clear semester if grade is الصف الثالث الثانوي
+        if (values.grade === "الصف الثالث الثانوي") {
+            updateData.semester = null;
         }
 
         try {
-            await axios.patch(`/api/courses/${courseId}`, values);
+            await axios.patch(`/api/courses/${courseId}`, updateData);
             toast.success(t("teacher.courseEdit.forms.updateSuccess"));
             toggleEdit();
             router.refresh();
-        } catch {
-            toast.error(t("teacher.courseEdit.forms.updateError"));
+        } catch (error: any) {
+            console.error("Grade update error:", error);
+            const errorMessage = error?.response?.data || error?.message || t("teacher.courseEdit.forms.updateError");
+            toast.error(typeof errorMessage === "string" ? errorMessage : t("teacher.courseEdit.forms.updateError"));
         }
     }
 

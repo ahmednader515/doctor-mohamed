@@ -56,7 +56,9 @@
       "signInSuccess": "تم تسجيل الدخول بنجاح",
       "accountCreated": "تم إنشاء الحساب بنجاح",
       "recaptchaRequired": "يرجى إكمال التحقق من reCAPTCHA",
-      "recaptchaError": "فشل التحقق من reCAPTCHA. يرجى المحاولة مرة أخرى."
+      "recaptchaError": "فشل التحقق من reCAPTCHA. يرجى المحاولة مرة أخرى.",
+      "selectAtLeastOneSubject": "يرجى اختيار مادة واحدة على الأقل",
+      "subjectRequired": "يرجى اختيار المادة"
     }
   },
   "recaptcha": {

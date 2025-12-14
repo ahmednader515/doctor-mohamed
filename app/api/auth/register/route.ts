@@ -31,8 +31,33 @@ export async function POST(req: Request) {
   try {
     const { fullName, phoneNumber, parentPhoneNumber, password, confirmPassword, subject, grade, semester, recaptchaToken } = await req.json();
 
-    if (!fullName || !phoneNumber || !parentPhoneNumber || !password || !confirmPassword || !subject || !grade || !semester) {
+    if (!fullName || !phoneNumber || !parentPhoneNumber || !password || !confirmPassword || !grade) {
       return new NextResponse("Missing required fields", { status: 400 });
+    }
+
+    // Semester is only required for الصف الاول الثانوي and الصف الثاني الثانوي
+    if (grade !== "الصف الثالث الثانوي" && !semester) {
+      return new NextResponse("Semester is required for this grade", { status: 400 });
+    }
+
+    // Validate subject based on grade
+    if (grade === "الصف الاول الثانوي") {
+      if (!subject || subject !== "علوم متكاملة") {
+        return new NextResponse("Invalid subject for grade", { status: 400 });
+      }
+    } else if (grade === "الصف الثاني الثانوي" || grade === "الصف الثالث الثانوي") {
+      if (!subject || subject.trim() === "") {
+        return new NextResponse("Please select at least one subject", { status: 400 });
+      }
+      // Validate that subject contains only valid values (كيمياء, فيزياء)
+      const subjects = subject.split(",").map(s => s.trim());
+      const validSubjects = ["كيمياء", "فيزياء"];
+      const invalidSubjects = subjects.filter(s => !validSubjects.includes(s));
+      if (invalidSubjects.length > 0) {
+        return new NextResponse("Invalid subject selected", { status: 400 });
+      }
+    } else {
+      return new NextResponse("Invalid grade", { status: 400 });
     }
 
     // Verify reCAPTCHA if secret key is configured
@@ -79,6 +104,7 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
     
     // Create user directly without email verification
+    // Semester is only saved for الصف الاول الثانوي and الصف الثاني الثانوي
     await db.user.create({
       data: {
         fullName,
@@ -88,7 +114,7 @@ export async function POST(req: Request) {
         role: "USER",
         subject,
         grade,
-        semester,
+        semester: grade === "الصف الثالث الثانوي" ? null : semester,
       },
     });
 

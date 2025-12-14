@@ -46,15 +46,20 @@ export function RecaptchaGate({ children, storageKey = "recaptcha_verified" }: R
     setIsVerifying(true);
 
     try {
-      // Verify token on server
+      // Verify token on server with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
       const response = await fetch("/api/auth/verify-recaptcha", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ token }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (response.ok && data.success) {
@@ -69,7 +74,7 @@ export function RecaptchaGate({ children, storageKey = "recaptcha_verified" }: R
         setRecaptchaToken(null);
         setIsVerifying(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("reCAPTCHA verification error:", error);
       // Reset on error
       if (recaptchaRef.current) {
@@ -77,6 +82,11 @@ export function RecaptchaGate({ children, storageKey = "recaptcha_verified" }: R
       }
       setRecaptchaToken(null);
       setIsVerifying(false);
+      
+      // Handle timeout specifically
+      if (error.name === 'AbortError') {
+        console.error("reCAPTCHA verification timeout");
+      }
     }
   };
 

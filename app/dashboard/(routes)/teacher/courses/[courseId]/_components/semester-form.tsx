@@ -23,6 +23,7 @@ import { useLanguage } from "@/lib/contexts/language-context";
 interface SemesterFormProps {
     initialData: {
         semester: string | null;
+        grade: string | null;
     };
 
     courseId: string;
@@ -63,6 +64,11 @@ export const SemesterForm = ({
         } catch {
             toast.error(t("teacher.courseEdit.forms.updateError"));
         }
+    }
+
+    // Hide semester form by default or if grade is الصف الثالث الثانوي
+    if (!initialData.grade || initialData.grade === "الصف الثالث الثانوي") {
+        return null;
     }
 
     return (

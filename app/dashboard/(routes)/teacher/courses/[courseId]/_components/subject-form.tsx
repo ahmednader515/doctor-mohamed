@@ -120,9 +120,19 @@ export const SubjectForm = ({
                 </Button>
             </div>
             {!isEditing && (
-                <p className="text-sm mt-2 text-muted-foreground">
-                    {initialData.subject || t("teacher.courseEdit.forms.noSubject")}
-                </p>
+                <div className="space-y-1">
+                    <p className="text-sm mt-2 text-muted-foreground">
+                        {initialData.subject || t("teacher.courseEdit.forms.noSubject")}
+                    </p>
+                    {currentGrade && initialData.subject && (
+                        (currentGrade === "الصف الاول الثانوي" && initialData.subject !== "علوم متكاملة") ||
+                        (currentGrade !== "الصف الاول الثانوي" && initialData.subject === "علوم متكاملة")
+                    ) && (
+                        <p className="text-sm text-destructive">
+                            {t("teacher.courseEdit.forms.subjectGradeMismatch") || "المادة الدراسية غير متوافقة مع الصف المحدد. يرجى تحديث الصف أو المادة."}
+                        </p>
+                    )}
+                </div>
             )}
 
             {isEditing && (

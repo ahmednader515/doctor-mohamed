@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
 import Link from "next/link";
 import axios, { AxiosError } from "axios";
@@ -30,6 +31,7 @@ export default function SignUpPage() {
     password: "",
     confirmPassword: "",
     subject: "",
+    subjects: [] as string[], // For multiple subjects (الصف الثاني الثانوي)
     grade: "",
     semester: "",
   });
@@ -57,6 +59,26 @@ export default function SignUpPage() {
 
     if (!passwordChecks.isValid) {
       toast.error(t("auth.passwordsNotMatch"));
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate subject selection
+    if (formData.grade === "الصف الثاني الثانوي" || formData.grade === "الصف الثالث الثانوي") {
+      if (formData.subjects.length === 0) {
+        toast.error(t("auth.errors.selectAtLeastOneSubject") || "Please select at least one subject");
+        setIsLoading(false);
+        return;
+      }
+    } else if (!formData.subject) {
+      toast.error(t("auth.errors.subjectRequired") || "Please select a subject");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate semester (not required for الصف الثالث الثانوي)
+    if (formData.grade !== "الصف الثالث الثانوي" && !formData.semester) {
+      toast.error(t("auth.semesterRequired") || "Please select a semester");
       setIsLoading(false);
       return;
     }
@@ -206,14 +228,12 @@ export default function SignUpPage() {
               <Select
                 value={formData.grade}
                 onValueChange={(value) => {
-                  // Reset subject if it's not compatible with the new grade
-                  let newSubject = formData.subject;
-                  if (value === "الصف الاول الثانوي" && formData.subject !== "علوم متكاملة") {
-                    newSubject = "";
-                  } else if (value !== "الصف الاول الثانوي" && formData.subject === "علوم متكاملة") {
-                    newSubject = "";
+                  // Reset subjects when grade changes
+                  if (value === "الصف الاول الثانوي") {
+                    setFormData((prev) => ({ ...prev, grade: value, subject: "", subjects: [] }));
+                  } else {
+                    setFormData((prev) => ({ ...prev, grade: value, subject: "", subjects: [] }));
                   }
-                  setFormData((prev) => ({ ...prev, grade: value, subject: newSubject }));
                 }}
                 disabled={isLoading}
                 required
@@ -228,46 +248,67 @@ export default function SignUpPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="subject">{t("auth.subject")}</Label>
-              <Select
-                value={formData.subject}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, subject: value }))}
-                disabled={isLoading || !formData.grade}
-                required
-              >
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder={t("auth.subjectPlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {formData.grade === "الصف الاول الثانوي" ? (
-                    <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
-                  ) : (
-                    <>
-                      <SelectItem value="كيمياء">كيمياء</SelectItem>
-                      <SelectItem value="فيزياء">فيزياء</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="semester">{t("auth.semester")}</Label>
-              <Select
-                value={formData.semester}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, semester: value }))}
-                disabled={isLoading}
-                required
-              >
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder={t("auth.semesterPlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="الترم الاول">الترم الاول</SelectItem>
-                  <SelectItem value="الترم الثاني">الترم الثاني</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {formData.grade && (
+              <div className="space-y-2">
+                <Label htmlFor="subject">{t("auth.subject")}</Label>
+                {formData.grade === "الصف الاول الثانوي" ? (
+                  <Select
+                    value={formData.subject}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, subject: value, subjects: [] }))}
+                    disabled={isLoading || !formData.grade}
+                    required
+                  >
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (formData.grade === "الصف الثاني الثانوي" || formData.grade === "الصف الثالث الثانوي") ? (
+                  <div className="space-y-2">
+                    <MultiSelect
+                      options={[
+                        { label: "كيمياء", value: "كيمياء" },
+                        { label: "فيزياء", value: "فيزياء" },
+                      ]}
+                      selected={formData.subjects}
+                      onChange={(selected) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          subjects: selected,
+                          subject: selected.join(",")
+                        }));
+                      }}
+                      placeholder={t("auth.subjectPlaceholder")}
+                      disabled={isLoading}
+                    />
+                    {formData.subjects.length === 0 && (
+                      <p className="text-sm text-destructive mt-1">{t("auth.errors.selectAtLeastOneSubject") || "Please select at least one subject"}</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            )}
+            {formData.grade !== "الصف الثالث الثانوي" && (
+              <div className="space-y-2">
+                <Label htmlFor="semester">{t("auth.semester")}</Label>
+                <Select
+                  value={formData.semester}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, semester: value }))}
+                  disabled={isLoading}
+                  required
+                >
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder={t("auth.semesterPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="الترم الاول">الترم الاول</SelectItem>
+                    <SelectItem value="الترم الثاني">الترم الثاني</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="password">{t("auth.password")}</Label>
               <div className="relative">
@@ -354,7 +395,13 @@ export default function SignUpPage() {
             <Button
               type="submit"
               className="w-full h-10 bg-brand hover:bg-brand/90 text-white"
-              disabled={isLoading || !passwordChecks.isValid || (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken)}
+              disabled={
+                isLoading || 
+                !passwordChecks.isValid || 
+                (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken) ||
+                (formData.grade === "الصف الثاني الثانوي" || formData.grade === "الصف الثالث الثانوي" ? formData.subjects.length === 0 : !formData.subject) ||
+                (formData.grade !== "الصف الثالث الثانوي" && !formData.semester)
+              }
             >
               {isLoading ? t("auth.creatingAccount") : t("auth.createAccountButton")}
             </Button>

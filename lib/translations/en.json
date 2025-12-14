@@ -56,7 +56,9 @@
       "signInSuccess": "Successfully signed in",
       "accountCreated": "Account created successfully",
       "recaptchaRequired": "Please complete the reCAPTCHA verification",
-      "recaptchaError": "reCAPTCHA verification failed. Please try again."
+      "recaptchaError": "reCAPTCHA verification failed. Please try again.",
+      "selectAtLeastOneSubject": "Please select at least one subject",
+      "subjectRequired": "Please select a subject"
     }
   },
   "recaptcha": {

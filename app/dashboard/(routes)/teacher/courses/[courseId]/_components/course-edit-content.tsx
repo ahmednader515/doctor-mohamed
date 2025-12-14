@@ -120,18 +120,20 @@ export const CourseEditContent = ({
                             initialData={course}
                             courseId={course.id}
                         />
-                        <SubjectForm
-                            initialData={course}
-                            courseId={course.id}
-                        />
                         <GradeForm
                             initialData={course}
                             courseId={course.id}
                         />
-                        <SemesterForm
+                        <SubjectForm
                             initialData={course}
                             courseId={course.id}
                         />
+                        {course.grade && course.grade !== "الصف الثالث الثانوي" && (
+                            <SemesterForm
+                                initialData={course}
+                                courseId={course.id}
+                            />
+                        )}
                     </div>
                     <div className="space-y-6">
                         <div>

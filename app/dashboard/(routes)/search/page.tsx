@@ -37,15 +37,22 @@ export default async function SearchPage({
         },
     });
 
+    // Handle multiple subjects (comma-separated)
+    const userSubjects = user?.subject 
+      ? user.subject.split(",").map(s => s.trim()).filter(s => s.length > 0)
+      : [];
+
     const courses = await db.course.findMany({
         where: {
             isPublished: true,
             title: {
                 contains: title,
             },
-            // Filter by student's subject if they have one
-            ...(user?.subject ? {
-                subject: user.subject,
+            // Filter by student's subject(s) if they have one
+            ...(userSubjects.length > 0 ? {
+                subject: {
+                    in: userSubjects,
+                },
             } : {}),
             // Filter by student's grade if they have one
             ...(user?.grade ? {
