@@ -251,7 +251,7 @@ const QuizViewPage = ({ params }: { params: Promise<{ quizId: string }> }) => {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <span>إمحمدي الدرجات</span>
+                                <span>إجمالي الدرجات</span>
                                 <Badge variant="default">
                                     {quiz.questions.reduce((sum, q) => sum + q.points, 0)} درجة
                                 </Badge>

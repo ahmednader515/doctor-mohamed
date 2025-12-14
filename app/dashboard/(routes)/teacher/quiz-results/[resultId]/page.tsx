@@ -366,7 +366,7 @@ const QuizResultDetailPage = ({ params }: { params: Promise<{ resultId: string }
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <span>إمحمدي الدرجات</span>
+                                <span>إجمالي الدرجات</span>
                                 <Badge variant="default">{result.totalPoints} درجة</Badge>
                             </div>
                             <div className="flex items-center justify-between">

@@ -5,6 +5,7 @@ import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import {
     Form,
@@ -16,13 +17,13 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
-import { useState } from "react";
 import toast from "react-hot-toast";
 import { useLanguage } from "@/lib/contexts/language-context";
 
 interface SubjectFormProps {
     initialData: {
         subject: string | null;
+        grade: string | null;
     };
 
     courseId: string;
@@ -40,6 +41,7 @@ export const SubjectForm = ({
 }: SubjectFormProps) => {
     const { t } = useLanguage();
     const [isEditing, setIsEditing] = useState(false);
+    const [currentGrade, setCurrentGrade] = useState<string | null>(initialData.grade);
 
     const toggleEdit = () => setIsEditing((current) => !current);
 
@@ -54,7 +56,46 @@ export const SubjectForm = ({
 
     const { isSubmitting, isValid } = form.formState;
 
+    // Update current grade when initialData changes (after router.refresh())
+    useEffect(() => {
+        setCurrentGrade(initialData.grade);
+        if (!isEditing) {
+            form.reset({
+                subject: initialData.subject || "",
+            });
+        }
+    }, [initialData.grade, initialData.subject, isEditing]);
+
+    // Get available subjects based on grade
+    const getAvailableSubjects = () => {
+        if (currentGrade === "الصف الاول الثانوي") {
+            return [{ value: "علوم متكاملة", label: "علوم متكاملة" }];
+        } else if (currentGrade === "الصف الثاني الثانوي" || currentGrade === "الصف الثالث الثانوي") {
+            return [
+                { value: "كيمياء", label: "كيمياء" },
+                { value: "فيزياء", label: "فيزياء" }
+            ];
+        }
+        return [
+            { value: "كيمياء", label: "كيمياء" },
+            { value: "فيزياء", label: "فيزياء" },
+            { value: "علوم متكاملة", label: "علوم متكاملة" }
+        ];
+    };
+
+    const availableSubjects = getAvailableSubjects();
+
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        // Validate subject against current grade
+        if (currentGrade === "الصف الاول الثانوي" && values.subject !== "علوم متكاملة") {
+            toast.error(t("teacher.courseEdit.forms.subjectGradeMismatch") || "علوم متكاملة متاحة فقط للصف الاول الثانوي");
+            return;
+        }
+        if (currentGrade && currentGrade !== "الصف الاول الثانوي" && values.subject === "علوم متكاملة") {
+            toast.error(t("teacher.courseEdit.forms.subjectGradeMismatch") || "علوم متكاملة متاحة فقط للصف الاول الثانوي");
+            return;
+        }
+
         try {
             await axios.patch(`/api/courses/${courseId}`, values);
             toast.success(t("teacher.courseEdit.forms.updateSuccess"));
@@ -87,6 +128,11 @@ export const SubjectForm = ({
             {isEditing && (
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+                        {!currentGrade && (
+                            <p className="text-sm text-yellow-600 mb-2">
+                                {t("teacher.courseEdit.forms.selectGradeFirst") || "يرجى تحديد الصف الدراسي أولاً"}
+                            </p>
+                        )}
                         <FormField 
                             control={form.control}
                             name="subject"
@@ -96,15 +142,17 @@ export const SubjectForm = ({
                                         <Select
                                             value={field.value}
                                             onValueChange={field.onChange}
-                                            disabled={isSubmitting}
+                                            disabled={isSubmitting || !currentGrade}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder={t("auth.subjectPlaceholder")} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="كيمياء">كيمياء</SelectItem>
-                                                <SelectItem value="فيزياء">فيزياء</SelectItem>
-                                                <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                {availableSubjects.map((subject) => (
+                                                    <SelectItem key={subject.value} value={subject.value}>
+                                                        {subject.label}
+                                                    </SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </FormControl>

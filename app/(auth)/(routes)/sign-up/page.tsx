@@ -200,28 +200,19 @@ export default function SignUpPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="subject">{t("auth.subject")}</Label>
-              <Select
-                value={formData.subject}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, subject: value }))}
-                disabled={isLoading}
-                required
-              >
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder={t("auth.subjectPlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="كيمياء">كيمياء</SelectItem>
-                  <SelectItem value="فيزياء">فيزياء</SelectItem>
-                  <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="grade">{t("auth.grade")}</Label>
               <Select
                 value={formData.grade}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, grade: value }))}
+                onValueChange={(value) => {
+                  // Reset subject if it's not compatible with the new grade
+                  let newSubject = formData.subject;
+                  if (value === "الصف الاول الثانوي" && formData.subject !== "علوم متكاملة") {
+                    newSubject = "";
+                  } else if (value !== "الصف الاول الثانوي" && formData.subject === "علوم متكاملة") {
+                    newSubject = "";
+                  }
+                  setFormData((prev) => ({ ...prev, grade: value, subject: newSubject }));
+                }}
                 disabled={isLoading}
                 required
               >
@@ -232,6 +223,29 @@ export default function SignUpPage() {
                   <SelectItem value="الصف الاول الثانوي">الصف الاول الثانوي</SelectItem>
                   <SelectItem value="الصف الثاني الثانوي">الصف الثاني الثانوي</SelectItem>
                   <SelectItem value="الصف الثالث الثانوي">الصف الثالث الثانوي</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="subject">{t("auth.subject")}</Label>
+              <Select
+                value={formData.subject}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, subject: value }))}
+                disabled={isLoading || !formData.grade}
+                required
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {formData.grade === "الصف الاول الثانوي" ? (
+                    <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                  ) : (
+                    <>
+                      <SelectItem value="كيمياء">كيمياء</SelectItem>
+                      <SelectItem value="فيزياء">فيزياء</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>

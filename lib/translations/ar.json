@@ -106,7 +106,7 @@
   },
   "dashboard": {
     "welcome": "مرحباً بك في لوحة التحكم",
-    "successStartsHere": "من الذرّة للمجرة… الفهم هو الأساس",
+    "successStartsHere": "معنا النجاح ليه طريق واضح",
     "currentBalance": "الرصيد الحالي",
     "purchasedCourses": "الكورسات المشتراة",
     "completedChapters": "الفصول المكتملة",
@@ -116,7 +116,7 @@
     "lastWatched": "آخر مشاهدة منذ ساعة",
     "continueWatching": "متابعة المشاهدة",
     "learningStats": "إحصائيات التعلم",
-    "totalChapters": "إمحمدي الفصول",
+    "totalChapters": "إجمالي الفصول",
     "completedOf": "{completed} من {total} مكتمل",
     "completedQuizzes": "الاختبارات المكتملة",
     "myCourses": "كورساتي",
@@ -361,10 +361,10 @@
       "title": "درجات الطلاب",
       "loading": "جاري التحميل...",
       "summary": {
-        "totalStudents": "إمحمدي الطلاب",
+        "totalStudents": "إجمالي الطلاب",
         "averageScore": "متوسط الدرجات",
         "highestScore": "أعلى درجة",
-        "totalQuizzes": "إمحمدي الاختبارات"
+        "totalQuizzes": "إجمالي الاختبارات"
       },
       "filters": {
         "title": "فلاتر البحث",
@@ -458,8 +458,8 @@
       "title": "لوحة الاحصائيات",
       "subtitle": "التحليلات الخاصة بك",
       "metrics": {
-        "totalRevenue": "إمحمدي الإيرادات",
-        "totalSales": "إمحمدي المبيعات",
+        "totalRevenue": "إجمالي الإيرادات",
+        "totalSales": "إجمالي المبيعات",
         "publishedCourses": "الكورسات المنشورة"
       },
       "charts": {
@@ -507,7 +507,7 @@
       "filterByCourse": "تصفية حسب الكورس:",
       "allCourses": "جميع الكورسات",
       "stats": {
-        "total": "إمحمدي الأكواد",
+        "total": "إجمالي الأكواد",
         "unused": "أكواد غير مستخدمة",
         "used": "أكواد مستخدمة"
       },
@@ -672,6 +672,9 @@
         "noSemester": "لا يوجد فصل محدد",
         "updateSuccess": "تم تحديث الكورس",
         "updateError": "حدث خطأ",
+        "subjectGradeMismatch": "المادة الدراسية غير متوافقة مع الصف المحدد",
+        "subjectReset": "تم إعادة تعيين المادة الدراسية لأنها غير متوافقة مع الصف المحدد",
+        "selectGradeFirst": "يرجى تحديد الصف الدراسي أولاً",
         "publishSuccess": "تم نشر الكورس",
         "unpublishSuccess": "تم إلغاء النشر",
         "publishError": "حدث خطأ",
@@ -984,7 +987,7 @@
       "filterByCourse": "تصفية حسب الكورس:",
       "allCourses": "جميع الكورسات",
       "statistics": {
-        "totalCodes": "إمحمدي الأكواد",
+        "totalCodes": "إجمالي الأكواد",
         "unusedCodes": "أكواد غير مستخدمة",
         "usedCodes": "أكواد مستخدمة"
       },
