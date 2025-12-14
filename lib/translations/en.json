@@ -59,6 +59,13 @@
       "recaptchaError": "reCAPTCHA verification failed. Please try again."
     }
   },
+  "recaptcha": {
+    "gate": {
+      "title": "Security Verification",
+      "description": "Please verify that you are human to continue",
+      "verifying": "Verifying..."
+    }
+  },
   "homepage": {
     "teacherName": "Dr. Mohamed Mahmoud",
     "successStartsHere": "success starts here",

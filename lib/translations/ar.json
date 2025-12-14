@@ -59,6 +59,13 @@
       "recaptchaError": "فشل التحقق من reCAPTCHA. يرجى المحاولة مرة أخرى."
     }
   },
+  "recaptcha": {
+    "gate": {
+      "title": "التحقق الأمني",
+      "description": "يرجى التحقق من أنك إنسان للمتابعة",
+      "verifying": "جاري التحقق..."
+    }
+  },
   "homepage": {
     "teacherName": "دكتور / محمد محمود",
     "successStartsHere": "معانا النجاح ليه طريق واضح",
