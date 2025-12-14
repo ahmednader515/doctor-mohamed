@@ -54,7 +54,9 @@
       "samePhone": "رقم الهاتف لا يمكن أن يكون نفس رقم هاتف الوالد",
       "accountCreationError": "حدث خطأ أثناء إنشاء الحساب",
       "signInSuccess": "تم تسجيل الدخول بنجاح",
-      "accountCreated": "تم إنشاء الحساب بنجاح"
+      "accountCreated": "تم إنشاء الحساب بنجاح",
+      "recaptchaRequired": "يرجى إكمال التحقق من reCAPTCHA",
+      "recaptchaError": "فشل التحقق من reCAPTCHA. يرجى المحاولة مرة أخرى."
     }
   },
   "homepage": {

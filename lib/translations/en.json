@@ -54,7 +54,9 @@
       "samePhone": "Phone number cannot be the same as parent phone number",
       "accountCreationError": "An error occurred while creating the account",
       "signInSuccess": "Successfully signed in",
-      "accountCreated": "Account created successfully"
+      "accountCreated": "Account created successfully",
+      "recaptchaRequired": "Please complete the reCAPTCHA verification",
+      "recaptchaError": "reCAPTCHA verification failed. Please try again."
     }
   },
   "homepage": {

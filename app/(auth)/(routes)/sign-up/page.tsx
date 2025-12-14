@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import axios, { AxiosError } from "axios";
 import { Check, X, Eye, EyeOff, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/lib/contexts/language-context";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -19,6 +20,8 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
@@ -57,14 +60,27 @@ export default function SignUpPage() {
       return;
     }
 
+    // Only require reCAPTCHA if site key is configured
+    if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken) {
+      toast.error(t("auth.errors.recaptchaRequired") || "Please complete the reCAPTCHA verification");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await axios.post("/api/auth/register", formData);
+      const response = await axios.post("/api/auth/register", {
+        ...formData,
+        recaptchaToken,
+      });
       
       if (response.data.success) {
         toast.success(t("auth.errors.accountCreated"));
         router.push("/sign-in");
       }
     } catch (error) {
+      // Reset reCAPTCHA on error
+      recaptchaRef.current?.reset();
+      setRecaptchaToken(null);
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 400) {
         const errorMessage = axiosError.response.data as string;
@@ -76,6 +92,8 @@ export default function SignUpPage() {
           toast.error(t("auth.errors.samePhone"));
         } else if (errorMessage.includes("Passwords do not match")) {
           toast.error(t("auth.passwordsNotMatch"));
+        } else if (errorMessage.includes("reCAPTCHA")) {
+          toast.error(t("auth.errors.recaptchaError") || "reCAPTCHA verification failed. Please try again.");
         } else {
           toast.error(t("auth.errors.accountCreationError"));
         }
@@ -305,10 +323,22 @@ export default function SignUpPage() {
               </div>
             </div>
 
+            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+              <div className="flex justify-center">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                  onChange={(token) => setRecaptchaToken(token)}
+                  onExpired={() => setRecaptchaToken(null)}
+                  onError={() => setRecaptchaToken(null)}
+                />
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full h-10 bg-brand hover:bg-brand/90 text-white"
-              disabled={isLoading || !passwordChecks.isValid}
+              disabled={isLoading || !passwordChecks.isValid || (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken)}
             >
               {isLoading ? t("auth.creatingAccount") : t("auth.createAccountButton")}
             </Button>
