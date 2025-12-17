@@ -12,6 +12,11 @@ export const contentType = 'image/png';
 
 // Image generation
 export default async function Icon() {
+  // Construct absolute URL for the logo using environment variables
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+  const logoUrl = `${baseUrl}/logo.png`;
+
   return new ImageResponse(
     (
       // ImageResponse JSX element
@@ -27,7 +32,7 @@ export default async function Icon() {
         }}
       >
         <img
-          src="/logo.png"
+          src={logoUrl}
           alt="Logo"
           style={{
             width: '100%',

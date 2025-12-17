@@ -19,7 +19,7 @@ export const FileUpload = ({
             onClientUploadComplete={(res) => {
                 if (res && res[0]) {
                     onChange({
-                        url: res[0].url || res[0].ufsUrl,
+                        url: res[0].ufsUrl,
                         name: res[0].name
                     });
                 }

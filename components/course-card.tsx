@@ -40,6 +40,9 @@ export const CourseCard = ({
                         className="object-cover"
                         alt={title}
                         src={imageUrl}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        loading="eager"
+                        priority
                     />
                 </div>
                 <div className="flex flex-col pt-2">

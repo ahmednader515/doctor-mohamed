@@ -24,7 +24,7 @@ export const ourFileRouter = {
     })
     .middleware(() => handleAuth())
     .onUploadComplete(async ({ file }) => {
-        return { url: file.url, name: file.name };
+        return { url: file.ufsUrl, name: file.name };
     }),
 
     chapterVideo: f({ video: {maxFileCount: 1, maxFileSize: "512GB"} })
