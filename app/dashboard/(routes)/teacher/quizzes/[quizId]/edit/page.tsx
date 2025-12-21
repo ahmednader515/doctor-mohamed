@@ -570,7 +570,7 @@ const EditQuizPage = () => {
                                                                             {item.title}
                                                                         </div>
                                                                         <div className={`text-sm ${item.id === quizId ? "text-blue-600" : "text-muted-foreground"}`}>
-                                                                            {item.type === "chapter" ? "فصل" : "اختبار"}
+                                                                            {item.type === "chapter" ? "درس" : "اختبار"}
                                                                         </div>
                                                                     </div>
                                                                 </div>

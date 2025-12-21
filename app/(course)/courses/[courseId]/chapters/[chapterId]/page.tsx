@@ -162,7 +162,7 @@ const ChapterPage = () => {
         console.error("🔍 Error fetching data:", axiosError);
         if (axiosError.response) {
           console.error("🔍 Error response:", axiosError.response.data);
-          toast.error(`فشل تحميل الفصل: ${axiosError.response.data}`);
+          toast.error(`فشل تحميل الدرس: ${axiosError.response.data}`);
         } else if (axiosError.request) {
           console.error("🔍 Error request:", axiosError.request);
           toast.error("فشل الاتصال بالخادم");
@@ -238,7 +238,7 @@ const ChapterPage = () => {
   if (!chapter) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-muted-foreground">لم يتم العثور على الفصل</div>
+        <div className="text-muted-foreground">لم يتم العثور على الدرس</div>
       </div>
     );
   }
@@ -248,7 +248,7 @@ const ChapterPage = () => {
       <div className="h-full flex items-center justify-center">
         <div className="text-center space-y-4">
           <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
-          <h2 className="text-2xl font-semibold">هذا الفصل مغلق</h2>
+          <h2 className="text-2xl font-semibold">هذا الدرس مغلق</h2>
           <p className="text-muted-foreground">شراء الكورس للوصول إلى جميع الفصول</p>
           <Button onClick={() => router.push(`/courses/${routeParams.courseId}/purchase`)}>
             شراء الكورس
@@ -337,7 +337,7 @@ const ChapterPage = () => {
               <div className="mt-6 p-4 border rounded-lg bg-card">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold">مستندات الفصل</h3>
+                  <h3 className="text-lg font-semibold">مستندات الدرس</h3>
                 </div>
                 <div className="space-y-2">
                   {chapter.attachments.map((attachment) => (
@@ -347,7 +347,7 @@ const ChapterPage = () => {
                         <p className="text-sm font-medium truncate">
                           {attachment.name || getFilenameFromUrl(attachment.url)}
                         </p>
-                        <p className="text-xs text-muted-foreground">مستند الفصل</p>
+                        <p className="text-xs text-muted-foreground">مستند الدرس</p>
                       </div>
                       <div className="mr-auto flex items-center gap-2 flex-shrink-0">
                         <Button
@@ -378,7 +378,7 @@ const ChapterPage = () => {
               <div className="mt-6 p-4 border rounded-lg bg-card">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold">مستند الفصل</h3>
+                  <h3 className="text-lg font-semibold">مستند الدرس</h3>
                 </div>
                 <div className="flex items-center p-3 w-full bg-secondary/50 border-secondary/50 border text-secondary-foreground rounded-md">
                   <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -386,7 +386,7 @@ const ChapterPage = () => {
                     <p className="text-sm font-medium truncate">
                       {chapter.documentName || getFilenameFromUrl(chapter.documentUrl || '')}
                     </p>
-                    <p className="text-xs text-muted-foreground">مستند الفصل</p>
+                    <p className="text-xs text-muted-foreground">مستند الدرس</p>
                   </div>
                   <div className="mr-auto flex items-center gap-2 flex-shrink-0">
                     <Button
@@ -420,7 +420,7 @@ const ChapterPage = () => {
               className="flex items-center gap-2"
             >
               <ChevronRight className="h-4 w-4" />
-              الفصل السابق
+              الدرس السابق
             </Button>
 
             <Button
@@ -428,7 +428,7 @@ const ChapterPage = () => {
               disabled={!chapter.nextChapterId}
               className="flex items-center gap-2"
             >
-              الفصل التالي
+              الدرس التالي
               <ChevronLeft className="h-4 w-4" />
             </Button>
           </div>

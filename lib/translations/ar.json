@@ -77,7 +77,7 @@
     "noCoursesAvailable": "لا توجد كورسات متاحة حالياً",
     "coursesComingSoon": "سيتم إضافة الكورسات قريباً. تحقق من هذه الصفحة لاحقاً للاطلاع على أحدث الكورسات التعليمية.",
     "signUpForEarlyAccess": "سجل الآن للوصول المبكر",
-    "chapter": "فصل",
+    "chapter": "درس",
     "chapters": "فصول",
     "quiz": "اختبار",
     "quizzes": "اختبارات",
@@ -120,8 +120,8 @@
     "purchasedCourses": "الكورسات المشتراة",
     "completedChapters": "الفصول المكتملة",
     "averageScore": "متوسط الدرجات",
-    "lastWatchedChapter": "آخر فصل كنت تشاهده",
-    "chapterNumber": "الفصل رقم {number}",
+    "lastWatchedChapter": "آخر درس كنت تشاهده",
+    "chapterNumber": "الدرس رقم {number}",
     "lastWatched": "آخر مشاهدة منذ ساعة",
     "continueWatching": "متابعة المشاهدة",
     "learningStats": "إحصائيات التعلم",
@@ -242,7 +242,7 @@
         "title": "إضافة عنوان للكورس",
         "description": "إضافة وصف للكورس",
         "image": "إضافة صورة للكورس",
-        "chapter": "إضافة فصل واحد على الأقل ونشره",
+        "chapter": "إضافة درس واحد على الأقل ونشره",
         "publish": "النقر على زر \"نشر\" في صفحة إعدادات الكورس"
       },
       "settings": {
@@ -257,7 +257,7 @@
           "description": "الوصف",
           "image": "الصورة",
           "price": "السعر",
-          "publishedChapter": "فصل منشور"
+          "publishedChapter": "درس منشور"
         }
       }
     },
@@ -306,7 +306,7 @@
           "selectedPosition": "الموقع المحدد: {position}",
           "loading": "جاري تحميل محتوى الكورس...",
           "empty": "لا توجد فصول أو اختبارات في هذه الكورس. سيتم إضافة الاختبار في الموقع الأول.",
-          "chapter": "فصل",
+          "chapter": "درس",
           "quiz": "اختبار",
           "new": "جديد"
         },
@@ -654,7 +654,7 @@
         "description": "الوصف",
         "image": "الصورة",
         "price": "السعر",
-        "publishedChapter": "فصل منشور"
+        "publishedChapter": "درس منشور"
       },
       "forms": {
         "courseTitle": "عنوان الكورس",
@@ -677,8 +677,8 @@
         "editGrade": "تعديل الصف",
         "noGrade": "لا يوجد صف محدد",
         "courseSemester": "الفصل الدراسي",
-        "editSemester": "تعديل الفصل",
-        "noSemester": "لا يوجد فصل محدد",
+        "editSemester": "تعديل الدرس",
+        "noSemester": "لا يوجد درس محدد",
         "updateSuccess": "تم تحديث الكورس",
         "updateError": "حدث خطأ",
         "subjectGradeMismatch": "المادة الدراسية غير متوافقة مع الصف المحدد",
@@ -695,20 +695,20 @@
           "description": "إضافة وصف للكورس",
           "image": "إضافة صورة للكورس",
           "price": "تحديد سعر للكورس (يمكن أن يكون مجاني)",
-          "chapter": "إضافة فصل واحد على الأقل ونشره"
+          "chapter": "إضافة درس واحد على الأقل ونشره"
         }
       },
       "content": {
         "title": "محتوى الكورس (فصول واختبارات)",
         "addQuiz": "إضافة اختبار",
-        "addChapter": "إضافة فصل",
+        "addChapter": "إضافة درس",
         "cancel": "إلغاء",
         "create": "انشاء",
         "noContent": "لا يوجد محتوى",
         "dragDropHint": "قم بالسحب والإفلات لترتيب الفصول والاختبارات",
         "chapterPlaceholder": "مثال: 'المقدمة في الكورس'",
         "list": {
-          "chapter": "فصل",
+          "chapter": "درس",
           "quiz": "اختبار",
           "free": "مجاني",
           "published": "تم النشر",
@@ -719,8 +719,8 @@
           "addQuiz": "اضافة اختبار"
         },
         "toasts": {
-          "chapterCreated": "تم انشاء الفصل",
-          "chapterDeleted": "تم حذف الفصل",
+          "chapterCreated": "تم انشاء الدرس",
+          "chapterDeleted": "تم حذف الدرس",
           "quizDeleted": "تم حذف الاختبار",
           "reordered": "تم ترتيب المحتوى",
           "error": "حدث خطأ"
@@ -729,24 +729,24 @@
     },
     "chapterEdit": {
       "backToCourse": "الرجوع إلى إعدادات الكورس",
-      "setupTitle": "إعدادات الفصل",
+      "setupTitle": "إعدادات الدرس",
       "completeFields": "أكمل جميع الحقول {completion}",
       "addVideo": "إضافة فيديو",
-      "chapterTitle": "عنوان الفصل",
+      "chapterTitle": "عنوان الدرس",
       "editTitle": "تعديل العنوان",
-      "chapterDescription": "وصف الفصل",
+      "chapterDescription": "وصف الدرس",
       "editDescription": "تعديل الوصف",
-      "chapterVideo": "فيديو الفصل",
+      "chapterVideo": "فيديو الدرس",
       "editVideo": "تعديل الفيديو",
-      "updateSuccess": "تم تحديث الفصل",
+      "updateSuccess": "تم تحديث الدرس",
       "updateError": "حدث خطأ",
       "accessSettings": "إعدادات الوصول",
-      "freePreview": "هذا الفصل مجاني للمعاينة",
-      "notFree": "هذا الفصل غير مجاني",
-      "makeFree": "قم بالتحقق من هذا المربع إذا أردت جعل هذا الفصل مجانيًا للمعاينة",
-      "chapterDocuments": "مستندات الفصل",
+      "freePreview": "هذا الدرس مجاني للمعاينة",
+      "notFree": "هذا الدرس غير مجاني",
+      "makeFree": "قم بالتحقق من هذا المربع إذا أردت جعل هذا الدرس مجانيًا للمعاينة",
+      "chapterDocuments": "مستندات الدرس",
       "manageDocuments": "إدارة المستندات",
-      "chapterDocument": "مستند الفصل",
+      "chapterDocument": "مستند الدرس",
       "noDocuments": "لا توجد مستندات مرفوعة",
       "view": "عرض",
       "download": "تحميل",
@@ -754,12 +754,12 @@
       "downloadOpened": "تم فتح الملف في تبويب جديد للتحميل",
       "documentUploaded": "تم رفع المستند بنجاح",
       "documentDeleted": "تم حذف المستند بنجاح",
-      "addDocumentsHint": "أضف مستندات إضافية قد يحتاجها الطلاب لفهم الفصل بشكل أفضل.",
-      "published": "الفصل منشور",
-      "unpublished": "الفصل غير منشور",
-      "publishedDescription": "يمكن للطلاب مشاهدة هذا الفصل الآن. يمكنك إلغاء النشر لإخفائه مؤقتًا.",
-      "unpublishedDescription": "لن يكون هذا الفصل مرئيًا للطلاب حتى يتم نشره.",
-      "publishChapter": "نشر الفصل",
+      "addDocumentsHint": "أضف مستندات إضافية قد يحتاجها الطلاب لفهم الدرس بشكل أفضل.",
+      "published": "الدرس منشور",
+      "unpublished": "الدرس غير منشور",
+      "publishedDescription": "يمكن للطلاب مشاهدة هذا الدرس الآن. يمكنك إلغاء النشر لإخفائه مؤقتًا.",
+      "unpublishedDescription": "لن يكون هذا الدرس مرئيًا للطلاب حتى يتم نشره.",
+      "publishChapter": "نشر الدرس",
       "unpublishChapter": "إلغاء النشر",
       "uploadVideo": "رفع فيديو",
       "youtubeLink": "رابط YouTube",
@@ -784,7 +784,7 @@
         "title": "إضافة عنوان للكورس",
         "description": "إضافة وصف للكورس",
         "image": "إضافة صورة للكورس",
-        "chapter": "إضافة فصل واحد على الأقل ونشره",
+        "chapter": "إضافة درس واحد على الأقل ونشره",
         "publish": "النقر على زر \"نشر\" في صفحة إعدادات الكورس"
       }
     },
@@ -831,7 +831,7 @@
         "actions": "الإجراءات"
       },
       "course": "كورس",
-      "chapter": "فصل",
+      "chapter": "درس",
       "viewProgress": "عرض التقدم",
       "dialog": {
         "title": "تقدم {name}",
@@ -853,7 +853,7 @@
         "progressDetails": {
           "title": "تفاصيل التقدم",
           "course": "الكورس",
-          "chapter": "الفصل",
+          "chapter": "الدرس",
           "status": "الحالة",
           "lastUpdate": "آخر تحديث",
           "completed": "مكتمل",

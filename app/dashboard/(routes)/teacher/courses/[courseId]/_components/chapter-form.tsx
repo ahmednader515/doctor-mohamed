@@ -111,7 +111,7 @@ export const ChapterForm = ({
                     {!isCreating && (
                     <>
                         <PlusCircle className="h-4 w-4 mr-2" />
-                        إضافة فصل
+                        إضافة درس
                     </>)}
                 </Button>
             </div>

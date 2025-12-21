@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Eye, EyeOff, UserPlus, ArrowLeft, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, UserPlus, ArrowLeft, CheckCircle, Check, X } from "lucide-react";
 import Link from "next/link";
 import axios, { AxiosError } from "axios";
 import { useLanguage } from "@/lib/contexts/language-context";
@@ -34,6 +35,7 @@ export default function CreateAccountPage() {
     password: "",
     confirmPassword: "",
     subject: "",
+    subjects: [] as string[], // For multiple subjects (الصف الثاني الثانوي)
     grade: "",
     semester: "",
   });
@@ -65,6 +67,26 @@ export default function CreateAccountPage() {
       return;
     }
 
+    // Validate subject selection
+    if (formData.grade === "الصف الثاني الثانوي" || formData.grade === "الصف الثالث الثانوي") {
+      if (formData.subjects.length === 0) {
+        toast.error(t("auth.errors.selectAtLeastOneSubject") || "Please select at least one subject");
+        setIsLoading(false);
+        return;
+      }
+    } else if (!formData.subject) {
+      toast.error(t("auth.errors.subjectRequired") || "Please select a subject");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate semester (not required for الصف الثالث الثانوي)
+    if (formData.grade !== "الصف الثالث الثانوي" && !formData.semester) {
+      toast.error(t("auth.semesterRequired") || "Please select a semester");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post("/api/teacher/create-account", formData);
       
@@ -79,6 +101,7 @@ export default function CreateAccountPage() {
           password: "",
           confirmPassword: "",
           subject: "",
+          subjects: [],
           grade: "",
           semester: "",
         });
@@ -113,6 +136,10 @@ export default function CreateAccountPage() {
       parentPhoneNumber: "",
       password: "",
       confirmPassword: "",
+      subject: "",
+      subjects: [],
+      grade: "",
+      semester: "",
     });
     setCreatedUser(null);
   };
@@ -174,74 +201,67 @@ export default function CreateAccountPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">{t("teacher.createAccount.form.fullName")}</Label>
-                    <Input
-                      id="fullName"
-                      name="fullName"
-                      type="text"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      placeholder={t("teacher.createAccount.form.fullNamePlaceholder")}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">{t("teacher.createAccount.form.phoneNumber")}</Label>
-                    <Input
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      type="tel"
-                      value={formData.phoneNumber}
-                      onChange={handleInputChange}
-                      placeholder={t("teacher.createAccount.form.phoneNumberPlaceholder")}
-                      required
-                    />
-                  </div>
-                </div>
-
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="parentPhoneNumber">{t("teacher.createAccount.form.parentPhoneNumber")}</Label>
+                  <Label htmlFor="fullName">{t("auth.fullName")}</Label>
+                  <Input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    autoComplete="name"
+                    required
+                    disabled={isLoading}
+                    className="h-10"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">{t("auth.phoneNumber")}</Label>
+                  <Input
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel"
+                    autoComplete="tel"
+                    required
+                    disabled={isLoading}
+                    className="h-10"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    placeholder="+20XXXXXXXXXX"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="parentPhoneNumber">{t("auth.parentPhoneNumber")}</Label>
                   <Input
                     id="parentPhoneNumber"
                     name="parentPhoneNumber"
                     type="tel"
+                    autoComplete="tel"
+                    required
+                    disabled={isLoading}
+                    className="h-10"
                     value={formData.parentPhoneNumber}
                     onChange={handleInputChange}
-                    placeholder={t("teacher.createAccount.form.parentPhoneNumberPlaceholder")}
-                    required
+                    placeholder="+20XXXXXXXXXX"
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subject">{t("auth.subject")}</Label>
-                  <Select
-                    value={formData.subject}
-                    onValueChange={(value) => setFormData((prev) => ({ ...prev, subject: value }))}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("auth.subjectPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="كيمياء">كيمياء</SelectItem>
-                      <SelectItem value="فيزياء">فيزياء</SelectItem>
-                      <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="grade">{t("auth.grade")}</Label>
                   <Select
                     value={formData.grade}
-                    onValueChange={(value) => setFormData((prev) => ({ ...prev, grade: value }))}
+                    onValueChange={(value) => {
+                      // Reset subjects when grade changes
+                      if (value === "الصف الاول الثانوي") {
+                        setFormData((prev) => ({ ...prev, grade: value, subject: "", subjects: [] }));
+                      } else {
+                        setFormData((prev) => ({ ...prev, grade: value, subject: "", subjects: [] }));
+                      }
+                    }}
+                    disabled={isLoading}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-10">
                       <SelectValue placeholder={t("auth.gradePlaceholder")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -251,116 +271,150 @@ export default function CreateAccountPage() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="semester">{t("auth.semester")}</Label>
-                  <Select
-                    value={formData.semester}
-                    onValueChange={(value) => setFormData((prev) => ({ ...prev, semester: value }))}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("auth.semesterPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="الترم الاول">الترم الاول</SelectItem>
-                      <SelectItem value="الترم الثاني">الترم الثاني</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formData.grade && (
                   <div className="space-y-2">
-                    <Label htmlFor="password">{t("teacher.createAccount.form.password")}</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        placeholder={t("teacher.createAccount.form.passwordPlaceholder")}
-                        className="rtl:pr-10 ltr:pl-10"
+                    <Label htmlFor="subject">{t("auth.subject")}</Label>
+                    {formData.grade === "الصف الاول الثانوي" ? (
+                      <Select
+                        value={formData.subject}
+                        onValueChange={(value) => setFormData((prev) => ({ ...prev, subject: value, subjects: [] }))}
+                        disabled={isLoading || !formData.grade}
                         required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent rtl:right-0 ltr:left-0"
-                        onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
+                        <SelectTrigger className="h-10">
+                          <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (formData.grade === "الصف الثاني الثانوي" || formData.grade === "الصف الثالث الثانوي") ? (
+                      <div className="space-y-2">
+                        <MultiSelect
+                          options={[
+                            { label: "كيمياء", value: "كيمياء" },
+                            { label: "فيزياء", value: "فيزياء" },
+                          ]}
+                          selected={formData.subjects}
+                          onChange={(selected) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              subjects: selected,
+                              subject: selected.join(",")
+                            }));
+                          }}
+                          placeholder={t("auth.subjectPlaceholder")}
+                          disabled={isLoading}
+                        />
+                        {formData.subjects.length === 0 && (
+                          <p className="text-sm text-destructive mt-1">{t("auth.errors.selectAtLeastOneSubject") || "Please select at least one subject"}</p>
                         )}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">{t("teacher.createAccount.form.confirmPassword")}</Label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        placeholder={t("teacher.createAccount.form.confirmPasswordPlaceholder")}
-                        className="rtl:pr-10 ltr:pl-10"
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent rtl:right-0 ltr:left-0"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {formData.password && formData.confirmPassword && (
-                  <div className={`text-sm ${passwordChecks.match ? 'text-green-600' : 'text-red-600'}`}>
-                    {passwordChecks.match ? (
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                        {t("auth.passwordsMatch")}
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                        {t("auth.passwordsNotMatch")}
-                      </span>
-                    )}
+                      </div>
+                    ) : null}
                   </div>
                 )}
-
-                <div className="flex gap-4">
-                  <Button
-                    type="submit"
-                    disabled={isLoading || !passwordChecks.isValid}
-                    className="flex-1 bg-brand hover:bg-brand/90 text-white"
-                  >
-                    {isLoading ? t("teacher.createAccount.form.creating") : t("teacher.createAccount.form.createAccount")}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={resetForm}
-                  >
-                    {t("teacher.createAccount.form.reset")}
-                  </Button>
+                {formData.grade !== "الصف الثالث الثانوي" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="semester">{t("auth.semester")}</Label>
+                    <Select
+                      value={formData.semester}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, semester: value }))}
+                      disabled={isLoading}
+                      required
+                    >
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder={t("auth.semesterPlaceholder")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="الترم الاول">الترم الاول</SelectItem>
+                        <SelectItem value="الترم الثاني">الترم الثاني</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="password">{t("auth.password")}</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      required
+                      disabled={isLoading}
+                      className="h-10 rtl:pr-10 ltr:pl-10"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute rtl:right-0 ltr:left-0 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      required
+                      disabled={isLoading}
+                      className="h-10 rtl:pr-10 ltr:pl-10"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute rtl:right-0 ltr:left-0 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    {passwordChecks.match ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-500" />
+                    )}
+                    <span className="text-sm text-muted-foreground">{passwordChecks.match ? t("auth.passwordsMatch") : t("auth.passwordsNotMatch")}</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-10 bg-brand hover:bg-brand/90 text-white"
+                  disabled={
+                    isLoading || 
+                    !passwordChecks.isValid || 
+                    (formData.grade === "الصف الثاني الثانوي" || formData.grade === "الصف الثالث الثانوي" ? formData.subjects.length === 0 : !formData.subject) ||
+                    (formData.grade !== "الصف الثالث الثانوي" && !formData.semester)
+                  }
+                >
+                  {isLoading ? t("teacher.createAccount.form.creating") : t("teacher.createAccount.form.createAccount")}
+                </Button>
               </form>
             </CardContent>
           </Card>

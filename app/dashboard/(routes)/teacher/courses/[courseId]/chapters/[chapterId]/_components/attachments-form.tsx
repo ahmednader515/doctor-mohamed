@@ -222,7 +222,7 @@ export const AttachmentsForm = ({
                                     <p className="text-sm font-medium truncate">
                                         {attachment.name || getFilenameFromUrl(attachment.url)}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">مستند الفصل</p>
+                                    <p className="text-xs text-muted-foreground">مستند الدرس</p>
                                 </div>
                                 <div className="ml-auto flex items-center gap-2 flex-shrink-0">
                                     <Button
