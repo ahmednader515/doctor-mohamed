@@ -109,8 +109,8 @@ export async function PATCH(
             return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
         }
 
-        // Only owner or admin can modify
-        if (user?.role !== "ADMIN" && currentQuiz.course.userId !== userId) {
+        // Admin, teacher, or owner can modify
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER" && currentQuiz.course.userId !== userId) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 

@@ -7,7 +7,7 @@ export async function POST(
     { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
-        const { userId } = await auth();
+        const { userId, user } = await auth();
         const { url, name } = await req.json();
 
         if (!userId) {
@@ -17,14 +17,21 @@ export async function POST(
         const resolvedParams = await params;
         const { courseId } = resolvedParams;
 
-        const courseOwner = await db.course.findUnique({
+        const course = await db.course.findUnique({
             where: {
                 id: courseId,
-                userId: userId,
+            },
+            select: {
+                userId: true,
             }
         });
 
-        if (!courseOwner) {
+        if (!course) {
+            return new NextResponse("Course not found", { status: 404 });
+        }
+
+        // Admin, teacher, or owner can add attachments
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER" && course.userId !== userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
@@ -48,7 +55,7 @@ export async function GET(
     { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
-        const { userId } = await auth();
+        const { userId, user } = await auth();
 
         if (!userId) {
             return new NextResponse("Unauthorized", { status: 401 });
@@ -57,14 +64,21 @@ export async function GET(
         const resolvedParams = await params;
         const { courseId } = resolvedParams;
 
-        const courseOwner = await db.course.findUnique({
+        const course = await db.course.findUnique({
             where: {
                 id: courseId,
-                userId: userId,
+            },
+            select: {
+                userId: true,
             }
         });
 
-        if (!courseOwner) {
+        if (!course) {
+            return new NextResponse("Course not found", { status: 404 });
+        }
+
+        // Admin, teacher, or owner can view attachments
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER" && course.userId !== userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 

@@ -10,10 +10,7 @@ const CoursesPage = async () => {
         return redirect("/");
     }
 
-    const courses = await db.course.findMany({
-        where: {
-            userId,
-        },
+    const coursesData = await db.course.findMany({
         include: {
             chapters: {
                 select: {
@@ -31,12 +28,18 @@ const CoursesPage = async () => {
         orderBy: {
             createdAt: "desc",
         },
-    }).then(courses => courses.map(course => ({
-        ...course,
-        price: course.price || 0,
-        publishedChaptersCount: course.chapters.filter(ch => ch.isPublished).length,
-        publishedQuizzesCount: course.quizzes.filter(q => q.isPublished).length,
-    })));
+    });
+
+    const courses = coursesData.map((course) => {
+        const chapters = (course as any).chapters || [];
+        const quizzes = (course as any).quizzes || [];
+        return {
+            ...course,
+            price: course.price || 0,
+            publishedChaptersCount: chapters.filter((ch: { isPublished: boolean }) => ch.isPublished).length,
+            publishedQuizzesCount: quizzes.filter((q: { isPublished: boolean }) => q.isPublished).length,
+        };
+    });
 
     const unpublishedCourses = courses.filter(course => !course.isPublished);
     const hasUnpublishedCourses = unpublishedCourses.length > 0;

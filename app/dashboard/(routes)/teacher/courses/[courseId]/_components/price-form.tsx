@@ -65,15 +65,16 @@ export const PriceForm = ({
     }
 
     return (
-        <div className="mt-6 border bg-card rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                {t("teacher.courseEdit.forms.coursePrice")}
-                <Button onClick={toggleEdit} variant="ghost">
+        <div className="mt-4 sm:mt-6 border bg-card rounded-md p-3 sm:p-4">
+            <div className="font-medium flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                <span className="text-sm sm:text-base">{t("teacher.courseEdit.forms.coursePrice")}</span>
+                <Button onClick={toggleEdit} variant="ghost" size="sm" className="self-start sm:self-auto">
                     {isEditing && (<>{t("common.cancel")}</>)}
                     {!isEditing && (
                     <>
                         <Pencil className="h-4 w-4 mr-2" />
-                        {t("teacher.courseEdit.forms.editPrice")}
+                        <span className="hidden sm:inline">{t("teacher.courseEdit.forms.editPrice")}</span>
+                        <span className="sm:hidden">{t("common.edit")}</span>
                     </>)}
                 </Button>
             </div>

@@ -2,10 +2,10 @@
 
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Chapter, Quiz } from "@prisma/client";
-import { Grip } from "lucide-react";
+import { Grip, Trash2, Edit, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/contexts/language-context";
 
 interface CourseItem {
@@ -68,53 +68,104 @@ export const CourseContentList = ({
                                 {(provided) => (
                                     <div
                                         className={cn(
-                                            "flex items-center gap-x-2 bg-muted border-muted text-muted-foreground rounded-md mb-4 text-sm",
+                                            "flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-x-2 bg-muted border border-muted text-muted-foreground rounded-md mb-4 text-sm p-3 sm:p-0",
                                             item.isPublished && "bg-primary/20 border-primary/20"
                                         )}
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                     >
+                                        {/* Mobile: Drag handle at top, Desktop: Left side */}
                                         <div
                                             className={cn(
-                                                "px-2 py-3 border-r border-r-muted hover:bg-muted rounded-l-md transition",
-                                                item.isPublished && "border-r-primary/20"
+                                                "flex items-center justify-between sm:justify-start gap-2 sm:px-2 sm:py-3 sm:border-r sm:border-r-muted hover:bg-muted rounded-md sm:rounded-l-md transition",
+                                                item.isPublished && "sm:border-r-primary/20"
                                             )}
                                             {...provided.dragHandleProps}
                                         >
                                             <Grip className="h-5 w-5" />
+                                            <span className="sm:hidden font-medium text-base">{item.title}</span>
                                         </div>
-                                        <div className="flex-1 px-2">
-                                            <div className="flex items-center gap-x-2">
+                                        
+                                        {/* Mobile: Content section, Desktop: Middle section */}
+                                        <div className="flex-1 px-0 sm:px-2">
+                                            {/* Desktop: Title and type badge */}
+                                            <div className="hidden sm:flex items-center gap-x-2">
                                                 <span>{item.title}</span>
                                                 <Badge variant="outline" className="text-xs">
                                                     {item.type === "chapter" ? t("teacher.courseEdit.content.list.chapter") : t("teacher.courseEdit.content.list.quiz")}
                                                 </Badge>
                                             </div>
-                                        </div>
-                                        <div className="ml-auto pr-2 flex items-center gap-x-2">
-                                                                                         {item.type === "chapter" && item.isFree && (
-                                                 <Badge>
-                                                     {t("teacher.courseEdit.content.list.free")}
-                                                 </Badge>
-                                             )}
-                                            <Badge
-                                                className={cn(
-                                                    "bg-muted text-muted-foreground",
-                                                    item.isPublished && "bg-primary text-primary-foreground"
+                                            
+                                            {/* Mobile: Type badge and status badges */}
+                                            <div className="flex flex-wrap items-center gap-2 sm:hidden">
+                                                <Badge variant="outline" className="text-xs">
+                                                    {item.type === "chapter" ? t("teacher.courseEdit.content.list.chapter") : t("teacher.courseEdit.content.list.quiz")}
+                                                </Badge>
+                                                {item.type === "chapter" && item.isFree && (
+                                                    <Badge className="text-xs">
+                                                        {t("teacher.courseEdit.content.list.free")}
+                                                    </Badge>
                                                 )}
-                                            >
-                                                {item.isPublished ? t("teacher.courseEdit.content.list.published") : t("teacher.courseEdit.content.list.draft")}
-                                            </Badge>
-                                            <button
-                                                onClick={() => onEdit(item.id, item.type)}
-                                                className="text-brand text-xs font-semibold hover:underline transition"
-                                            >
-                                                {getActionLabel(item.type, item.isPublished)}
-                                            </button>
-                                            <Trash2
-                                                onClick={() => onDelete(item.id, item.type)}
-                                                className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
-                                            />
+                                                <Badge
+                                                    className={cn(
+                                                        "text-xs bg-muted text-muted-foreground",
+                                                        item.isPublished && "bg-primary text-primary-foreground"
+                                                    )}
+                                                >
+                                                    {item.isPublished ? t("teacher.courseEdit.content.list.published") : t("teacher.courseEdit.content.list.draft")}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Mobile: Actions at bottom, Desktop: Right side */}
+                                        <div className="flex items-center justify-between sm:ml-auto sm:pr-2 sm:gap-x-2 gap-2">
+                                            {/* Desktop: Badges */}
+                                            <div className="hidden sm:flex items-center gap-x-2">
+                                                {item.type === "chapter" && item.isFree && (
+                                                    <Badge className="text-xs">
+                                                        {t("teacher.courseEdit.content.list.free")}
+                                                    </Badge>
+                                                )}
+                                                <Badge
+                                                    className={cn(
+                                                        "text-xs bg-muted text-muted-foreground",
+                                                        item.isPublished && "bg-primary text-primary-foreground"
+                                                    )}
+                                                >
+                                                    {item.isPublished ? t("teacher.courseEdit.content.list.published") : t("teacher.courseEdit.content.list.draft")}
+                                                </Badge>
+                                            </div>
+                                            
+                                            {/* Actions */}
+                                            <div className="flex items-center gap-2 sm:gap-x-2">
+                                                <Button
+                                                    onClick={() => onEdit(item.id, item.type)}
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 sm:h-7 text-xs font-medium border-brand/20 text-brand hover:bg-brand hover:text-white hover:border-brand transition-colors flex-shrink-0"
+                                                >
+                                                    {item.isPublished ? (
+                                                        <>
+                                                            <Edit className="h-3 w-3 mr-1.5 sm:mr-1" />
+                                                            {getActionLabel(item.type, item.isPublished)}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Plus className="h-3 w-3 mr-1.5 sm:mr-1" />
+                                                            {getActionLabel(item.type, item.isPublished)}
+                                                        </>
+                                                    )}
+                                                </Button>
+                                                <Button
+                                                    onClick={() => onDelete(item.id, item.type)}
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 sm:h-7 w-8 sm:w-7 p-0 border-destructive/20 text-destructive hover:bg-destructive hover:text-white hover:border-destructive transition-colors flex-shrink-0"
+                                                    aria-label={t("common.delete")}
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
                                 )}

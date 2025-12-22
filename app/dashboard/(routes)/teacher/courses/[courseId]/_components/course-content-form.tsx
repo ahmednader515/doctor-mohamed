@@ -110,24 +110,8 @@ export const CourseContentForm = ({
                     <div className="animate-spin h-6 w-6 border-4 border-primary rounded-full border-t-transparent" />
                 </div>
             )}
-            <div className="font-medium flex items-center justify-between">
+            <div className="font-medium">
                 {t("teacher.courseEdit.content.title")}
-                <div className="flex gap-2">
-                    <Button onClick={() => router.push(`/dashboard/teacher/quizzes/create?courseId=${courseId}`)} variant="ghost">
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        {t("teacher.courseEdit.content.addQuiz")}
-                    </Button>
-                    <Button onClick={() => setIsCreating((current) => !current)} variant="ghost">
-                        {isCreating ? (
-                            <>{t("teacher.courseEdit.content.cancel")}</>
-                        ) : (
-                            <>
-                                <PlusCircle className="h-4 w-4 mr-2" />
-                                {t("teacher.courseEdit.content.addChapter")}
-                            </>
-                        )}
-                    </Button>
-                </div>
             </div>
             {isCreating && (
                 <div className="mt-4 space-y-4">
@@ -137,13 +121,25 @@ export const CourseContentForm = ({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                     />
-                    <Button
-                        onClick={onCreate}
-                        disabled={!title || isUpdating}
-                        type="button"
-                    >
-                        {t("teacher.courseEdit.content.create")}
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            onClick={onCreate}
+                            disabled={!title || isUpdating}
+                            type="button"
+                        >
+                            {t("teacher.courseEdit.content.create")}
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setIsCreating(false);
+                                setTitle("");
+                            }}
+                            variant="outline"
+                            type="button"
+                        >
+                            {t("teacher.courseEdit.content.cancel")}
+                        </Button>
+                    </div>
                 </div>
             )}
             {!isCreating && (
@@ -164,6 +160,26 @@ export const CourseContentForm = ({
                 <p className="text-xs text-muted-foreground mt-4">
                     {t("teacher.courseEdit.content.dragDropHint")}
                 </p>
+            )}
+            {!isCreating && (
+                <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t">
+                    <Button 
+                        onClick={() => router.push(`/dashboard/teacher/quizzes/create?courseId=${courseId}`)} 
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                    >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        {t("teacher.courseEdit.content.addQuiz")}
+                    </Button>
+                    <Button 
+                        onClick={() => setIsCreating((current) => !current)} 
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                    >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        {t("teacher.courseEdit.content.addChapter")}
+                    </Button>
+                </div>
             )}
         </div>
     );

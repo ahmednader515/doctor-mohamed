@@ -42,7 +42,7 @@ export async function POST(
     { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
-        const { userId } = await auth();
+        const { userId, user } = await auth();
         const resolvedParams = await params;
         const { title } = await req.json();
 
@@ -50,14 +50,21 @@ export async function POST(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const courseOwner = await db.course.findUnique({
+        const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId: userId,
+            },
+            select: {
+                userId: true,
             }
         });
 
-        if (!courseOwner) {
+        if (!course) {
+            return new NextResponse("Course not found", { status: 404 });
+        }
+
+        // Admin, teacher, or owner can create chapters
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER" && course.userId !== userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 

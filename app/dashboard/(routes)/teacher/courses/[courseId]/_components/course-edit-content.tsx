@@ -58,18 +58,18 @@ export const CourseEditContent = ({
                     label={t("teacher.courseEdit.unpublishedBanner")}
                 />
             )}
-            <div className="p-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex flex-col gap-y-2">
-                        <h1 className="text-2xl font-medium">
+            <div className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex flex-col gap-y-2 flex-1">
+                        <h1 className="text-xl sm:text-2xl font-medium">
                             {t("teacher.courseEdit.setupTitle")}
                         </h1>
-                        <span className="text-sm text-slate-700">
+                        <span className="text-xs sm:text-sm text-slate-700">
                             {t("teacher.courseEdit.completeFields", { completion: completionText })}
                         </span>
                         {!isComplete && (
                             <div className="text-xs text-muted-foreground mt-2">
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     <div className={`flex items-center gap-1 ${completionStatus.title ? 'text-brand' : 'text-red-600'}`}>
                                         <span>{completionStatus.title ? '✓' : '✗'}</span>
                                         <span>{t("teacher.courseEdit.fields.title")}</span>
@@ -94,17 +94,19 @@ export const CourseEditContent = ({
                             </div>
                         )}
                     </div>
-                    <Actions
-                        disabled={!isComplete}
-                        courseId={courseId}
-                        isPublished={course.isPublished}
-                    />
+                    <div className="flex-shrink-0">
+                        <Actions
+                            disabled={!isComplete}
+                            courseId={courseId}
+                            isPublished={course.isPublished}
+                        />
+                    </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-8 sm:mt-16">
                     <div>
-                        <div className="flex items-center gap-x-2">
+                        <div className="flex items-center gap-x-2 mb-4">
                             <IconBadge icon={LayoutDashboard} />
-                            <h2 className="text-xl">
+                            <h2 className="text-lg sm:text-xl">
                                 {t("teacher.courseEdit.customizeCourse")}
                             </h2>
                         </div>
@@ -135,11 +137,11 @@ export const CourseEditContent = ({
                             />
                         )}
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                         <div>
-                            <div className="flex items-center gap-x-2">
+                            <div className="flex items-center gap-x-2 mb-4">
                                 <IconBadge icon={LayoutDashboard} />
-                                <h2 className="text-xl">
+                                <h2 className="text-lg sm:text-xl">
                                     {t("teacher.courseEdit.resourcesChapters")}
                                 </h2>
                             </div>
@@ -149,9 +151,9 @@ export const CourseEditContent = ({
                             />
                         </div>
                         <div>
-                            <div className="flex items-center gap-x-2">
+                            <div className="flex items-center gap-x-2 mb-4">
                                 <IconBadge icon={LayoutDashboard} />
-                                <h2 className="text-xl">
+                                <h2 className="text-lg sm:text-xl">
                                     {t("teacher.courseEdit.courseSettings")}
                                 </h2>
                             </div>

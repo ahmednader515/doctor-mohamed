@@ -118,7 +118,7 @@ export async function PATCH(
     { params }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
     try {
-        const { userId } = await auth();
+        const { userId, user } = await auth();
         const resolvedParams = await params;
         const values = await req.json();
 
@@ -126,14 +126,21 @@ export async function PATCH(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const courseOwner = await db.course.findUnique({
+        const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId: userId,
+            },
+            select: {
+                userId: true,
             }
         });
 
-        if (!courseOwner) {
+        if (!course) {
+            return new NextResponse("Course not found", { status: 404 });
+        }
+
+        // Admin, teacher, or owner can update
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER" && course.userId !== userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
@@ -159,22 +166,29 @@ export async function DELETE(
     { params }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
     try {
-        const { userId } = await auth();
+        const { userId, user } = await auth();
         const resolvedParams = await params;
 
         if (!userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // Check if user owns the course
-        const courseOwner = await db.course.findUnique({
+        // Check if course exists and user has permission
+        const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId: userId,
+            },
+            select: {
+                userId: true,
             }
         });
 
-        if (!courseOwner) {
+        if (!course) {
+            return new NextResponse("Course not found", { status: 404 });
+        }
+
+        // Admin, teacher, or owner can delete
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER" && course.userId !== userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 

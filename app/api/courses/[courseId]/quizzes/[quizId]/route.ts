@@ -97,7 +97,7 @@ export async function PATCH(
     { params }: { params: Promise<{ courseId: string; quizId: string }> }
 ) {
     try {
-        const { userId } = await auth();
+        const { userId, user } = await auth();
         const resolvedParams = await params;
         const { title, description, questions, position } = await req.json();
 
@@ -105,16 +105,23 @@ export async function PATCH(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // Verify the course belongs to the teacher
+        // Verify the course exists and user has permission
         const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId: userId
+            },
+            select: {
+                userId: true,
             }
         });
 
         if (!course) {
-            return new NextResponse("Course not found or unauthorized", { status: 404 });
+            return new NextResponse("Course not found", { status: 404 });
+        }
+
+        // Admin, teacher, or owner can update quizzes
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER" && course.userId !== userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
         }
 
         // Update the quiz
@@ -166,23 +173,30 @@ export async function DELETE(
     { params }: { params: Promise<{ courseId: string; quizId: string }> }
 ) {
     try {
-        const { userId } = await auth();
+        const { userId, user } = await auth();
         const resolvedParams = await params;
 
         if (!userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // Verify the course belongs to the teacher
+        // Verify the course exists and user has permission
         const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId: userId
+            },
+            select: {
+                userId: true,
             }
         });
 
         if (!course) {
-            return new NextResponse("Course not found or unauthorized", { status: 404 });
+            return new NextResponse("Course not found", { status: 404 });
+        }
+
+        // Admin, teacher, or owner can delete quizzes
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER" && course.userId !== userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
         }
 
         // Delete the quiz and all related data

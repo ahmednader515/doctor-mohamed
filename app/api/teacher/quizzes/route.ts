@@ -98,7 +98,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Course not found" }, { status: 404 });
         }
 
-        if (!isAdmin && course.userId !== userId) {
+        const isTeacher = user?.role === "TEACHER";
+        if (!isAdmin && !isTeacher && course.userId !== userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 
