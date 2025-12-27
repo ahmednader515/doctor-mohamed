@@ -24,10 +24,9 @@ export async function GET() {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Get all published courses by the user
+    // Get all published courses (all teachers can see all analytics)
     const courses = await db.course.findMany({
       where: {
-        userId,
         isPublished: true,
       },
       include: {
