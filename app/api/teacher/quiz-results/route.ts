@@ -12,21 +12,15 @@ export async function GET(req: Request) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // Build the where clause
-        const whereClause: any = {
-            quiz: {
-                course: {
-                    userId: userId
-                }
-            }
-        };
+        // Build the where clause (all teachers can see all quiz results)
+        const whereClause: any = {};
 
         // Add quizId filter if provided
         if (quizId) {
             whereClause.quizId = quizId;
         }
 
-        // Get quiz results for quizzes owned by the teacher
+        // Get all quiz results
         const quizResults = await db.quizResult.findMany({
             where: whereClause,
             include: {

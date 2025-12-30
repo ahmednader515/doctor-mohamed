@@ -11,12 +11,9 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        // Get all quizzes (all teachers can see all quizzes)
         const quizzes = await db.quiz.findMany({
-            where: {
-                course: {
-                    userId: userId
-                }
-            },
+            where: {},
             include: {
                 course: {
                     select: {
