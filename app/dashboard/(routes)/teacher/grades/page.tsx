@@ -58,6 +58,7 @@ interface QuizAnswer {
         text: string;
         type: string;
         points: number;
+        imageUrl?: string | null;
     };
     studentAnswer: string;
     correctAnswer: string;
@@ -193,8 +194,8 @@ const GradesPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.averageScore")}</p>
                                 <p className="text-2xl font-bold">
                                     {quizResults.length > 0 
-                                        ? Math.round(quizResults.reduce((sum, r) => sum + r.percentage, 0) / quizResults.length)
-                                        : 0}%
+                                        ? (quizResults.reduce((sum, r) => sum + r.percentage, 0) / quizResults.length).toFixed(1)
+                                        : "0.0"}%
                                 </p>
                             </div>
                         </div>
@@ -208,8 +209,8 @@ const GradesPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.highestScore")}</p>
                                 <p className="text-2xl font-bold">
                                     {quizResults.length > 0 
-                                        ? Math.max(...quizResults.map(r => r.percentage))
-                                        : 0}%
+                                        ? Math.max(...quizResults.map(r => r.percentage)).toFixed(1)
+                                        : "0.0"}%
                                 </p>
                             </div>
                         </div>
@@ -323,7 +324,7 @@ const GradesPage = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Badge {...gradeBadge}>
-                                                {result.percentage}%
+                                                {result.percentage.toFixed(1)}%
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -372,7 +373,7 @@ const GradesPage = () => {
                                         </div>
                                         <div className="text-center">
                                             <div className={`text-2xl font-bold ${getGradeColor(selectedResult.percentage)}`}>
-                                                {selectedResult.percentage}%
+                                                {selectedResult.percentage.toFixed(1)}%
                                             </div>
                                             <div className="text-sm text-muted-foreground">{t("teacher.grades.details.summary.percentage")}</div>
                                         </div>
@@ -392,7 +393,7 @@ const GradesPage = () => {
                                     <div className="mt-4">
                                         <div className="flex items-center justify-between mb-2">
                                             <span className="text-sm font-medium">{t("teacher.grades.details.summary.overallProgress")}</span>
-                                            <span className="text-sm font-medium">{selectedResult.percentage}%</span>
+                                            <span className="text-sm font-medium">{selectedResult.percentage.toFixed(1)}%</span>
                                         </div>
                                         <Progress value={selectedResult.percentage} className="w-full" />
                                     </div>
@@ -410,11 +411,23 @@ const GradesPage = () => {
                                             <div key={answer.questionId} className="border rounded-lg p-4">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <h4 className="font-medium">{t("teacher.grades.details.answers.questionNumber", { number: index + 1 })}</h4>
-                                                    <Badge variant={answer.isCorrect ? "default" : "destructive"}>
+                                                    <Badge className={answer.isCorrect ? "bg-green-600 text-white" : "bg-red-600 text-white"}>
                                                         {answer.isCorrect ? t("teacher.grades.details.answers.correct") : t("teacher.grades.details.answers.wrong")}
                                                     </Badge>
                                                 </div>
                                                 <p className="text-sm text-muted-foreground mb-2">{answer.question.text}</p>
+                                                
+                                                {/* Question Image */}
+                                                {answer.question.imageUrl && (
+                                                    <div className="mb-3">
+                                                        <img 
+                                                            src={answer.question.imageUrl} 
+                                                            alt="Question" 
+                                                            className="max-w-full h-auto max-h-64 rounded-lg border shadow-sm"
+                                                        />
+                                                    </div>
+                                                )}
+                                                
                                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                                     <div>
                                                         <span className="font-medium">{t("teacher.grades.details.answers.studentAnswer")}</span>

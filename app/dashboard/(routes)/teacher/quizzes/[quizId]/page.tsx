@@ -32,6 +32,7 @@ interface Question {
     options?: string[];
     correctAnswer: string;
     points: number;
+    imageUrl?: string | null;
 }
 
 const QuizViewPage = ({ params }: { params: Promise<{ quizId: string }> }) => {
@@ -187,6 +188,17 @@ const QuizViewPage = ({ params }: { params: Promise<{ quizId: string }> }) => {
                                     </div>
                                     
                                     <p className="text-muted-foreground mb-3">{question.text}</p>
+                                    
+                                    {/* Question Image */}
+                                    {question.imageUrl && (
+                                        <div className="mb-3">
+                                            <img 
+                                                src={question.imageUrl} 
+                                                alt="Question" 
+                                                className="max-w-full h-auto max-h-64 rounded-lg border shadow-sm"
+                                            />
+                                        </div>
+                                    )}
                                     
                                     <div className="space-y-2">
                                         <div className="flex items-center space-x-2">

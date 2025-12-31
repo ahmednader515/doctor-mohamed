@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, CheckCircle, XCircle, Award } from "lucide-react";
+import { parseQuizOptions } from "@/lib/utils";
 
 interface QuizAnswer {
     questionId: string;
@@ -18,6 +19,8 @@ interface QuizAnswer {
         text: string;
         type: string;
         points: number;
+        options?: string | null;
+        imageUrl?: string | null;
     };
 }
 
@@ -86,7 +89,18 @@ export default function QuizResultPage({
             const response = await fetch(`/api/courses/${courseId}/quizzes/${quizId}/result`);
             if (response.ok) {
                 const data = await response.json();
-                setResult(data);
+                // Parse options for multiple choice questions
+                const parsedData = {
+                    ...data,
+                    answers: data.answers.map((answer: any) => ({
+                        ...answer,
+                        question: {
+                            ...answer.question,
+                            options: answer.question.options ? parseQuizOptions(answer.question.options) : null
+                        }
+                    }))
+                };
+                setResult(parsedData);
             } else {
                 console.error("Error fetching result");
             }
@@ -172,6 +186,47 @@ export default function QuizResultPage({
             return answer === "true" ? "صح" : "خطأ";
         }
         return answer;
+    };
+
+    const renderQuestionChoices = (answer: QuizAnswer) => {
+        if (answer.question.type === "MULTIPLE_CHOICE" && answer.question.options && Array.isArray(answer.question.options)) {
+            return (
+                <div className="space-y-2 mt-3">
+                    <h5 className="font-medium text-sm">الخيارات:</h5>
+                    <div className="space-y-1">
+                        {answer.question.options.map((option: string, optionIndex: number) => (
+                            <div
+                                key={optionIndex}
+                                className={`p-2 rounded border ${
+                                    option === answer.studentAnswer
+                                        ? answer.isCorrect
+                                            ? "bg-green-50 border-green-200"
+                                            : "bg-red-50 border-red-200"
+                                        : option === answer.correctAnswer
+                                        ? "bg-green-50 border-green-200"
+                                        : "bg-gray-50"
+                                }`}
+                            >
+                                <span className="text-sm">
+                                    {optionIndex + 1}. {option}
+                                    {option === answer.studentAnswer && (
+                                        <Badge variant={answer.isCorrect ? "default" : "destructive"} className="mr-2">
+                                            إجابتك
+                                        </Badge>
+                                    )}
+                                    {option === answer.correctAnswer && option !== answer.studentAnswer && (
+                                        <Badge variant="default" className="mr-2">
+                                            الإجابة الصحيحة
+                                        </Badge>
+                                    )}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        return null;
     };
 
     if (loading) {
@@ -276,23 +331,77 @@ export default function QuizResultPage({
                                             </div>
                                         </div>
                                         <p className="text-sm text-muted-foreground mb-2">{answer.question.text}</p>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                            <div>
-                                                <span className="font-medium">إجابتك:</span>
-                                                <p className="text-muted-foreground">
-                                                    {answer.studentAnswer 
-                                                        ? formatAnswer(answer.studentAnswer, answer.question.type)
-                                                        : "لم تجب"
-                                                    }
-                                                </p>
+                                        
+                                        {/* Question Image */}
+                                        {answer.question.imageUrl && (
+                                            <div className="mb-3">
+                                                <img 
+                                                    src={answer.question.imageUrl} 
+                                                    alt="Question" 
+                                                    className="max-w-full h-auto max-h-64 rounded-lg border shadow-sm"
+                                                />
                                             </div>
-                                            <div>
-                                                <span className="font-medium">الإجابة الصحيحة:</span>
-                                                <p className="text-primary">
-                                                    {formatAnswer(answer.correctAnswer, answer.question.type)}
-                                                </p>
+                                        )}
+                                        
+                                        {/* Multiple Choice Questions - Show all options */}
+                                        {answer.question.type === "MULTIPLE_CHOICE" && renderQuestionChoices(answer)}
+                                        
+                                        {/* True/False Questions */}
+                                        {answer.question.type === "TRUE_FALSE" && (
+                                            <div className="space-y-2 mt-3">
+                                                <h5 className="font-medium text-sm">الإجابة الصحيحة:</h5>
+                                                <div className="space-y-1">
+                                                    <div className={`p-2 rounded border ${
+                                                        answer.correctAnswer === "true"
+                                                            ? "bg-green-50 border-green-200"
+                                                            : "bg-gray-50"
+                                                    }`}>
+                                                        <span className="text-sm">صح</span>
+                                                        {answer.correctAnswer === "true" && (
+                                                            <Badge variant="default" className="mr-2">الإجابة الصحيحة</Badge>
+                                                        )}
+                                                    </div>
+                                                    <div className={`p-2 rounded border ${
+                                                        answer.correctAnswer === "false"
+                                                            ? "bg-green-50 border-green-200"
+                                                            : "bg-gray-50"
+                                                    }`}>
+                                                        <span className="text-sm">خطأ</span>
+                                                        {answer.correctAnswer === "false" && (
+                                                            <Badge variant="default" className="mr-2">الإجابة الصحيحة</Badge>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="mt-2">
+                                                    <span className="text-sm font-medium">إجابتك: </span>
+                                                    <Badge variant={answer.isCorrect ? "default" : "destructive"}>
+                                                        {answer.studentAnswer === "true" ? "صح" : "خطأ"}
+                                                    </Badge>
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
+                                        
+                                        {/* Short Answer Questions */}
+                                        {answer.question.type === "SHORT_ANSWER" && (
+                                            <div className="space-y-2 mt-3">
+                                                <div>
+                                                    <span className="font-medium text-sm">إجابتك:</span>
+                                                    <p className={`text-sm p-2 rounded border mt-1 ${
+                                                        answer.isCorrect 
+                                                            ? "bg-green-50 border-green-200" 
+                                                            : "bg-red-50 border-red-200"
+                                                    }`}>
+                                                        {answer.studentAnswer || "لم تجب"}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <span className="font-medium text-sm">الإجابة الصحيحة:</span>
+                                                    <p className="text-sm bg-green-50 p-2 rounded border border-green-200 mt-1">
+                                                        {answer.correctAnswer}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
                                         <div className="mt-2 text-sm">
                                             <span className="font-medium">الدرجات:</span>
                                             <span className="text-muted-foreground">
