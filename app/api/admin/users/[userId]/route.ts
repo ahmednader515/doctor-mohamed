@@ -32,6 +32,11 @@ export async function PATCH(
             return new NextResponse("User not found", { status: 404 });
         }
 
+        // Prevent admin from editing staff accounts (ADMIN or TEACHER)
+        if (existingUser.role === "ADMIN" || existingUser.role === "TEACHER") {
+            return new NextResponse("Cannot edit staff accounts. Only student accounts can be edited.", { status: 403 });
+        }
+
         // Check if phone number is already taken by another user
         if (phoneNumber && phoneNumber !== existingUser.phoneNumber) {
             const phoneExists = await db.user.findUnique({
@@ -111,6 +116,11 @@ export async function DELETE(
         // Prevent admin from deleting themselves
         if (userId === session.user.id) {
             return new NextResponse("Cannot delete your own account", { status: 400 });
+        }
+
+        // Prevent admin from deleting staff accounts (ADMIN or TEACHER)
+        if (existingUser.role === "ADMIN" || existingUser.role === "TEACHER") {
+            return new NextResponse("Cannot delete staff accounts. Only student accounts can be deleted.", { status: 403 });
         }
 
         // Delete user (this will cascade delete related data due to Prisma relations)
