@@ -60,7 +60,7 @@ export const ChaptersForm = ({
             await axios.put(`/api/courses/${courseId}/chapters/reorder`, {
                 list: updateData
             });
-            toast.success("تم ترتيب الفصول");
+            toast.success("تم ترتيب الدروس");
             router.refresh();
         } catch {
             toast.error("حدث خطأ");
@@ -81,7 +81,7 @@ export const ChaptersForm = ({
                 </div>
             )}
             <div className="font-medium flex items-center justify-between">
-                الفصول
+                الدروس
                 <Button onClick={() => setIsCreating((current) => !current)} variant="ghost">
                     {isCreating ? (
                         <>إلغاء</>
@@ -115,7 +115,7 @@ export const ChaptersForm = ({
                     "text-sm mt-2",
                     !initialData.chapters.length && "text-muted-foreground italic"
                 )}>
-                    {!initialData.chapters.length && "لا يوجد فصول"}
+                    {!initialData.chapters.length && "لا يوجد دروس"}
                     <ChaptersList
                         onEdit={onEdit}
                         onDelete={onDelete}
@@ -126,7 +126,7 @@ export const ChaptersForm = ({
             )}
             {!isCreating && initialData.chapters.length > 0 && (
                 <p className="text-xs text-muted-foreground mt-4">
-                    قم بالسحب والإفلات لترتيب الفصول
+                    قم بالسحب والإفلات لترتيب الدروس
                 </p>
             )}
         </div>

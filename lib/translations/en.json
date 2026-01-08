@@ -548,7 +548,12 @@
         "generateSuccess": "Successfully created {count} codes",
         "generateError": "An error occurred while creating codes",
         "copySuccess": "Code copied",
-        "copyError": "Failed to copy code"
+        "copyError": "Failed to copy code",
+        "deleteSuccess": "Code deleted successfully",
+        "deleteError": "Failed to delete code"
+      },
+      "delete": {
+        "confirm": "Are you sure you want to delete this code? This action cannot be undone."
       },
       "empty": "No codes found"
     },
@@ -1030,7 +1035,12 @@
         "generateSuccess": "Successfully created {count} code(s)",
         "generateError": "An error occurred while creating codes",
         "copySuccess": "Code copied",
-        "copyError": "Failed to copy code"
+        "copyError": "Failed to copy code",
+        "deleteSuccess": "Code deleted successfully",
+        "deleteError": "Failed to delete code"
+      },
+      "delete": {
+        "confirm": "Are you sure you want to delete this code? This action cannot be undone."
       },
       "empty": "No codes available"
     },

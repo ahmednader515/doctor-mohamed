@@ -8,7 +8,7 @@ import { DialogTitle } from "@/components/ui/dialog";
 export const CourseMobileSidebar = () => {
   return (
     <Sheet>
-      <SheetTrigger className="md:hidden pl-4 hover:opacity-75 transition">
+      <SheetTrigger className="lg:hidden pl-4 hover:opacity-75 transition">
         <div className="flex items-center justify-center h-10 w-10 rounded-md hover:bg-slate-100">
           <Menu className="h-6 w-6" />
         </div>

@@ -78,7 +78,7 @@
     "coursesComingSoon": "سيتم إضافة الكورسات قريباً. تحقق من هذه الصفحة لاحقاً للاطلاع على أحدث الكورسات التعليمية.",
     "signUpForEarlyAccess": "سجل الآن للوصول المبكر",
     "chapter": "درس",
-    "chapters": "فصول",
+    "chapters": "دروس",
     "quiz": "اختبار",
     "quizzes": "اختبارات",
     "viewCourse": "عرض الكورس",
@@ -118,14 +118,14 @@
     "successStartsHere": "معنا النجاح ليه طريق واضح",
     "currentBalance": "الرصيد الحالي",
     "purchasedCourses": "الكورسات المشتراة",
-    "completedChapters": "الفصول المكتملة",
+    "completedChapters": "الدروس المكتملة",
     "averageScore": "متوسط الدرجات",
     "lastWatchedChapter": "آخر درس كنت تشاهده",
     "chapterNumber": "الدرس رقم {number}",
     "lastWatched": "آخر مشاهدة منذ ساعة",
     "continueWatching": "متابعة المشاهدة",
     "learningStats": "إحصائيات التعلم",
-    "totalChapters": "إجمالي الفصول",
+    "totalChapters": "إجمالي الدروس",
     "completedOf": "{completed} من {total} مكتمل",
     "completedQuizzes": "الاختبارات المكتملة",
     "myCourses": "كورساتي",
@@ -249,7 +249,7 @@
         "title": "إعداد الكورس",
         "completeFields": "أكمل جميع الحقول {completion}",
         "customizeCourse": "تخصيص دورتك",
-        "resourcesChapters": "الموارد والفصول",
+        "resourcesChapters": "الموارد والدروس",
         "courseSettings": "إعدادات الكورس",
         "unpublishedBanner": "هذه الكورس غير منشورة. لن تكون مرئية للطلاب.",
         "fields": {
@@ -302,10 +302,10 @@
         "newQuiz": "اختبار جديد",
         "position": {
           "title": "ترتيب الاختبار في الكورس",
-          "description": "اسحب الاختبار الجديد إلى الموقع المطلوب بين الفصول والاختبارات الموجودة",
+          "description": "اسحب الاختبار الجديد إلى الموقع المطلوب بين الدروس والاختبارات الموجودة",
           "selectedPosition": "الموقع المحدد: {position}",
           "loading": "جاري تحميل محتوى الكورس...",
-          "empty": "لا توجد فصول أو اختبارات في هذه الكورس. سيتم إضافة الاختبار في الموقع الأول.",
+          "empty": "لا توجد دروس أو اختبارات في هذه الكورس. سيتم إضافة الاختبار في الموقع الأول.",
           "chapter": "درس",
           "quiz": "اختبار",
           "new": "جديد"
@@ -548,7 +548,12 @@
         "generateSuccess": "تم إنشاء {count} كود بنجاح",
         "generateError": "حدث خطأ أثناء إنشاء الأكواد",
         "copySuccess": "تم نسخ الكود",
-        "copyError": "فشل نسخ الكود"
+        "copyError": "فشل نسخ الكود",
+        "deleteSuccess": "تم حذف الكود بنجاح",
+        "deleteError": "فشل حذف الكود"
+      },
+      "delete": {
+        "confirm": "هل أنت متأكد من حذف هذا الكود؟ لا يمكن التراجع عن هذا الإجراء."
       },
       "empty": "لا توجد أكواد"
     },
@@ -647,7 +652,7 @@
       "setupTitle": "إعداد الكورس",
       "completeFields": "أكمل جميع الحقول {completion}",
       "customizeCourse": "تخصيص دورتك",
-      "resourcesChapters": "الموارد والفصول",
+      "resourcesChapters": "الموارد والدروس",
       "courseSettings": "إعدادات الكورس",
       "fields": {
         "title": "العنوان",
@@ -699,13 +704,13 @@
         }
       },
       "content": {
-        "title": "محتوى الكورس (فصول واختبارات)",
+        "title": "محتوى الكورس (دروس واختبارات)",
         "addQuiz": "إضافة اختبار",
         "addChapter": "إضافة درس",
         "cancel": "إلغاء",
         "create": "انشاء",
         "noContent": "لا يوجد محتوى",
-        "dragDropHint": "قم بالسحب والإفلات لترتيب الفصول والاختبارات",
+        "dragDropHint": "قم بالسحب والإفلات لترتيب الدروس والاختبارات",
         "chapterPlaceholder": "مثال: 'المقدمة في الكورس'",
         "list": {
           "chapter": "درس",
@@ -1030,7 +1035,12 @@
         "generateSuccess": "تم إنشاء {count} كود بنجاح",
         "generateError": "حدث خطأ أثناء إنشاء الأكواد",
         "copySuccess": "تم نسخ الكود",
-        "copyError": "فشل نسخ الكود"
+        "copyError": "فشل نسخ الكود",
+        "deleteSuccess": "تم حذف الكود بنجاح",
+        "deleteError": "فشل حذف الكود"
+      },
+      "delete": {
+        "confirm": "هل أنت متأكد من حذف هذا الكود؟ لا يمكن التراجع عن هذا الإجراء."
       },
       "empty": "لا توجد أكواد"
     },

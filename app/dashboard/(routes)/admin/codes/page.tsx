@@ -7,9 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Search, Plus, Copy, Check, Ticket } from "lucide-react";
+import { Search, Plus, Copy, Check, Ticket, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
@@ -56,6 +67,7 @@ const AdminCodesPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCodes();
@@ -142,6 +154,28 @@ const AdminCodesPage = () => {
     }
   };
 
+  const handleDeleteCode = async (codeId: string) => {
+    setIsDeleting(codeId);
+    try {
+      const response = await fetch(`/api/admin/codes/${codeId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success(t("admin.codes.errors.deleteSuccess") || "Code deleted successfully");
+        fetchCodes(); // Refresh the list
+      } else {
+        const error = await response.text();
+        toast.error(error || t("admin.codes.errors.deleteError") || "Failed to delete code");
+      }
+    } catch (error) {
+      console.error("Error deleting code:", error);
+      toast.error(t("admin.codes.errors.deleteError") || "Failed to delete code");
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
   const filteredCodes = codes.filter((code) => {
     const matchesSearch =
       code.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -163,10 +197,10 @@ const AdminCodesPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("admin.codes.title")}</h1>
-        <Button onClick={() => setIsDialogOpen(true)} className="bg-brand hover:bg-brand/90">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{t("admin.codes.title")}</h1>
+        <Button onClick={() => setIsDialogOpen(true)} className="bg-brand hover:bg-brand/90 w-full sm:w-auto">
           <Plus className="h-4 w-4 ml-2" />
           {t("admin.codes.createNew")}
         </Button>
@@ -176,19 +210,19 @@ const AdminCodesPage = () => {
       <Card>
         <CardHeader>
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex items-center space-x-2 flex-1">
-              <Search className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center space-x-2 flex-1 w-full">
+              <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <Input
                 placeholder={t("admin.codes.searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm"
+                className="w-full text-sm md:text-base"
               />
             </div>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="course-filter" className="whitespace-nowrap">{t("admin.codes.filterByCourse")}</Label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 w-full md:w-auto">
+              <Label htmlFor="course-filter" className="whitespace-nowrap text-sm">{t("admin.codes.filterByCourse")}</Label>
               <Select value={courseFilter} onValueChange={setCourseFilter}>
-                <SelectTrigger id="course-filter" className="w-[250px]">
+                <SelectTrigger id="course-filter" className="w-full md:w-[250px] text-sm">
                   <SelectValue placeholder={t("admin.codes.allCourses")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -209,26 +243,26 @@ const AdminCodesPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">{t("admin.codes.statistics.totalCodes")}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("admin.codes.statistics.totalCodes")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{filteredCodes.length}</div>
+            <div className="text-xl sm:text-2xl font-bold">{filteredCodes.length}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">{t("admin.codes.statistics.unusedCodes")}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("admin.codes.statistics.unusedCodes")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{unusedCodes.length}</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{unusedCodes.length}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">{t("admin.codes.statistics.usedCodes")}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("admin.codes.statistics.usedCodes")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-600">{usedCodes.length}</div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-600">{usedCodes.length}</div>
           </CardContent>
         </Card>
       </div>
@@ -240,29 +274,30 @@ const AdminCodesPage = () => {
         </CardHeader>
         <CardContent>
           {filteredCodes.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-muted-foreground px-4">
               {t("admin.codes.empty")}
             </div>
           ) : (
-            <Table>
+            <div className="overflow-x-auto">
+              <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.code")}</TableHead>
-                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.course")}</TableHead>
-                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.creator")}</TableHead>
-                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.status")}</TableHead>
-                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.user")}</TableHead>
-                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.usedAt")}</TableHead>
-                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.createdAt")}</TableHead>
-                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.actions")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left text-xs sm:text-sm">{t("admin.codes.table.code")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left text-xs sm:text-sm">{t("admin.codes.table.course")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left text-xs sm:text-sm">{t("admin.codes.table.creator")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left text-xs sm:text-sm">{t("admin.codes.table.status")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left text-xs sm:text-sm">{t("admin.codes.table.user")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left text-xs sm:text-sm">{t("admin.codes.table.usedAt")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left text-xs sm:text-sm">{t("admin.codes.table.createdAt")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left text-xs sm:text-sm">{t("admin.codes.table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCodes.map((code) => (
                   <TableRow key={code.id}>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <code className="font-mono text-sm bg-muted px-2 py-1 rounded">
+                      <div className="flex items-center gap-2 min-w-[120px]">
+                        <code className="font-mono text-sm bg-muted px-2 py-1 rounded break-all">
                           {code.code}
                         </code>
                         <Button
@@ -291,11 +326,15 @@ const AdminCodesPage = () => {
                         {code.isUsed ? t("admin.codes.status.used") : t("admin.codes.status.unused")}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="max-w-[150px]">
                       {code.user ? (
                         <div>
-                          <div className="font-medium">{code.user.fullName}</div>
-                          <div className="text-sm text-muted-foreground">{code.user.phoneNumber}</div>
+                          <div className="font-medium truncate" title={code.user.fullName}>
+                            {code.user.fullName}
+                          </div>
+                          <div className="text-sm text-muted-foreground truncate" title={code.user.phoneNumber}>
+                            {code.user.phoneNumber}
+                          </div>
                         </div>
                       ) : (
                         <span className="text-muted-foreground">-</span>
@@ -310,18 +349,49 @@ const AdminCodesPage = () => {
                       {format(new Date(code.createdAt), "yyyy-MM-dd HH:mm", { locale: ar })}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCopyCode(code.code)}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopyCode(code.code)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              disabled={isDeleting === code.id}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t("common.confirm")}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t("admin.codes.delete.confirm") || "Are you sure you want to delete this code? This action cannot be undone."}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteCode(code.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                {t("common.delete")}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>

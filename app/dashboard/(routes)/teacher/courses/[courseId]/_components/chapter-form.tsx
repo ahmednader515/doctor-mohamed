@@ -105,7 +105,7 @@ export const ChapterForm = ({
                 </div>
             )}
             <div className="font-medium flex items-center justify-between">
-                الفصول
+                الدروس
                 <Button onClick={toggleCreating} variant="ghost">
                     {isCreating && (<>الغاء</>)}
                     {!isCreating && (
@@ -147,7 +147,7 @@ export const ChapterForm = ({
                     "text-sm mt-2",
                     !initialData.chapters.length && "text-muted-foreground italic"
                 )}>
-                    {!initialData.chapters.length && "لا يوجد فصول"}
+                    {!initialData.chapters.length && "لا يوجد دروس"}
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId="chapters">
                             {(provided) => (

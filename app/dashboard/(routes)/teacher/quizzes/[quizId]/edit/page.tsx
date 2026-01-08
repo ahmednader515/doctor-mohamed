@@ -531,7 +531,7 @@ const EditQuizPage = () => {
                         <CardHeader>
                             <CardTitle>ترتيب الاختبار في الكورس</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                اسحب الاختبار إلى الموقع المطلوب بين الفصول والاختبارات الموجودة
+                                اسحب الاختبار إلى الموقع المطلوب بين الدروس والاختبارات الموجودة
                             </p>
                             <p className="text-sm text-blue-600">
                                 الموقع المحدد: {selectedPosition}
@@ -590,7 +590,7 @@ const EditQuizPage = () => {
                             ) : (
                                 <div className="text-center py-8">
                                     <p className="text-muted-foreground mb-4">
-                                        لا توجد فصول أو اختبارات في هذه الكورس. سيتم إضافة الاختبار في الموقع الأول.
+                                        لا توجد دروس أو اختبارات في هذه الكورس. سيتم إضافة الاختبار في الموقع الأول.
                                     </p>
                                     <div className="p-3 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
                                         <div className="flex items-center justify-center space-x-3">

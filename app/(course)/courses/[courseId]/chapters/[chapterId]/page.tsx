@@ -249,7 +249,7 @@ const ChapterPage = () => {
         <div className="text-center space-y-4">
           <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
           <h2 className="text-2xl font-semibold">هذا الدرس مغلق</h2>
-          <p className="text-muted-foreground">شراء الكورس للوصول إلى جميع الفصول</p>
+          <p className="text-muted-foreground">شراء الكورس للوصول إلى جميع الدروس</p>
           <Button onClick={() => router.push(`/courses/${routeParams.courseId}/purchase`)}>
             شراء الكورس
           </Button>
