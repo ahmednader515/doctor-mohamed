@@ -14,8 +14,8 @@ export async function GET(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Get total content (chapters + quizzes) in the course
-    const [totalChapters, totalQuizzes] = await Promise.all([
+    // Get total content (chapters + quizzes + homeworks) in the course
+    const [totalChapters, totalQuizzes, totalHomeworks] = await Promise.all([
       db.chapter.count({
         where: {
           courseId: resolvedParams.courseId,
@@ -27,10 +27,16 @@ export async function GET(
           courseId: resolvedParams.courseId,
           isPublished: true,
         }
+      }),
+      db.homework.count({
+        where: {
+          courseId: resolvedParams.courseId,
+          isPublished: true,
+        }
       })
     ]);
 
-    const totalContent = totalChapters + totalQuizzes;
+    const totalContent = totalChapters + totalQuizzes + totalHomeworks;
 
     // Get completed chapters
     const completedChapters = await db.userProgress.count({
@@ -61,7 +67,25 @@ export async function GET(
     const uniqueQuizIds = new Set(completedQuizResults.map(result => result.quizId));
     const completedQuizzes = uniqueQuizIds.size;
 
-    const completedContent = completedChapters + completedQuizzes;
+    // Get completed homeworks (homeworks that the student has submitted at least once)
+    const completedHomeworkResults = await db.homeworkResult.findMany({
+        where: {
+            studentId: userId,
+            homework: {
+                courseId: resolvedParams.courseId,
+                isPublished: true,
+            }
+        },
+        select: {
+            homeworkId: true
+        }
+    });
+
+    // Count unique homeworkIds
+    const uniqueHomeworkIds = new Set(completedHomeworkResults.map(result => result.homeworkId));
+    const completedHomeworks = uniqueHomeworkIds.size;
+
+    const completedContent = completedChapters + completedQuizzes + completedHomeworks;
 
     // Calculate progress percentage
     const progress = totalContent > 0 

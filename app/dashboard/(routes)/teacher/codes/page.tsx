@@ -288,9 +288,9 @@ const TeacherCodesPage = () => {
               <TableBody>
                 {filteredCodes.map((code) => (
                   <TableRow key={code.id}>
-                    <TableCell>
+                    <TableCell className="max-w-[200px] sm:max-w-none">
                       <div className="flex items-center gap-2 min-w-[120px]">
-                        <code className="font-mono text-sm bg-muted px-2 py-1 rounded break-all">
+                        <code className="font-mono text-sm bg-muted px-2 py-1 rounded whitespace-nowrap">
                           {code.code}
                         </code>
                         <Button

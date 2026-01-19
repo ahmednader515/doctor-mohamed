@@ -55,19 +55,19 @@ const QuizViewPage = ({ params }: { params: Promise<{ quizId: string }> }) => {
                 const data = await response.json();
                 setQuiz(data);
             } else {
-                toast.error("لم يتم العثور على الاختبار");
+                toast.error("لم يتم العثور على الامتحان");
                 router.push("/dashboard/teacher/quizzes");
             }
         } catch (error) {
             console.error("Error fetching quiz:", error);
-            toast.error("حدث خطأ أثناء تحميل الاختبار");
+            toast.error("حدث خطأ أثناء تحميل الامتحان");
         } finally {
             setLoading(false);
         }
     };
 
     const handleDeleteQuiz = async () => {
-        if (!quiz || !confirm("هل أنت متأكد من حذف هذا الاختبار؟")) {
+        if (!quiz || !confirm("هل أنت متأكد من حذف هذا الامتحان؟")) {
             return;
         }
 
@@ -77,14 +77,14 @@ const QuizViewPage = ({ params }: { params: Promise<{ quizId: string }> }) => {
             });
 
             if (response.ok) {
-                toast.success("تم حذف الاختبار بنجاح");
+                toast.success("تم حذف الامتحان بنجاح");
                 router.push("/dashboard/teacher/quizzes");
             } else {
-                toast.error("حدث خطأ أثناء حذف الاختبار");
+                toast.error("حدث خطأ أثناء حذف الامتحان");
             }
         } catch (error) {
             console.error("Error deleting quiz:", error);
-            toast.error("حدث خطأ أثناء حذف الاختبار");
+            toast.error("حدث خطأ أثناء حذف الامتحان");
         }
     };
 
@@ -99,7 +99,7 @@ const QuizViewPage = ({ params }: { params: Promise<{ quizId: string }> }) => {
     if (!quiz) {
         return (
             <div className="p-6">
-                <div className="text-center">لم يتم العثور على الاختبار</div>
+                <div className="text-center">لم يتم العثور على الامتحان</div>
             </div>
         );
     }
@@ -141,7 +141,7 @@ const QuizViewPage = ({ params }: { params: Promise<{ quizId: string }> }) => {
                 <div className="md:col-span-2 space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>تفاصيل الاختبار</CardTitle>
+                            <CardTitle>تفاصيل الامتحان</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
@@ -294,7 +294,7 @@ const QuizViewPage = ({ params }: { params: Promise<{ quizId: string }> }) => {
                                 onClick={() => router.push(`/dashboard/teacher/quizzes/${quiz.id}/edit`)}
                             >
                                 <Edit className="h-4 w-4 mr-2" />
-                                تعديل الاختبار
+                                تعديل الامتحان
                             </Button>
                             <Button
                                 className="w-full"

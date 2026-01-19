@@ -183,7 +183,7 @@ export default function AdminQuizzesPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{quiz.questions.length} {t("admin.quizzes.question")}</Badge>
+                      <Badge variant="secondary">{quiz.questions.length} {quiz.questions.length === 1 ? t("admin.quizzes.question") : t("admin.quizzes.questions")}</Badge>
                     </TableCell>
                     <TableCell>
                       {new Date(quiz.createdAt).toLocaleDateString("ar-EG")}

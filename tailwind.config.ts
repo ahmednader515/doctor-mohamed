@@ -20,7 +20,8 @@ const config = {
     },
     extend: {
       fontFamily: {
-        'playpen-sans-arabic': ['var(--font-playpen-sans-arabic)'],
+        'cairo': ['var(--font-cairo)', 'system-ui', 'sans-serif'],
+        'roboto': ['var(--font-roboto)', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

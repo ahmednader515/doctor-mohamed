@@ -63,6 +63,14 @@ export async function GET(req: Request) {
             id: true,
           }
         },
+        homeworks: {
+          where: {
+            isPublished: true,
+          },
+          select: {
+            id: true,
+          }
+        },
         purchases: includeProgress && userId ? {
           where: {
             userId: userId,
@@ -80,10 +88,12 @@ export async function GET(req: Request) {
         courses.map(async (course) => {
           const totalChapters = course.chapters.length;
           const totalQuizzes = course.quizzes.length;
-          const totalContent = totalChapters + totalQuizzes;
+          const totalHomeworks = course.homeworks.length;
+          const totalContent = totalChapters + totalQuizzes + totalHomeworks;
 
           let completedChapters = 0;
           let completedQuizzes = 0;
+          let completedHomeworks = 0;
 
           if (course.purchases && course.purchases.length > 0) {
             // Get completed chapters
@@ -113,9 +123,26 @@ export async function GET(req: Request) {
             // Count unique quizIds
             const uniqueQuizIds = new Set(completedQuizResults.map(result => result.quizId));
             completedQuizzes = uniqueQuizIds.size;
+
+            // Get completed homeworks
+            const completedHomeworkResults = await db.homeworkResult.findMany({
+                where: {
+                    studentId: userId,
+                    homeworkId: {
+                        in: course.homeworks.map(homework => homework.id)
+                    }
+                },
+                select: {
+                    homeworkId: true
+                }
+            });
+
+            // Count unique homeworkIds
+            const uniqueHomeworkIds = new Set(completedHomeworkResults.map(result => result.homeworkId));
+            completedHomeworks = uniqueHomeworkIds.size;
           }
 
-          const completedContent = completedChapters + completedQuizzes;
+          const completedContent = completedChapters + completedQuizzes + completedHomeworks;
           const progress = totalContent > 0 ? (completedContent / totalContent) * 100 : 0;
 
           return {

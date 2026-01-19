@@ -1,0 +1,370 @@
+"use client";
+
+import { useState, useEffect, use } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { ArrowLeft, CheckCircle, XCircle, Award } from "lucide-react";
+import { parseQuizOptions } from "@/lib/utils";
+
+interface HomeworkAnswer {
+    questionId: string;
+    studentAnswer: string;
+    correctAnswer: string;
+    isCorrect: boolean;
+    pointsEarned: number;
+    question: {
+        text: string;
+        type: string;
+        points: number;
+        options?: string | null;
+        imageUrl?: string | null;
+    };
+}
+
+interface HomeworkResult {
+    id: string;
+    score: number;
+    totalPoints: number;
+    percentage: number;
+    answers: HomeworkAnswer[];
+}
+
+interface Homework {
+    id: string;
+    title: string;
+    maxAttempts: number;
+}
+
+export default function HomeworkResultPage({
+    params,
+}: {
+    params: Promise<{ courseId: string; homeworkId: string }>;
+}) {
+    const router = useRouter();
+    const { courseId, homeworkId } = use(params);
+    const [result, setResult] = useState<HomeworkResult | null>(null);
+    const [homework, setHomework] = useState<Homework | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchResult();
+        fetchHomework();
+    }, [homeworkId]);
+
+    const fetchResult = async () => {
+        try {
+            // Try to get result from API endpoint
+            const response = await fetch(`/api/courses/${courseId}/homeworks/${homeworkId}/result`);
+            if (response.ok) {
+                const data = await response.json();
+                const parsedData = {
+                    ...data,
+                    answers: data.answers.map((answer: any) => ({
+                        ...answer,
+                        question: {
+                            ...answer.question,
+                            options: answer.question.options ? parseQuizOptions(answer.question.options) : null
+                        }
+                    }))
+                };
+                setResult(parsedData);
+            } else {
+                // If no result endpoint, try to get from sessionStorage (stored after submission)
+                const storedResult = sessionStorage.getItem(`homework-result-${homeworkId}`);
+                if (storedResult) {
+                    const data = JSON.parse(storedResult);
+                    const parsedData = {
+                        ...data,
+                        answers: data.answers.map((answer: any) => ({
+                            ...answer,
+                            question: {
+                                ...answer.question,
+                                options: answer.question.options ? parseQuizOptions(answer.question.options) : null
+                            }
+                        }))
+                    };
+                    setResult(parsedData);
+                } else {
+                    console.error("No result found");
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching result:", error);
+            // Try sessionStorage as fallback
+            const storedResult = sessionStorage.getItem(`homework-result-${homeworkId}`);
+            if (storedResult) {
+                const data = JSON.parse(storedResult);
+                setResult(data);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchHomework = async () => {
+        try {
+            const response = await fetch(`/api/courses/${courseId}/homeworks/${homeworkId}`);
+            if (response.ok) {
+                const data = await response.json();
+                setHomework({
+                    id: data.id,
+                    title: data.title,
+                    maxAttempts: data.maxAttempts || 1
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching homework:", error);
+        }
+    };
+
+    const getGradeColor = (percentage: number) => {
+        if (percentage >= 90) return "text-primary";
+        if (percentage >= 80) return "text-primary/90";
+        if (percentage >= 70) return "text-primary/80";
+        if (percentage >= 60) return "text-amber-600";
+        return "text-destructive";
+    };
+
+    const formatAnswer = (answer: string, questionType: string) => {
+        if (questionType === "TRUE_FALSE") {
+            return answer === "true" ? "صح" : "خطأ";
+        }
+        return answer;
+    };
+
+    const renderQuestionChoices = (answer: HomeworkAnswer) => {
+        if (answer.question.type === "MULTIPLE_CHOICE" && answer.question.options && Array.isArray(answer.question.options)) {
+            return (
+                <div className="space-y-2 mt-3">
+                    <h5 className="font-medium text-sm">الخيارات:</h5>
+                    <div className="space-y-1">
+                        {answer.question.options.map((option: string, optionIndex: number) => (
+                            <div
+                                key={optionIndex}
+                                className={`p-2 rounded border ${
+                                    option === answer.studentAnswer
+                                        ? answer.isCorrect
+                                            ? "bg-green-50 border-green-200"
+                                            : "bg-red-50 border-red-200"
+                                        : option === answer.correctAnswer
+                                        ? "bg-green-50 border-green-200"
+                                        : "bg-gray-50"
+                                }`}
+                            >
+                                <span className="text-sm">
+                                    {optionIndex + 1}. {option}
+                                    {option === answer.studentAnswer && (
+                                        <Badge variant={answer.isCorrect ? "default" : "destructive"} className="mr-2">
+                                            إجابتك
+                                        </Badge>
+                                    )}
+                                    {option === answer.correctAnswer && option !== answer.studentAnswer && (
+                                        <Badge variant="default" className="mr-2">
+                                            الإجابة الصحيحة
+                                        </Badge>
+                                    )}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (!result) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">لم يتم العثور على النتيجة</h1>
+                    <Button onClick={() => router.back()}>العودة</Button>
+                </div>
+            </div>
+        );
+    }
+
+    const correctAnswers = result.answers.filter(a => a.isCorrect).length;
+    const incorrectAnswers = result.answers.filter(a => !a.isCorrect).length;
+
+    return (
+        <div className="min-h-screen bg-background">
+            <div className="container mx-auto px-4 py-8">
+                <div className="max-w-4xl mx-auto space-y-6">
+                    <div className="flex items-center gap-4">
+                        <h1 className="text-2xl font-bold">نتيجة الواجب</h1>
+                    </div>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Award className="h-5 w-5" />
+                                ملخص النتيجة
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-primary">
+                                        {result.score}/{result.totalPoints}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">الدرجة</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className={`text-2xl font-bold ${getGradeColor(result.percentage)}`}>
+                                        {result.percentage.toFixed(1)}%
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">النسبة المئوية</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-primary">
+                                        {correctAnswers}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">إجابات صحيحة</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-destructive">
+                                        {incorrectAnswers}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">إجابات خاطئة</div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium">التقدم العام</span>
+                                    <span className="text-sm font-medium">{result.percentage.toFixed(1)}%</span>
+                                </div>
+                                <Progress value={result.percentage} className="w-full" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>تفاصيل الإجابات</CardTitle>
+                            <CardDescription>
+                                مراجعة إجاباتك والتحقق من الإجابات الصحيحة
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {result.answers.map((answer, index) => (
+                                    <div key={answer.questionId} className="border rounded-lg p-4">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="font-medium">السؤال {index + 1}</h4>
+                                            <div className="flex items-center gap-2">
+                                                {answer.isCorrect ? (
+                                                    <CheckCircle className="h-4 w-4 text-primary" />
+                                                ) : (
+                                                    <XCircle className="h-4 w-4 text-destructive" />
+                                                )}
+                                                <Badge variant={answer.isCorrect ? "secondary" : "destructive"}>
+                                                    {answer.isCorrect ? "صحيح" : "خاطئ"}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground mb-2">{answer.question.text}</p>
+                                        
+                                        {answer.question.imageUrl && (
+                                            <div className="mb-3">
+                                                <img 
+                                                    src={answer.question.imageUrl} 
+                                                    alt="Question" 
+                                                    className="max-w-full h-auto max-h-64 rounded-lg border shadow-sm"
+                                                />
+                                            </div>
+                                        )}
+                                        
+                                        {answer.question.type === "MULTIPLE_CHOICE" && renderQuestionChoices(answer)}
+                                        
+                                        {answer.question.type === "TRUE_FALSE" && (
+                                            <div className="space-y-2 mt-3">
+                                                <h5 className="font-medium text-sm">الإجابة الصحيحة:</h5>
+                                                <div className="space-y-1">
+                                                    <div className={`p-2 rounded border ${
+                                                        answer.correctAnswer === "true"
+                                                            ? "bg-green-50 border-green-200"
+                                                            : "bg-gray-50"
+                                                    }`}>
+                                                        <span className="text-sm">صح</span>
+                                                        {answer.correctAnswer === "true" && (
+                                                            <Badge variant="default" className="mr-2">الإجابة الصحيحة</Badge>
+                                                        )}
+                                                    </div>
+                                                    <div className={`p-2 rounded border ${
+                                                        answer.correctAnswer === "false"
+                                                            ? "bg-green-50 border-green-200"
+                                                            : "bg-gray-50"
+                                                    }`}>
+                                                        <span className="text-sm">خطأ</span>
+                                                        {answer.correctAnswer === "false" && (
+                                                            <Badge variant="default" className="mr-2">الإجابة الصحيحة</Badge>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="mt-2">
+                                                    <span className="text-sm font-medium">إجابتك: </span>
+                                                    <Badge variant={answer.isCorrect ? "default" : "destructive"}>
+                                                        {answer.studentAnswer === "true" ? "صح" : "خطأ"}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        {answer.question.type === "SHORT_ANSWER" && (
+                                            <div className="space-y-2 mt-3">
+                                                <div>
+                                                    <span className="font-medium text-sm">إجابتك:</span>
+                                                    <p className={`text-sm p-2 rounded border mt-1 ${
+                                                        answer.isCorrect 
+                                                            ? "bg-green-50 border-green-200" 
+                                                            : "bg-red-50 border-red-200"
+                                                    }`}>
+                                                        {answer.studentAnswer || "لم تجب"}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <span className="font-medium text-sm">الإجابة الصحيحة:</span>
+                                                    <p className="text-sm bg-green-50 p-2 rounded border border-green-200 mt-1">
+                                                        {answer.correctAnswer}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="mt-2 text-sm">
+                                            <span className="font-medium">الدرجات:</span>
+                                            <span className="text-muted-foreground">
+                                                {" "}{answer.pointsEarned}/{answer.question.points}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <div className="flex justify-center gap-4">
+                        <Button
+                            onClick={() => router.push(`/courses/${courseId}`)}
+                            className="bg-primary hover:bg-primary/90"
+                        >
+                            العودة إلى الكورس
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+

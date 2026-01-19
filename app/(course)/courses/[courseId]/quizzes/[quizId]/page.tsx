@@ -92,16 +92,16 @@ export default function QuizPage({
             } else {
                 const errorText = await response.text();
                 if (errorText.includes("Maximum attempts reached")) {
-                    toast.error("لقد استنفذت جميع المحاولات المسموحة لهذا الاختبار");
+                    toast.error("لقد استنفذت جميع المحاولات المسموحة لهذا الامتحان");
                     // Set flag to redirect to result page when no attempts remaining
                     setRedirectToResult(true);
                 } else {
-                    toast.error("حدث خطأ أثناء تحميل الاختبار");
+                    toast.error("حدث خطأ أثناء تحميل الامتحان");
                 }
             }
         } catch (error) {
             console.error("Error fetching quiz:", error);
-            toast.error("حدث خطأ أثناء تحميل الاختبار");
+            toast.error("حدث خطأ أثناء تحميل الامتحان");
         } finally {
             setLoading(false);
         }
@@ -145,15 +145,15 @@ export default function QuizPage({
 
             if (response.ok) {
                 const result = await response.json();
-                toast.success("تم إرسال الاختبار بنجاح!");
+                toast.success("تم إرسال الامتحان بنجاح!");
                 router.push(`/courses/${courseId}/quizzes/${quizId}/result`);
             } else {
                 const error = await response.text();
-                toast.error(error || "حدث خطأ أثناء إرسال الاختبار");
+                toast.error(error || "حدث خطأ أثناء إرسال الامتحان");
             }
         } catch (error) {
             console.error("Error submitting quiz:", error);
-            toast.error("حدث خطأ أثناء إرسال الاختبار");
+            toast.error("حدث خطأ أثناء إرسال الامتحان");
         } finally {
             setSubmitting(false);
         }
@@ -210,7 +210,7 @@ export default function QuizPage({
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">الاختبار غير موجود</h1>
+                    <h1 className="text-2xl font-bold mb-4">الامتحان غير موجود</h1>
                     <Button onClick={() => router.back()}>العودة</Button>
                 </div>
             </div>
@@ -348,7 +348,7 @@ export default function QuizPage({
                                     disabled={submitting}
                                     className="bg-primary hover:bg-primary/90"
                                 >
-                                    {submitting ? "جاري الإرسال..." : "إنهاء الاختبار"}
+                                    {submitting ? "جاري الإرسال..." : "إنهاء الامتحان"}
                                 </Button>
                             ) : (
                                 <Button
@@ -370,8 +370,8 @@ export default function QuizPage({
                             </div>
                             <p className="text-amber-700 dark:text-amber-200 mt-2">
                                 {quiz.maxAttempts > 1 
-                                    ? `تأكد من إجابة جميع الأسئلة قبل إنهاء الاختبار. يمكنك إعادة الاختبار ${quiz.maxAttempts - (quiz.currentAttempt || 1)} مرات أخرى.`
-                                    : "تأكد من إجابة جميع الأسئلة قبل إنهاء الاختبار. لا يمكنك العودة للاختبار بعد الإرسال."
+                                    ? `تأكد من إجابة جميع الأسئلة قبل إنهاء الامتحان. يمكنك إعادة الامتحان ${quiz.maxAttempts - (quiz.currentAttempt || 1)} مرات أخرى.`
+                                    : "تأكد من إجابة جميع الأسئلة قبل إنهاء الامتحان. لا يمكنك العودة للامتحان بعد الإرسال."
                                 }
                             </p>
                         </CardContent>

@@ -36,6 +36,11 @@ export async function PATCH(
             return new NextResponse("User not found", { status: 404 });
         }
 
+        // Prevent admin from changing teacher passwords
+        if (user.role === "TEACHER") {
+            return new NextResponse("Cannot change teacher passwords. Only student and admin passwords can be changed.", { status: 403 });
+        }
+
         const hashedPassword = await bcrypt.hash(newPassword, 12);
 
         await db.user.update({

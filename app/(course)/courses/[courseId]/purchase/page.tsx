@@ -161,7 +161,7 @@ export default function PurchasePage({
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">الكورس غير موجودة</h1>
           <Button asChild>
-            <Link href="/dashboard">العودة إلى لوحة التحكم</Link>
+            <Link href="/dashboard">العودة إلى الصفحة الرئيسية</Link>
           </Button>
         </div>
       </div>

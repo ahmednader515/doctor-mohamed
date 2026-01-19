@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart, Compass, Layout, List, Wallet, Shield, Users, Eye, TrendingUp, BookOpen, FileText, Award, PlusSquare, Key, Ticket } from "lucide-react";
+import { BarChart, Compass, Layout, List, Wallet, Shield, Users, Eye, TrendingUp, BookOpen, FileText, Award, PlusSquare, Key, Ticket, User, ClipboardList, Home } from "lucide-react";
 import { SidebarItem } from "./sidebar-item";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/contexts/language-context";
@@ -11,19 +11,39 @@ export const SidebarRoutes = ({ closeOnClick = false }: { closeOnClick?: boolean
 
     const guestRoutes = [
         {
-            icon: Layout,
+            icon: Home,
             label: t("sidebar.dashboard"),
             href: "/dashboard",
         },
         {
             icon: Compass,
-            label: t("sidebar.courses"),
+            label: t("sidebar.allCourses"),
             href: "/dashboard/search",
+        },
+        {
+            icon: BookOpen,
+            label: t("sidebar.myCourses"),
+            href: "/dashboard/my-courses",
         },
         {
             icon: Wallet,
             label: t("sidebar.balance"),
             href: "/dashboard/balance",
+        },
+        {
+            icon: FileText,
+            label: t("sidebar.quizzes"),
+            href: "/dashboard/quizzes",
+        },
+        {
+            icon: ClipboardList,
+            label: t("sidebar.homeworks"),
+            href: "/dashboard/homeworks",
+        },
+        {
+            icon: User,
+            label: t("sidebar.profile"),
+            href: "/dashboard/profile",
         },
     ];
 
@@ -37,6 +57,11 @@ export const SidebarRoutes = ({ closeOnClick = false }: { closeOnClick?: boolean
             icon: FileText,
             label: t("sidebar.teacher.quizzes"),
             href: "/dashboard/teacher/quizzes",
+        },
+        {
+            icon: ClipboardList,
+            label: t("sidebar.teacher.homeworks"),
+            href: "/dashboard/teacher/homeworks",
         },
         {
             icon: Award,
@@ -95,6 +120,11 @@ export const SidebarRoutes = ({ closeOnClick = false }: { closeOnClick?: boolean
             icon: FileText,
             label: t("sidebar.admin.quizzes"),
             href: "/dashboard/admin/quizzes",
+        },
+        {
+            icon: ClipboardList,
+            label: t("sidebar.admin.homeworks"),
+            href: "/dashboard/admin/homeworks",
         },
         {
             icon: Shield,

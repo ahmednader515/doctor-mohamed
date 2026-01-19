@@ -142,12 +142,12 @@ const EditQuizPage = () => {
                 setSelectedPosition(quiz.position);
                 await fetchCourseItems(quiz.courseId);
             } else {
-                toast.error("حدث خطأ أثناء تحميل الاختبار");
+                toast.error("حدث خطأ أثناء تحميل الامتحان");
                 router.push(dashboardPath);
             }
         } catch (error) {
             console.error("Error fetching quiz:", error);
-            toast.error("حدث خطأ أثناء تحميل الاختبار");
+            toast.error("حدث خطأ أثناء تحميل الامتحان");
             router.push(dashboardPath);
         } finally {
             setIsLoadingQuiz(false);
@@ -383,15 +383,15 @@ const EditQuizPage = () => {
             });
 
             if (response.ok) {
-                toast.success("تم تحديث الاختبار بنجاح");
+                toast.success("تم تحديث الامتحان بنجاح");
                 router.push(dashboardPath);
             } else {
                 const error = await response.json();
-                toast.error(error.message || "حدث خطأ أثناء تحديث الاختبار");
+                toast.error(error.message || "حدث خطأ أثناء تحديث الامتحان");
             }
         } catch (error) {
             console.error("Error updating quiz:", error);
-            toast.error("حدث خطأ أثناء تحديث الاختبار");
+            toast.error("حدث خطأ أثناء تحديث الامتحان");
         } finally {
             setIsUpdatingQuiz(false);
         }
@@ -459,13 +459,13 @@ const EditQuizPage = () => {
                 });
 
                 if (response.ok) {
-                    toast.success("تم ترتيب الاختبار بنجاح");
+                    toast.success("تم ترتيب الامتحان بنجاح");
                 } else {
-                    toast.error("حدث خطأ أثناء ترتيب الاختبار");
+                    toast.error("حدث خطأ أثناء ترتيب الامتحان");
                 }
             } catch (error) {
                 console.error("Error reordering quiz:", error);
-                toast.error("حدث خطأ أثناء ترتيب الاختبار");
+                toast.error("حدث خطأ أثناء ترتيب الامتحان");
             }
         }
         // For other items, we don't want to reorder them, so we ignore the drag
@@ -484,10 +484,10 @@ const EditQuizPage = () => {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    تعديل الاختبار
+                    تعديل الامتحان
                 </h1>
                 <Button variant="outline" onClick={() => router.push(dashboardPath)}>
-                    العودة إلى الاختبارات
+                    العودة إلى الامتحانات
                 </Button>
             </div>
 
@@ -517,11 +517,11 @@ const EditQuizPage = () => {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label>عنوان الاختبار</Label>
+                        <Label>عنوان الامتحان</Label>
                         <Input
                             value={quizTitle}
                             onChange={(e) => setQuizTitle(e.target.value)}
-                            placeholder="أدخل عنوان الاختبار"
+                            placeholder="أدخل عنوان الامتحان"
                         />
                     </div>
                 </div>
@@ -529,9 +529,9 @@ const EditQuizPage = () => {
                 {selectedCourse && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>ترتيب الاختبار في الكورس</CardTitle>
+                            <CardTitle>ترتيب الامتحان في الكورس</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                اسحب الاختبار إلى الموقع المطلوب بين الدروس والاختبارات الموجودة
+                                اسحب الامتحان إلى الموقع المطلوب بين الدروس والامتحانات الموجودة
                             </p>
                             <p className="text-sm text-blue-600">
                                 الموقع المحدد: {selectedPosition}
@@ -570,7 +570,7 @@ const EditQuizPage = () => {
                                                                             {item.title}
                                                                         </div>
                                                                         <div className={`text-sm ${item.id === quizId ? "text-blue-600" : "text-muted-foreground"}`}>
-                                                                            {item.type === "chapter" ? "درس" : "اختبار"}
+                                                                            {item.type === "chapter" ? "درس" : "امتحان"}
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -590,15 +590,15 @@ const EditQuizPage = () => {
                             ) : (
                                 <div className="text-center py-8">
                                     <p className="text-muted-foreground mb-4">
-                                        لا توجد دروس أو اختبارات في هذه الكورس. سيتم إضافة الاختبار في الموقع الأول.
+                                        لا توجد دروس أو امتحانات في هذه الكورس. سيتم إضافة الامتحان في الموقع الأول.
                                     </p>
                                     <div className="p-3 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
                                         <div className="flex items-center justify-center space-x-3">
                                             <div>
                                                 <div className="font-medium text-blue-800">
-                                                    {quizTitle || "اختبار جديد"}
+                                                    {quizTitle || "امتحان جديد"}
                                                 </div>
-                                                <div className="text-sm text-blue-600">اختبار</div>
+                                                <div className="text-sm text-blue-600">امتحان</div>
                                             </div>
                                             <Badge variant="outline" className="border-blue-300 text-blue-700">
                                                 قيد التعديل
@@ -612,18 +612,18 @@ const EditQuizPage = () => {
                 )}
 
                 <div className="space-y-2">
-                    <Label>وصف الاختبار</Label>
+                    <Label>وصف الامتحان</Label>
                     <Textarea
                         value={quizDescription}
                         onChange={(e) => setQuizDescription(e.target.value)}
-                        placeholder="أدخل وصف الاختبار"
+                        placeholder="أدخل وصف الامتحان"
                         rows={3}
                     />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>مدة الاختبار (بالدقائق)</Label>
+                        <Label>مدة الامتحان (بالدقائق)</Label>
                         <Input
                             type="number"
                             value={quizTimer || ""}
@@ -632,7 +632,7 @@ const EditQuizPage = () => {
                             min="1"
                         />
                         <p className="text-sm text-muted-foreground">
-                            اترك الحقل فارغاً إذا كنت لا تريد تحديد مدة للاختبار
+                            اترك الحقل فارغاً إذا كنت لا تريد تحديد مدة للامتحان
                         </p>
                     </div>
                     <div className="space-y-2">
@@ -645,7 +645,7 @@ const EditQuizPage = () => {
                             max="10"
                         />
                         <p className="text-sm text-muted-foreground">
-                            عدد المرات التي يمكن للطالب إعادة الاختبار
+                            عدد المرات التي يمكن للطالب إعادة الامتحان
                         </p>
                     </div>
                 </div>
@@ -868,7 +868,7 @@ const EditQuizPage = () => {
                         onClick={handleUpdateQuiz}
                         disabled={isUpdatingQuiz || questions.length === 0}
                     >
-                        {isUpdatingQuiz ? "جاري التحديث..." : "تحديث الاختبار"}
+                        {isUpdatingQuiz ? "جاري التحديث..." : "تحديث الامتحان"}
                     </Button>
                 </div>
             </div>

@@ -37,6 +37,11 @@ export async function PATCH(
             return new NextResponse("Cannot edit staff accounts. Only student accounts can be edited.", { status: 403 });
         }
 
+        // Prevent changing student role to TEACHER
+        if (role === "TEACHER" && existingUser.role === "USER") {
+            return new NextResponse("Cannot change student role to teacher. Only student and admin roles are allowed.", { status: 403 });
+        }
+
         // Check if phone number is already taken by another user
         if (phoneNumber && phoneNumber !== existingUser.phoneNumber) {
             const phoneExists = await db.user.findUnique({

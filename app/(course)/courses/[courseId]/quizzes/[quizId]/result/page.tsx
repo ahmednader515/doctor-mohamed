@@ -257,7 +257,7 @@ export default function QuizResultPage({
                 <div className="max-w-4xl mx-auto space-y-6">
                     {/* Header */}
                     <div className="flex items-center gap-4">
-                        <h1 className="text-2xl font-bold">نتيجة الاختبار</h1>
+                        <h1 className="text-2xl font-bold">نتيجة الامتحان</h1>
                     </div>
 
                     {/* Summary Card */}
@@ -421,14 +421,14 @@ export default function QuizResultPage({
                                 onClick={handleTryAgain}
                                 className="bg-primary hover:bg-primary/90"
                             >
-                                إعادة الاختبار
+                                إعادة الامتحان
                             </Button>
                         ) : (
                             <Button
                                 onClick={handleNextChapter}
                                 className="bg-primary hover:bg-primary/90"
                             >
-                                {willRedirectToDashboard ? "لوحة التحكم" : "الدرس التالي"}
+                                {willRedirectToDashboard ? "الصفحة الرئيسية" : "الدرس التالي"}
                             </Button>
                         )}
                     </div>

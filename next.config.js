@@ -23,6 +23,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: '6c8pm9dkvh.ufs.sh',
       },
+      {
+        protocol: 'https',
+        hostname: 'za4fcj06bh.ufs.sh',
+      },
     ],
   },
   serverExternalPackages: ['@prisma/client', 'bcrypt'],

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import localFont from 'next/font/local';
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Footer } from "@/components/footer";
 import { NavigationLoading } from "@/components/navigation-loading";
 import { Suspense } from "react";
 import { theme } from "@/lib/theme";
+import { cairo, roboto } from "@/lib/fonts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,13 +16,6 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-});
-
-const playpenSansArabic = localFont({
-  src: '../public/fonts/PlaypenSansArabic-VariableFont_wght.ttf',
-  variable: '--font-playpen-sans-arabic',
-  display: 'swap',
-  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -36,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning lang="ar" dir="rtl" className={`${geistSans.variable} ${geistMono.variable} ${playpenSansArabic.variable}`}>
-      <body suppressHydrationWarning className="font-playpen-sans-arabic">
+    <html suppressHydrationWarning lang="ar" dir="rtl" className={`${geistSans.variable} ${geistMono.variable} ${cairo.variable} ${roboto.variable}`}>
+      <body suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
             __html: `

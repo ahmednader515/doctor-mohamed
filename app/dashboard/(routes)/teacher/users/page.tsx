@@ -47,6 +47,7 @@ interface User {
     parentPhoneNumber: string;
     role: string;
     balance: number;
+    grade: string | null;
     createdAt: string;
     updatedAt: string;
     _count: {
@@ -189,6 +190,11 @@ const UsersPage = () => {
     // Separate users by role
     const studentUsers = filteredUsers.filter(user => user.role === "USER");
     const staffUsers = filteredUsers.filter(user => user.role === "TEACHER" || user.role === "ADMIN");
+
+    // Group students by grade level
+    const grade1Students = studentUsers.filter(user => user.grade === "الصف الأول الثانوي");
+    const grade2Students = studentUsers.filter(user => user.grade === "الصف الثاني الثانوي");
+    const grade3Students = studentUsers.filter(user => user.grade === "الصف الثالث الثانوي");
 
     // Debug logging
     console.log("All users:", users);
@@ -393,37 +399,31 @@ const UsersPage = () => {
                 </Card>
             )}
 
-            {/* Students Table */}
-            {studentUsers.length > 0 && (
+            {/* Students Tables by Grade */}
+            <>
+                {/* Grade 1 Students Table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>{t("teacher.users.studentsTitle")}</CardTitle>
-                        <div className="flex items-center space-x-2">
-                            <Search className="h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder={t("teacher.users.searchPlaceholder")}
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="max-w-sm"
-                            />
-                        </div>
+                        <CardTitle>الصف الأول الثانوي</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
-                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
-                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
-                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
-                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
-                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
-                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
-                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {studentUsers.map((user) => (
+                        {grade1Students.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {grade1Students.map((user) => (
                                     <TableRow key={user.id}>
                                         <TableCell className="font-medium">
                                             {user.fullName}
@@ -573,12 +573,386 @@ const UsersPage = () => {
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                                لا يوجد طلاب في هذا الصف
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
-            )}
+
+                {/* Grade 2 Students Table */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>الصف الثاني الثانوي</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {grade2Students.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {grade2Students.map((user) => (
+                                                <TableRow key={user.id}>
+                                                    <TableCell className="font-medium">
+                                                        {user.fullName}
+                                                    </TableCell>
+                                                    <TableCell>{user.phoneNumber}</TableCell>
+                                                    <TableCell>{user.parentPhoneNumber}</TableCell>
+                                                    <TableCell>
+                                                        <Badge 
+                                                            variant="secondary"
+                                                            className="bg-green-600 text-white hover:bg-green-700"
+                                                        >
+                                                            {t("teacher.users.roles.student")}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="secondary">
+                                                            {user.balance} {t("dashboard.egp")}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="outline">
+                                                            {user._count.purchases}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: ar })}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-2">
+                                                            <Dialog open={isEditDialogOpen && editingUser?.id === user.id} onOpenChange={(open) => {
+                                                                if (!open) {
+                                                                    setIsEditDialogOpen(false);
+                                                                    setEditingUser(null);
+                                                                }
+                                                            }}>
+                                                                <DialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => handleEditUser(user)}
+                                                                    >
+                                                                        <Edit className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>{t("teacher.users.edit.studentTitle")}</DialogTitle>
+                                                                        <DialogDescription>
+                                                                            {t("teacher.users.edit.studentDescription")}
+                                                                        </DialogDescription>
+                                                                    </DialogHeader>
+                                                                    <div className="grid gap-4 py-4">
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="fullName" className="text-right">
+                                                                                {t("auth.fullName")}
+                                                                            </Label>
+                                                                            <Input
+                                                                                id="fullName"
+                                                                                value={editData.fullName}
+                                                                                onChange={(e) => setEditData({...editData, fullName: e.target.value})}
+                                                                                className="col-span-3"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="phoneNumber" className="text-right">
+                                                                                {t("auth.phoneNumber")}
+                                                                            </Label>
+                                                                            <Input
+                                                                                id="phoneNumber"
+                                                                                value={editData.phoneNumber}
+                                                                                onChange={(e) => setEditData({...editData, phoneNumber: e.target.value})}
+                                                                                className="col-span-3"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="parentPhoneNumber" className="text-right">
+                                                                                {t("auth.parentPhoneNumber")}
+                                                                            </Label>
+                                                                            <Input
+                                                                                id="parentPhoneNumber"
+                                                                                value={editData.parentPhoneNumber}
+                                                                                onChange={(e) => setEditData({...editData, parentPhoneNumber: e.target.value})}
+                                                                                className="col-span-3"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="role" className="text-right">
+                                                                                {t("teacher.users.table.role")}
+                                                                            </Label>
+                                                                            <Select
+                                                                                value={editData.role}
+                                                                                onValueChange={(value) => setEditData({...editData, role: value})}
+                                                                            >
+                                                                                <SelectTrigger className="col-span-3">
+                                                                                    <SelectValue placeholder={t("teacher.users.edit.selectRole")} />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                    <SelectItem value="USER">{t("teacher.users.roles.student")}</SelectItem>
+                                                                                    <SelectItem value="TEACHER">{t("teacher.users.roles.teacher")}</SelectItem>
+                                                                                    <SelectItem value="ADMIN">{t("teacher.users.roles.admin")}</SelectItem>
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                        </div>
+                                                                    </div>
+                                                                    <DialogFooter>
+                                                                        <Button variant="outline" onClick={() => {
+                                                                            setIsEditDialogOpen(false);
+                                                                            setEditingUser(null);
+                                                                        }}>
+                                                                            {t("common.cancel")}
+                                                                        </Button>
+                                                                        <Button onClick={handleSaveUser}>
+                                                                            {t("teacher.users.edit.saveChanges")}
+                                                                        </Button>
+                                                                    </DialogFooter>
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                            
+                                                            <AlertDialog>
+                                                                <AlertDialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="destructive"
+                                                                        size="sm"
+                                                                        disabled={isDeleting}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </AlertDialogTrigger>
+                                                                <AlertDialogContent>
+                                                                    <AlertDialogHeader>
+                                                                        <AlertDialogTitle>{t("teacher.users.delete.confirm")}</AlertDialogTitle>
+                                                                        <AlertDialogDescription>
+                                                                            {t("teacher.users.delete.studentDescription")}
+                                                                        </AlertDialogDescription>
+                                                                    </AlertDialogHeader>
+                                                                    <AlertDialogFooter>
+                                                                        <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                                                                        <AlertDialogAction
+                                                                            onClick={() => handleDeleteUser(user.id)}
+                                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                        >
+                                                                            {t("common.delete")}
+                                                                        </AlertDialogAction>
+                                                                    </AlertDialogFooter>
+                                                                </AlertDialogContent>
+                                                            </AlertDialog>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                                لا يوجد طلاب في هذا الصف
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Grade 3 Students Table */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>الصف الثالث الثانوي</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {grade3Students.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
+                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {grade3Students.map((user) => (
+                                                <TableRow key={user.id}>
+                                                    <TableCell className="font-medium">
+                                                        {user.fullName}
+                                                    </TableCell>
+                                                    <TableCell>{user.phoneNumber}</TableCell>
+                                                    <TableCell>{user.parentPhoneNumber}</TableCell>
+                                                    <TableCell>
+                                                        <Badge 
+                                                            variant="secondary"
+                                                            className="bg-green-600 text-white hover:bg-green-700"
+                                                        >
+                                                            {t("teacher.users.roles.student")}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="secondary">
+                                                            {user.balance} {t("dashboard.egp")}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="outline">
+                                                            {user._count.purchases}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: ar })}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-2">
+                                                            <Dialog open={isEditDialogOpen && editingUser?.id === user.id} onOpenChange={(open) => {
+                                                                if (!open) {
+                                                                    setIsEditDialogOpen(false);
+                                                                    setEditingUser(null);
+                                                                }
+                                                            }}>
+                                                                <DialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => handleEditUser(user)}
+                                                                    >
+                                                                        <Edit className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>{t("teacher.users.edit.studentTitle")}</DialogTitle>
+                                                                        <DialogDescription>
+                                                                            {t("teacher.users.edit.studentDescription")}
+                                                                        </DialogDescription>
+                                                                    </DialogHeader>
+                                                                    <div className="grid gap-4 py-4">
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="fullName" className="text-right">
+                                                                                {t("auth.fullName")}
+                                                                            </Label>
+                                                                            <Input
+                                                                                id="fullName"
+                                                                                value={editData.fullName}
+                                                                                onChange={(e) => setEditData({...editData, fullName: e.target.value})}
+                                                                                className="col-span-3"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="phoneNumber" className="text-right">
+                                                                                {t("auth.phoneNumber")}
+                                                                            </Label>
+                                                                            <Input
+                                                                                id="phoneNumber"
+                                                                                value={editData.phoneNumber}
+                                                                                onChange={(e) => setEditData({...editData, phoneNumber: e.target.value})}
+                                                                                className="col-span-3"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="parentPhoneNumber" className="text-right">
+                                                                                {t("auth.parentPhoneNumber")}
+                                                                            </Label>
+                                                                            <Input
+                                                                                id="parentPhoneNumber"
+                                                                                value={editData.parentPhoneNumber}
+                                                                                onChange={(e) => setEditData({...editData, parentPhoneNumber: e.target.value})}
+                                                                                className="col-span-3"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="role" className="text-right">
+                                                                                {t("teacher.users.table.role")}
+                                                                            </Label>
+                                                                            <Select
+                                                                                value={editData.role}
+                                                                                onValueChange={(value) => setEditData({...editData, role: value})}
+                                                                            >
+                                                                                <SelectTrigger className="col-span-3">
+                                                                                    <SelectValue placeholder={t("teacher.users.edit.selectRole")} />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                    <SelectItem value="USER">{t("teacher.users.roles.student")}</SelectItem>
+                                                                                    <SelectItem value="TEACHER">{t("teacher.users.roles.teacher")}</SelectItem>
+                                                                                    <SelectItem value="ADMIN">{t("teacher.users.roles.admin")}</SelectItem>
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                        </div>
+                                                                    </div>
+                                                                    <DialogFooter>
+                                                                        <Button variant="outline" onClick={() => {
+                                                                            setIsEditDialogOpen(false);
+                                                                            setEditingUser(null);
+                                                                        }}>
+                                                                            {t("common.cancel")}
+                                                                        </Button>
+                                                                        <Button onClick={handleSaveUser}>
+                                                                            {t("teacher.users.edit.saveChanges")}
+                                                                        </Button>
+                                                                    </DialogFooter>
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                            
+                                                            <AlertDialog>
+                                                                <AlertDialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="destructive"
+                                                                        size="sm"
+                                                                        disabled={isDeleting}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </AlertDialogTrigger>
+                                                                <AlertDialogContent>
+                                                                    <AlertDialogHeader>
+                                                                        <AlertDialogTitle>{t("teacher.users.delete.confirm")}</AlertDialogTitle>
+                                                                        <AlertDialogDescription>
+                                                                            {t("teacher.users.delete.studentDescription")}
+                                                                        </AlertDialogDescription>
+                                                                    </AlertDialogHeader>
+                                                                    <AlertDialogFooter>
+                                                                        <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                                                                        <AlertDialogAction
+                                                                            onClick={() => handleDeleteUser(user.id)}
+                                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                        >
+                                                                            {t("common.delete")}
+                                                                        </AlertDialogAction>
+                                                                    </AlertDialogFooter>
+                                                                </AlertDialogContent>
+                                                            </AlertDialog>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                                لا يوجد طلاب في هذا الصف
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </>
 
             {staffUsers.length === 0 && studentUsers.length === 0 && !loading && (
                 <Card>

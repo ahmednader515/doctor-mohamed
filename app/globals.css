@@ -129,12 +129,15 @@ body,
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-noto-sans-arabic), var(--font-geist-sans), system-ui, sans-serif;
+    font-family: var(--font-roboto), system-ui, sans-serif;
   }
   :lang(ar) {
-    font-family: var(--font-noto-sans-arabic), system-ui, sans-serif;
+    font-family: var(--font-cairo), system-ui, sans-serif;
     letter-spacing: 0;
     line-height: 1.6;
+  }
+  :lang(en) {
+    font-family: var(--font-roboto), system-ui, sans-serif;
   }
 }
 
@@ -163,9 +166,12 @@ body,
     scrollbar-color: hsl(var(--muted)) transparent;
 }
 
-/* Ensure the font is applied to all text */
+/* Ensure the font is applied to all text based on language */
 * {
-  font-family: var(--font-playpen-sans-arabic), system-ui, sans-serif;
+  font-family: var(--font-roboto), system-ui, sans-serif;
+}
+*:lang(ar) {
+  font-family: var(--font-cairo), system-ui, sans-serif;
 }
 
 /* Prevent YouTube overlay buttons from being clickable inside Plyr */

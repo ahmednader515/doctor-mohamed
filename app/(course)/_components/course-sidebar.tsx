@@ -32,12 +32,18 @@ interface CourseContent {
   id: string;
   title: string;
   position: number;
-  type: 'chapter' | 'quiz';
+  type: 'chapter' | 'quiz' | 'homework';
   isFree?: boolean;
   userProgress?: {
     isCompleted: boolean;
   }[];
   quizResults?: {
+    id: string;
+    score: number;
+    totalPoints: number;
+    percentage: number;
+  }[];
+  homeworkResults?: {
     id: string;
     score: number;
     totalPoints: number;
@@ -109,6 +115,8 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
         router.push(`/courses/${courseId}/chapters/${content.id}`);
       } else if (content.type === 'quiz') {
         router.push(`/courses/${courseId}/quizzes/${content.id}`);
+      } else if (content.type === 'homework') {
+        router.push(`/courses/${courseId}/homeworks/${content.id}`);
       }
       router.refresh();
     }
@@ -150,7 +158,11 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
           const isSelected = selectedContentId === content.id;
           const isCompleted = content.type === 'chapter' 
             ? content.userProgress?.[0]?.isCompleted || false
-            : content.quizResults && content.quizResults.length > 0;
+            : (content.type === 'quiz' 
+                ? content.quizResults && content.quizResults.length > 0
+                : (content.type === 'homework'
+                    ? content.homeworkResults && content.homeworkResults.length > 0
+                    : false));
           
           return (
             <div
@@ -173,6 +185,9 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
                 {content.title}
                 {content.type === 'quiz' && (
                   <span className="ml-2 text-xs text-green-600">({t("course.quiz")})</span>
+                )}
+                {content.type === 'homework' && (
+                  <span className="ml-2 text-xs text-blue-600">({t("course.homework")})</span>
                 )}
               </span>
               {content.type === 'chapter' && content.isFree && (

@@ -371,7 +371,6 @@ const UsersPage = () => {
                                                                     </SelectTrigger>
                                                                     <SelectContent>
                                                                         <SelectItem value="USER">{t("teacher.users.roles.student")}</SelectItem>
-                                                                        <SelectItem value="TEACHER">{t("teacher.users.roles.teacher")}</SelectItem>
                                                                         <SelectItem value="ADMIN">{t("teacher.users.roles.admin")}</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>

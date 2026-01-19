@@ -165,7 +165,7 @@ const QuizzesPage = () => {
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant="secondary">
-                                            {quiz.questions.length} {t("homepage.quiz")}
+                                            {quiz.questions.length} {quiz.questions.length === 1 ? t("teacher.quizzes.question") : t("teacher.quizzes.questions")}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>

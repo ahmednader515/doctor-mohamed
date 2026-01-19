@@ -146,17 +146,23 @@ const PasswordsPage = () => {
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <Button 
-                                                size="sm" 
-                                                variant="outline"
-                                                onClick={() => {
-                                                    setSelectedUser(user);
-                                                    setIsDialogOpen(true);
-                                                }}
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                                {t("admin.passwords.change.button")}
-                                            </Button>
+                                            {user.role === "TEACHER" ? (
+                                                <span className="text-sm text-muted-foreground">
+                                                    {t("common.notAvailable")}
+                                                </span>
+                                            ) : (
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        setSelectedUser(user);
+                                                        setIsDialogOpen(true);
+                                                    }}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                    {t("admin.passwords.change.button")}
+                                                </Button>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}

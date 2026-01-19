@@ -98,8 +98,8 @@ export const LanguageProvider = ({
 
     // Update body class for font
     document.body.className = language === "ar"
-      ? "font-playpen-sans-arabic"
-      : "font-playpen-sans-arabic";
+      ? "font-cairo"
+      : "font-roboto";
 
     // Save to localStorage
     localStorage.setItem("language", language);

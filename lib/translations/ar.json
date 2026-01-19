@@ -2,7 +2,7 @@
   "navigation": {
     "signIn": "تسجيل الدخول",
     "signUp": "انشاء الحساب",
-    "dashboard": "لوحة التحكم",
+    "dashboard": "الصفحة الرئيسية",
     "logout": "تسجيل الخروج"
   },
   "auth": {
@@ -79,8 +79,21 @@
     "signUpForEarlyAccess": "سجل الآن للوصول المبكر",
     "chapter": "درس",
     "chapters": "دروس",
-    "quiz": "اختبار",
-    "quizzes": "اختبارات",
+    "quiz": "امتحان",
+    "quizzes": "امتحانات",
+    "homework": "واجب",
+    "question": "سؤال",
+    "questions": "أسئلة",
+    "latestQuizzes": "أحدث الامتحانات",
+    "latestHomeworks": "أحدث الواجبات",
+    "discoverQuizzes": "اكتشف أحدث الامتحانات المتاحة",
+    "discoverHomeworks": "اكتشف أحدث الواجبات المتاحة",
+    "noQuizzesAvailable": "لا توجد امتحانات متاحة حالياً",
+    "noHomeworksAvailable": "لا توجد واجبات متاحة حالياً",
+    "quizzesComingSoon": "سيتم إضافة امتحانات جديدة قريباً",
+    "homeworksComingSoon": "سيتم إضافة واجبات جديدة قريباً",
+    "viewQuiz": "عرض الامتحان",
+    "viewHomework": "عرض الواجب",
     "viewCourse": "عرض الكورس",
     "testimonials": "آراء الطلاب",
     "testimonialsSubtitle": "ماذا يقول طلابنا عن تجربتهم معنا",
@@ -114,7 +127,7 @@
     "signUpNow": "سجل الآن"
   },
   "dashboard": {
-    "welcome": "مرحباً بك في لوحة التحكم",
+    "welcome": "مرحباً بك في الصفحة الرئيسية",
     "successStartsHere": "معنا النجاح ليه طريق واضح",
     "currentBalance": "الرصيد الحالي",
     "purchasedCourses": "الكورسات المشتراة",
@@ -127,8 +140,24 @@
     "learningStats": "إحصائيات التعلم",
     "totalChapters": "إجمالي الدروس",
     "completedOf": "{completed} من {total} مكتمل",
-    "completedQuizzes": "الاختبارات المكتملة",
+    "completedQuizzes": "الامتحانات المكتملة",
+    "completedHomeworks": "الواجبات المكتملة",
     "myCourses": "كورساتي",
+    "latestQuizzes": "أحدث الامتحانات",
+    "latestHomeworks": "أحدث الواجبات",
+    "latestResults": "أحدث النتائج",
+    "viewQuiz": "عرض الامتحان",
+    "viewHomework": "عرض الواجب",
+    "viewResult": "عرض النتيجة",
+    "score": "الدرجة",
+    "percentage": "النسبة المئوية",
+    "submittedAt": "تاريخ التقديم",
+    "noQuizzesAvailable": "لا توجد امتحانات متاحة حالياً",
+    "noHomeworksAvailable": "لا توجد واجبات متاحة حالياً",
+    "noQuizResults": "لا توجد نتائج امتحانات",
+    "noHomeworkResults": "لا توجد نتائج واجبات",
+    "quizzesComingSoon": "سيتم إضافة امتحانات جديدة قريباً",
+    "homeworksComingSoon": "سيتم إضافة واجبات جديدة قريباً",
     "progress": "التقدم",
     "continueLearning": "متابعة التعلم",
     "noCoursesPurchased": "لم تقم بشراء أي كورسات بعد",
@@ -178,12 +207,18 @@
     "scanToSubscribe": "امسح الكود للاشتراك في قناتنا على يوتيوب"
   },
   "sidebar": {
-    "dashboard": "لوحة التحكم",
+    "dashboard": "الصفحة الرئيسية",
     "courses": "الكورسات",
+    "allCourses": "جميع الكورسات",
+    "myCourses": "كورساتي",
     "balance": "الرصيد",
+    "quizzes": "الامتحانات",
+    "homeworks": "الواجبات",
+    "profile": "الملف الشخصي",
     "teacher": {
       "courses": "الكورسات",
-      "quizzes": "الاختبارات",
+      "quizzes": "الامتحانات",
+      "homeworks": "الواجبات",
       "grades": "الدرجات",
       "analytics": "الاحصائيات",
       "manageStudents": "إدارة الطلاب",
@@ -196,7 +231,8 @@
     "admin": {
       "manageUsers": "إدارة المستخدمين",
       "courses": "الكورسات",
-      "quizzes": "الاختبارات",
+      "quizzes": "الامتحانات",
+      "homeworks": "الواجبات",
       "createStudentAccount": "إنشاء حساب طالب",
       "passwords": "كلمات المرور",
       "manageBalances": "إدارة الأرصدة",
@@ -230,7 +266,8 @@
     "viewAllCourses": "عرض جميع الكورسات"
   },
   "course": {
-    "quiz": "اختبار",
+    "quiz": "امتحان",
+    "homework": "واجب",
     "free": "مجاني"
   },
   "teacher": {
@@ -262,11 +299,11 @@
       }
     },
     "quizzes": {
-      "title": "إدارة الاختبارات",
-      "createNew": "إنشاء اختبار جديد",
-      "searchPlaceholder": "البحث في الاختبارات...",
+      "title": "إدارة الامتحانات",
+      "createNew": "إنشاء امتحان جديد",
+      "searchPlaceholder": "البحث في الامتحانات...",
       "table": {
-        "quizTitle": "عنوان الاختبار",
+        "quizTitle": "عنوان الامتحان",
         "course": "الكورس",
         "position": "الموقع",
         "status": "الحالة",
@@ -278,6 +315,8 @@
         "published": "منشور",
         "draft": "مسودة"
       },
+      "question": "سؤال",
+      "questions": "أسئلة",
       "actions": {
         "view": "عرض",
         "edit": "تعديل",
@@ -286,40 +325,40 @@
         "delete": "حذف",
         "deleting": "جاري الحذف..."
       },
-      "deleteConfirm": "هل أنت متأكد من حذف هذا الاختبار؟",
-      "deleteSuccess": "تم حذف الاختبار بنجاح",
-      "deleteError": "حدث خطأ أثناء حذف الاختبار",
+      "deleteConfirm": "هل أنت متأكد من حذف هذا الامتحان؟",
+      "deleteSuccess": "تم حذف الامتحان بنجاح",
+      "deleteError": "حدث خطأ أثناء حذف الامتحان",
       "publishSuccess": "تم النشر بنجاح",
       "unpublishSuccess": "تم إلغاء النشر",
       "publishError": "حدث خطأ",
       "create": {
-        "title": "إنشاء اختبار جديد",
-        "backToQuizzes": "العودة إلى الاختبارات",
+        "title": "إنشاء امتحان جديد",
+        "backToQuizzes": "العودة إلى الامتحانات",
         "selectCourse": "اختر الكورس",
         "selectCoursePlaceholder": "اختر كورس...",
-        "quizTitle": "عنوان الاختبار",
-        "quizTitlePlaceholder": "أدخل عنوان الاختبار",
-        "newQuiz": "اختبار جديد",
+        "quizTitle": "عنوان الامتحان",
+        "quizTitlePlaceholder": "أدخل عنوان الامتحان",
+        "newQuiz": "امتحان جديد",
         "position": {
-          "title": "ترتيب الاختبار في الكورس",
-          "description": "اسحب الاختبار الجديد إلى الموقع المطلوب بين الدروس والاختبارات الموجودة",
+          "title": "ترتيب الامتحان في الكورس",
+          "description": "اسحب الامتحان الجديد إلى الموقع المطلوب بين الدروس والامتحانات الموجودة",
           "selectedPosition": "الموقع المحدد: {position}",
           "loading": "جاري تحميل محتوى الكورس...",
-          "empty": "لا توجد دروس أو اختبارات في هذه الكورس. سيتم إضافة الاختبار في الموقع الأول.",
+          "empty": "لا توجد دروس أو امتحانات في هذه الكورس. سيتم إضافة الامتحان في الموقع الأول.",
           "chapter": "درس",
-          "quiz": "اختبار",
+          "quiz": "امتحان",
           "new": "جديد"
         },
-        "description": "وصف الاختبار",
-        "descriptionPlaceholder": "أدخل وصف الاختبار",
+        "description": "وصف الامتحان",
+        "descriptionPlaceholder": "أدخل وصف الامتحان",
         "timer": {
-          "label": "مدة الاختبار (بالدقائق)",
+          "label": "مدة الامتحان (بالدقائق)",
           "placeholder": "اترك فارغاً لعدم تحديد مدة",
-          "hint": "اترك الحقل فارغاً إذا كنت لا تريد تحديد مدة للاختبار"
+          "hint": "اترك الحقل فارغاً إذا كنت لا تريد تحديد مدة للامتحان"
         },
         "maxAttempts": {
           "label": "عدد المحاولات المسموحة",
-          "hint": "عدد المرات التي يمكن للطالب إعادة الاختبار"
+          "hint": "عدد المرات التي يمكن للطالب إعادة الامتحان"
         },
         "questions": {
           "label": "الأسئلة",
@@ -355,15 +394,123 @@
           "questionCorrectAnswerTextRequired": "السؤال {number}: الإجابة الصحيحة مطلوبة",
           "questionPointsRequired": "السؤال {number}: الدرجات يجب أن تكون أكبر من صفر",
           "atLeastOneQuestion": "يجب إضافة سؤال واحد على الأقل",
-          "createSuccess": "تم إنشاء الاختبار بنجاح",
-          "createError": "حدث خطأ أثناء إنشاء الاختبار",
+          "createSuccess": "تم إنشاء الامتحان بنجاح",
+          "createError": "حدث خطأ أثناء إنشاء الامتحان",
           "speechNotSupported": "المتصفح لا يدعم الإملاء الصوتي",
           "speechRecognitionError": "تعذر التعرف على الصوت",
           "speechStartError": "تعذر بدء التسجيل الصوتي"
         },
         "cancel": "إلغاء",
         "creating": "جاري الحفظ...",
-        "createQuiz": "إنشاء الاختبار"
+        "createQuiz": "إنشاء الامتحان"
+      }
+    },
+    "homeworks": {
+      "title": "إدارة الواجبات",
+      "createNew": "إنشاء واجب جديد",
+      "searchPlaceholder": "البحث في الواجبات...",
+      "question": "سؤال",
+      "questions": "أسئلة",
+      "table": {
+        "homeworkTitle": "عنوان الواجب",
+        "course": "الكورس",
+        "position": "الموقع",
+        "status": "الحالة",
+        "questionsCount": "عدد الأسئلة",
+        "createdAt": "تاريخ الإنشاء",
+        "actions": "الإجراءات"
+      },
+      "status": {
+        "published": "منشور",
+        "draft": "مسودة"
+      },
+      "actions": {
+        "view": "عرض",
+        "edit": "تعديل",
+        "publish": "نشر",
+        "unpublish": "إلغاء النشر",
+        "delete": "حذف",
+        "deleting": "جاري الحذف..."
+      },
+      "deleteConfirm": "هل أنت متأكد من حذف هذا الواجب؟",
+      "deleteSuccess": "تم حذف الواجب بنجاح",
+      "deleteError": "حدث خطأ أثناء حذف الواجب",
+      "publishSuccess": "تم النشر بنجاح",
+      "unpublishSuccess": "تم إلغاء النشر",
+      "publishError": "حدث خطأ",
+      "create": {
+        "title": "إنشاء واجب جديد",
+        "backToHomeworks": "العودة إلى الواجبات",
+        "selectCourse": "اختر الكورس",
+        "selectCoursePlaceholder": "اختر كورس...",
+        "homeworkTitle": "عنوان الواجب",
+        "homeworkTitlePlaceholder": "أدخل عنوان الواجب",
+        "newHomework": "واجب جديد",
+        "position": {
+          "title": "ترتيب الواجب في الكورس",
+          "description": "اسحب الواجب الجديد إلى الموقع المطلوب بين الدروس والامتحانات والواجبات الموجودة",
+          "selectedPosition": "الموقع المحدد: {position}",
+          "loading": "جاري تحميل محتوى الكورس...",
+          "empty": "لا توجد دروس أو امتحانات أو واجبات في هذه الكورس. سيتم إضافة الواجب في الموقع الأول.",
+          "chapter": "درس",
+          "quiz": "امتحان",
+          "homework": "واجب",
+          "new": "جديد"
+        },
+        "description": "وصف الواجب",
+        "descriptionPlaceholder": "أدخل وصف الواجب",
+        "timer": {
+          "label": "مدة الواجب (بالدقائق)",
+          "placeholder": "اترك فارغاً لعدم تحديد مدة",
+          "hint": "اترك الحقل فارغاً إذا كنت لا تريد تحديد مدة للواجب"
+        },
+        "maxAttempts": {
+          "label": "عدد المحاولات المسموحة",
+          "hint": "عدد المرات التي يمكن للطالب إعادة الواجب"
+        },
+        "questions": {
+          "label": "الأسئلة",
+          "addQuestion": "إضافة سؤال",
+          "questionNumber": "السؤال {number}",
+          "incomplete": "غير مكتمل",
+          "questionText": "نص السؤال",
+          "listening": "جاري الاستماع...",
+          "startRecording": "بدء التسجيل الصوتي",
+          "stopRecording": "إيقاف التسجيل الصوتي",
+          "questionTextPlaceholder": "أدخل نص السؤال",
+          "questionImage": "صورة السؤال (اختياري)",
+          "imageUploadSuccess": "تم رفع الصورة بنجاح",
+          "imageUploadError": "حدث خطأ أثناء رفع الصورة: {error}",
+          "questionType": "نوع السؤال",
+          "points": "الدرجات",
+          "multipleChoice": "اختيار من متعدد",
+          "trueFalse": "صح أو خطأ",
+          "shortAnswer": "إجابة قصيرة",
+          "options": "الخيارات",
+          "optionPlaceholder": "الخيار {number}",
+          "correctAnswer": "الإجابة الصحيحة",
+          "selectCorrectAnswer": "اختر الإجابة الصحيحة",
+          "true": "صح",
+          "false": "خطأ",
+          "correctAnswerPlaceholder": "أدخل الإجابة الصحيحة"
+        },
+        "errors": {
+          "requiredFields": "يرجى إدخال جميع البيانات المطلوبة",
+          "questionTextRequired": "السؤال {number}: نص السؤال مطلوب",
+          "questionOptionsRequired": "السؤال {number}: يجب إضافة خيار واحد على الأقل",
+          "questionCorrectAnswerRequired": "السؤال {number}: يجب اختيار إجابة صحيحة",
+          "questionCorrectAnswerTextRequired": "السؤال {number}: الإجابة الصحيحة مطلوبة",
+          "questionPointsRequired": "السؤال {number}: الدرجات يجب أن تكون أكبر من صفر",
+          "atLeastOneQuestion": "يجب إضافة سؤال واحد على الأقل",
+          "createSuccess": "تم إنشاء الواجب بنجاح",
+          "createError": "حدث خطأ أثناء إنشاء الواجب",
+          "speechNotSupported": "المتصفح لا يدعم الإملاء الصوتي",
+          "speechRecognitionError": "تعذر التعرف على الصوت",
+          "speechStartError": "تعذر بدء التسجيل الصوتي"
+        },
+        "cancel": "إلغاء",
+        "creating": "جاري الحفظ...",
+        "createHomework": "إنشاء الواجب"
       }
     },
     "grades": {
@@ -373,21 +520,21 @@
         "totalStudents": "إجمالي الطلاب",
         "averageScore": "متوسط الدرجات",
         "highestScore": "أعلى درجة",
-        "totalQuizzes": "إجمالي الاختبارات"
+        "totalQuizzes": "إجمالي الامتحانات"
       },
       "filters": {
         "title": "فلاتر البحث",
         "search": "البحث",
-        "searchPlaceholder": "البحث بالطالب أو الاختبار...",
+        "searchPlaceholder": "البحث بالطالب أو الامتحان...",
         "course": "الكورس",
         "allCourses": "جميع الكورسات",
-        "quiz": "الاختبار",
-        "allQuizzes": "جميع الاختبارات"
+        "quiz": "الامتحان",
+        "allQuizzes": "جميع الامتحانات"
       },
       "table": {
-        "title": "نتائج الاختبارات",
+        "title": "نتائج الامتحانات",
         "student": "الطالب",
-        "quiz": "الاختبار",
+        "quiz": "الامتحان",
         "course": "الكورس",
         "score": "الدرجة",
         "percentage": "النسبة المئوية",
@@ -704,29 +851,30 @@
         }
       },
       "content": {
-        "title": "محتوى الكورس (دروس واختبارات)",
-        "addQuiz": "إضافة اختبار",
+        "title": "محتوى الكورس (دروس وامتحانات)",
+        "addQuiz": "إضافة امتحان",
+        "addHomework": "إضافة واجب",
         "addChapter": "إضافة درس",
         "cancel": "إلغاء",
         "create": "انشاء",
         "noContent": "لا يوجد محتوى",
-        "dragDropHint": "قم بالسحب والإفلات لترتيب الدروس والاختبارات",
+        "dragDropHint": "قم بالسحب والإفلات لترتيب الدروس والامتحانات",
         "chapterPlaceholder": "مثال: 'المقدمة في الكورس'",
         "list": {
           "chapter": "درس",
-          "quiz": "اختبار",
+          "quiz": "امتحان",
           "free": "مجاني",
           "published": "تم النشر",
           "draft": "مسودة",
           "editVideo": "تعديل فيديو",
           "addVideo": "اضافة فيديو",
-          "editQuiz": "تعديل اختبار",
-          "addQuiz": "اضافة اختبار"
+          "editQuiz": "تعديل امتحان",
+          "addQuiz": "اضافة امتحان"
         },
         "toasts": {
           "chapterCreated": "تم انشاء الدرس",
           "chapterDeleted": "تم حذف الدرس",
-          "quizDeleted": "تم حذف الاختبار",
+          "quizDeleted": "تم حذف الامتحان",
           "reordered": "تم ترتيب المحتوى",
           "error": "حدث خطأ"
         }
@@ -954,12 +1102,12 @@
       "empty": "لا توجد طلاب متاحين"
     },
     "quizzes": {
-      "title": "كل الاختبارات",
-      "createNew": "إنشاء اختبار",
-      "quizzesTitle": "الاختبارات",
-      "searchPlaceholder": "البحث في الاختبارات...",
+      "title": "كل الامتحانات",
+      "createNew": "إنشاء امتحان",
+      "quizzesTitle": "الامتحانات",
+      "searchPlaceholder": "البحث في الامتحانات...",
       "table": {
-        "quizTitle": "عنوان الاختبار",
+        "quizTitle": "عنوان الامتحان",
         "course": "الكورس",
         "position": "الموقع",
         "status": "الحالة",
@@ -982,16 +1130,57 @@
         "deleting": "جاري الحذف..."
       },
       "errors": {
-        "loadError": "تعذر تحميل الاختبارات",
+        "loadError": "تعذر تحميل الامتحانات",
         "loadErrorGeneric": "حدث خطأ أثناء التحميل",
-        "updateError": "حدث خطأ أثناء تحديث حالة الاختبار",
+        "updateError": "حدث خطأ أثناء تحديث حالة الامتحان",
         "publishSuccess": "تم النشر بنجاح",
         "unpublishSuccess": "تم إلغاء النشر",
-        "deleteConfirm": "هل أنت متأكد من حذف الاختبار \"{title}\"؟ سيتم حذف جميع الأسئلة المرتبطة به.",
-        "deleteSuccess": "تم حذف الاختبار بنجاح",
-        "deleteError": "تعذر حذف الاختبار"
+        "deleteConfirm": "هل أنت متأكد من حذف الامتحان \"{title}\"؟ سيتم حذف جميع الأسئلة المرتبطة به.",
+        "deleteSuccess": "تم حذف الامتحان بنجاح",
+        "deleteError": "تعذر حذف الامتحان"
       },
-      "empty": "لا توجد اختبارات"
+      "empty": "لا توجد امتحانات"
+    },
+    "homeworks": {
+      "title": "جميع الواجبات",
+      "createNew": "إنشاء واجب",
+      "homeworksTitle": "الواجبات",
+      "searchPlaceholder": "البحث في الواجبات...",
+      "table": {
+        "homeworkTitle": "عنوان الواجب",
+        "course": "الكورس",
+        "position": "الموقع",
+        "status": "الحالة",
+        "questionsCount": "عدد الأسئلة",
+        "createdAt": "تاريخ الإنشاء",
+        "actions": "الإجراءات"
+      },
+      "status": {
+        "published": "منشور",
+        "draft": "مسودة"
+      },
+      "question": "سؤال",
+      "questions": "أسئلة",
+      "actions": {
+        "view": "عرض",
+        "edit": "تعديل",
+        "publish": "نشر",
+        "unpublish": "إلغاء النشر",
+        "updating": "جاري التحديث...",
+        "delete": "حذف",
+        "deleting": "جاري الحذف..."
+      },
+      "errors": {
+        "loadError": "تعذر تحميل الواجبات",
+        "loadErrorGeneric": "حدث خطأ أثناء التحميل",
+        "updateError": "حدث خطأ أثناء تحديث حالة الواجب",
+        "publishSuccess": "تم النشر بنجاح",
+        "unpublishSuccess": "تم إلغاء النشر",
+        "deleteConfirm": "هل أنت متأكد من حذف الواجب \"{title}\"؟ سيتم حذف جميع الأسئلة المرتبطة به.",
+        "deleteSuccess": "تم حذف الواجب بنجاح",
+        "deleteError": "تعذر حذف الواجب"
+      },
+      "empty": "لا توجد واجبات"
     },
     "codes": {
       "title": "إدارة الأكواد",
@@ -1100,6 +1289,106 @@
     "noOptions": "لا يوجد خيارات.",
     "notAvailable": "غير متاح",
     "switchToEnglish": "التبديل إلى العربي",
-    "arabic": "عربي"
+    "arabic": "عربي",
+    "saving": "جاري الحفظ..."
+  },
+  "student": {
+    "quizzes": {
+      "title": "امتحاناتي",
+      "subtitle": "عرض جميع نتائج ومحاولات الامتحانات",
+      "noQuizzes": "لا توجد امتحانات",
+      "bestScore": "أفضل درجة",
+      "points": "نقطة",
+      "attempts": "محاولة",
+      "viewDetails": "عرض التفاصيل",
+      "attempt": "محاولة",
+      "best": "الأفضل",
+      "summary": "ملخص",
+      "score": "الدرجة",
+      "percentage": "النسبة المئوية",
+      "correct": "صحيح",
+      "incorrect": "خاطئ",
+      "progress": "التقدم",
+      "answers": "الإجابات",
+      "question": "السؤال",
+      "options": "الخيارات",
+      "yourAnswer": "إجابتك",
+      "correctAnswer": "الإجابة الصحيحة"
+    },
+    "myCourses": {
+      "title": "كورساتي",
+      "subtitle": "تابع التعلم من الكورسات المشتراة",
+      "noCourses": "لم تشتري أي كورسات بعد",
+      "browseCourses": "تصفح الكورسات",
+      "progress": "التقدم",
+      "chapters": "درس",
+      "quizzes": "امتحان",
+      "homeworks": "واجب",
+      "continueLearning": "تابع التعلم"
+    },
+    "homeworks": {
+      "title": "الواجبات",
+      "subtitle": "عرض جميع نتائج ومحاولات الواجبات",
+      "noHomeworks": "لا توجد واجبات",
+      "bestScore": "أفضل درجة",
+      "points": "نقطة",
+      "attempts": "محاولة",
+      "viewDetails": "عرض التفاصيل",
+      "attempt": "محاولة",
+      "best": "الأفضل",
+      "summary": "ملخص",
+      "score": "الدرجة",
+      "percentage": "النسبة المئوية",
+      "correct": "صحيح",
+      "incorrect": "خاطئ",
+      "progress": "التقدم",
+      "answers": "الإجابات",
+      "question": "السؤال",
+      "options": "الخيارات",
+      "yourAnswer": "إجابتك",
+      "correctAnswer": "الإجابة الصحيحة",
+      "notCompleted": "لم تكمل هذا الواجب بعد",
+      "startHomework": "ابدأ الواجب"
+    },
+    "profile": {
+      "title": "الملف الشخصي",
+      "subtitle": "إدارة معلومات حسابك",
+      "personalInfo": "المعلومات الشخصية",
+      "personalInfoDesc": "تحديث بياناتك الشخصية",
+      "accountInfo": "معلومات الحساب",
+      "accountInfoDesc": "تفاصيل حسابك (للقراءة فقط)",
+      "fullName": "الاسم الكامل",
+      "phoneNumber": "رقم الهاتف",
+      "parentPhoneNumber": "رقم هاتف الوالد",
+      "email": "البريد الإلكتروني",
+      "grade": "الصف",
+      "subject": "المادة",
+      "semester": "الفصل الدراسي",
+      "notSet": "غير محدد",
+      "save": "حفظ التغييرات",
+      "loadError": "فشل تحميل الملف الشخصي",
+      "updateSuccess": "تم تحديث الملف الشخصي بنجاح",
+      "updateError": "فشل تحديث الملف الشخصي",
+      "notFound": "الملف الشخصي غير موجود",
+      "password": {
+        "title": "تغيير كلمة المرور",
+        "subtitle": "تحديث كلمة مرور حسابك",
+        "currentPassword": "كلمة المرور الحالية",
+        "currentPasswordPlaceholder": "أدخل كلمة المرور الحالية (اختياري إذا لم تكن هناك كلمة مرور)",
+        "newPassword": "كلمة المرور الجديدة",
+        "newPasswordPlaceholder": "أدخل كلمة المرور الجديدة",
+        "confirmPassword": "تأكيد كلمة المرور",
+        "confirmPasswordPlaceholder": "أكد كلمة المرور الجديدة",
+        "change": "تغيير كلمة المرور",
+        "changeSuccess": "تم تغيير كلمة المرور بنجاح",
+        "changeError": "فشل تغيير كلمة المرور",
+        "enterNewPassword": "يرجى إدخال كلمة مرور جديدة",
+        "passwordsNotMatch": "كلمات المرور غير متطابقة",
+        "passwordTooShort": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+        "noPassword": "لا توجد كلمة مرور",
+        "passwordSet": "تم تعيين كلمة مرور لحسابك",
+        "passwordNotSet": "لم يتم تعيين كلمة مرور. انقر على 'تغيير كلمة المرور' لتعيين واحدة."
+      }
+    }
   }
 }

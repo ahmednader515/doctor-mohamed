@@ -164,7 +164,7 @@ const PaymentStatusPage = () => {
           </p>
           <Button asChild size="lg" className="w-full">
             <Link href="/dashboard">
-              لوحة التحكم
+              الصفحة الرئيسية
             </Link>
           </Button>
         </div>

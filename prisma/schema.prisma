@@ -28,6 +28,7 @@ model User {
   userProgress            UserProgress[]
   balanceTransactions     BalanceTransaction[]
   quizResults             QuizResult[]
+  homeworkResults         HomeworkResult[]
   createdPurchaseCodes    PurchaseCode[] @relation("CodeCreator")
   usedPurchaseCodes       PurchaseCode[] @relation("CodeUser")
 }
@@ -50,6 +51,7 @@ model Course {
   chapters Chapter[]
   purchases Purchase[]
   quizzes Quiz[]
+  homeworks Homework[]
   purchaseCodes PurchaseCode[]
 
   createdAt DateTime @default(now())
@@ -249,4 +251,76 @@ model QuizAnswer {
 
     @@index([questionId])
     @@index([quizResultId])
+}
+
+model Homework {
+    id String @id @default(uuid())
+    title String
+    description String? @db.Text
+    position Int
+    isPublished Boolean @default(false)
+    timer Int? // Timer in minutes, null means no time limit
+    maxAttempts Int @default(1) // Maximum number of attempts allowed
+    courseId String
+    course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    questions HomeworkQuestion[]
+    homeworkResults HomeworkResult[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([courseId])
+}
+
+model HomeworkQuestion {
+    id String @id @default(uuid())
+    text String @db.Text
+    type String // "MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"
+    options String? @db.Text // JSON string for multiple choice options
+    correctAnswer String @db.Text
+    points Int @default(1)
+    imageUrl String? @db.Text
+    position Int @default(1)
+    homeworkId String
+    homework Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+    answers HomeworkAnswer[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([homeworkId])
+}
+
+model HomeworkResult {
+    id String @id @default(uuid())
+    studentId String
+    homeworkId String
+    score Int
+    totalPoints Int
+    percentage Float
+    attemptNumber Int @default(1) // Track which attempt this is
+    submittedAt DateTime @default(now())
+    user User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+    homework Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+    answers HomeworkAnswer[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([studentId, homeworkId])
+    @@index([homeworkId])
+}
+
+model HomeworkAnswer {
+    id String @id @default(uuid())
+    questionId String
+    homeworkResultId String
+    studentAnswer String @db.Text
+    correctAnswer String @db.Text
+    isCorrect Boolean
+    pointsEarned Int
+    question HomeworkQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    homeworkResult HomeworkResult @relation(fields: [homeworkResultId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([questionId])
+    @@index([homeworkResultId])
 }

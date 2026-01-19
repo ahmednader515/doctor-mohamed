@@ -172,6 +172,14 @@ export const CourseContentForm = ({
                         {t("teacher.courseEdit.content.addQuiz")}
                     </Button>
                     <Button 
+                        onClick={() => router.push(`/dashboard/teacher/homeworks/create?courseId=${courseId}`)} 
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                    >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        {t("teacher.courseEdit.content.addHomework")}
+                    </Button>
+                    <Button 
                         onClick={() => setIsCreating((current) => !current)} 
                         variant="outline"
                         className="w-full sm:w-auto"

@@ -9,6 +9,7 @@ import { Course, Purchase, Chapter } from "@prisma/client";
 type CourseWithProgress = Course & {
   chapters: { id: string }[];
   quizzes: { id: string }[];
+  homeworks?: { id: string }[];
   purchases: Purchase[];
   progress: number;
 }
@@ -28,6 +29,8 @@ type StudentStats = {
   completedChapters: number;
   totalQuizzes: number;
   completedQuizzes: number;
+  totalHomeworks: number;
+  completedHomeworks: number;
   averageScore: number;
 }
 
@@ -123,6 +126,35 @@ const CoursesPage = async () => {
   const uniqueQuizIds = new Set(completedQuizResults.map(result => result.quizId));
   const completedQuizzes = uniqueQuizIds.size;
 
+  // Get total homeworks from courses the student has purchased
+  const totalHomeworks = await db.homework.count({
+    where: {
+      course: {
+        purchases: {
+          some: {
+            userId: session.user.id,
+            status: "ACTIVE"
+          }
+        }
+      },
+      isPublished: true
+    }
+  });
+
+  // Get unique completed homeworks
+  const completedHomeworkResults = await db.homeworkResult.findMany({
+    where: {
+      studentId: session.user.id
+    },
+    select: {
+      homeworkId: true
+    }
+  });
+
+  // Count unique homeworkIds
+  const uniqueHomeworkIds = new Set(completedHomeworkResults.map(result => result.homeworkId));
+  const completedHomeworks = uniqueHomeworkIds.size;
+
   // Calculate average score from quiz results (using best attempt for each quiz)
   const quizResults = await db.quizResult.findMany({
     where: {
@@ -155,6 +187,8 @@ const CoursesPage = async () => {
     completedChapters,
     totalQuizzes,
     completedQuizzes,
+    totalHomeworks,
+    completedHomeworks,
     averageScore
   };
 
@@ -184,6 +218,14 @@ const CoursesPage = async () => {
           id: true,
         }
       },
+      homeworks: {
+        where: {
+          isPublished: true,
+        },
+        select: {
+          id: true,
+        }
+      },
       purchases: {
         where: {
           userId: session.user.id,
@@ -199,7 +241,8 @@ const CoursesPage = async () => {
     courses.map(async (course) => {
       const totalChapters = course.chapters.length;
       const totalQuizzes = course.quizzes.length;
-      const totalContent = totalChapters + totalQuizzes;
+      const totalHomeworks = course.homeworks.length;
+      const totalContent = totalChapters + totalQuizzes + totalHomeworks;
 
       const completedChapters = await db.userProgress.count({
         where: {
@@ -228,7 +271,24 @@ const CoursesPage = async () => {
       const uniqueQuizIds = new Set(completedQuizResults.map(result => result.quizId));
       const completedQuizzes = uniqueQuizIds.size;
 
-      const completedContent = completedChapters + completedQuizzes;
+      // Get unique completed homeworks
+      const completedHomeworkResults = await db.homeworkResult.findMany({
+        where: {
+          studentId: session.user.id,
+          homeworkId: {
+            in: course.homeworks.map(homework => homework.id)
+          }
+        },
+        select: {
+          homeworkId: true
+        }
+      });
+
+      // Count unique homeworkIds
+      const uniqueHomeworkIds = new Set(completedHomeworkResults.map(result => result.homeworkId));
+      const completedHomeworks = uniqueHomeworkIds.size;
+
+      const completedContent = completedChapters + completedQuizzes + completedHomeworks;
 
       const progress = totalContent > 0 
         ? (completedContent / totalContent) * 100 

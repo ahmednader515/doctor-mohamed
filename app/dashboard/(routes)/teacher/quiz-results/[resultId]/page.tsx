@@ -190,7 +190,7 @@ const QuizResultDetailPage = ({ params }: { params: Promise<{ resultId: string }
                 <div className="md:col-span-2 space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>معلومات الطالب والاختبار</CardTitle>
+                            <CardTitle>معلومات الطالب والامتحان</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -205,7 +205,7 @@ const QuizResultDetailPage = ({ params }: { params: Promise<{ resultId: string }
                                 <div className="flex items-center space-x-3">
                                     <FileText className="h-5 w-5 text-muted-foreground" />
                                     <div>
-                                        <h4 className="font-medium">الاختبار</h4>
+                                        <h4 className="font-medium">الامتحان</h4>
                                         <p className="text-sm text-muted-foreground">{result.quiz.title}</p>
                                         <p className="text-xs text-muted-foreground">{result.quiz.course.title}</p>
                                     </div>
@@ -402,14 +402,14 @@ const QuizResultDetailPage = ({ params }: { params: Promise<{ resultId: string }
                                 variant="outline"
                                 onClick={() => router.push(`/dashboard/teacher/quiz-results?quizId=${result.quizId}`)}
                             >
-                                عرض جميع نتائج هذا الاختبار
+                                عرض جميع نتائج هذا الامتحان
                             </Button>
                             <Button
                                 className="w-full"
                                 variant="outline"
                                 onClick={() => router.push(`/dashboard/teacher/quizzes/${result.quizId}`)}
                             >
-                                عرض تفاصيل الاختبار
+                                عرض تفاصيل الامتحان
                             </Button>
                         </CardContent>
                     </Card>

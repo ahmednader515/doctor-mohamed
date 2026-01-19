@@ -2,7 +2,7 @@
 
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Play, Clock, Trophy, Wallet, TrendingUp, BookOpen as BookOpenIcon } from "lucide-react";
+import { BookOpen, Play, Clock, Trophy, Wallet, TrendingUp, BookOpen as BookOpenIcon, ClipboardList, FileText } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Course, Purchase, Chapter } from "@prisma/client";
@@ -11,6 +11,7 @@ import { useLanguage } from "@/lib/contexts/language-context";
 type CourseWithProgress = Course & {
   chapters: { id: string }[];
   quizzes: { id: string }[];
+  homeworks?: { id: string }[];
   purchases: Purchase[];
   progress: number;
 }
@@ -30,6 +31,8 @@ type StudentStats = {
   completedChapters: number;
   totalQuizzes: number;
   completedQuizzes: number;
+  totalHomeworks: number;
+  completedHomeworks: number;
   averageScore: number;
 }
 
@@ -197,6 +200,22 @@ export const DashboardContent = ({
               {t("dashboard.completedOf", { completed: studentStats.completedQuizzes.toString(), total: studentStats.totalQuizzes.toString() })}
             </p>
           </div>
+
+          <div className="bg-card rounded-xl p-6 border">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-blue-100 p-3 rounded-full">
+                <ClipboardList className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{t("dashboard.completedHomeworks")}</p>
+                <p className="text-2xl font-bold">{studentStats.completedHomeworks}</p>
+              </div>
+            </div>
+            <Progress value={(studentStats.completedHomeworks / Math.max(studentStats.totalHomeworks, 1)) * 100} className="h-2" />
+            <p className="text-sm text-muted-foreground mt-2">
+              {t("dashboard.completedOf", { completed: studentStats.completedHomeworks.toString(), total: studentStats.totalHomeworks.toString() })}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -240,6 +259,14 @@ export const DashboardContent = ({
                         <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
                         <span>
                           {course.quizzes.length} {course.quizzes.length === 1 ? t("homepage.quiz") : t("homepage.quizzes")}
+                        </span>
+                      </div>
+                    )}
+                    {course.homeworks && course.homeworks.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
+                        <span>
+                          {course.homeworks.length} {t("course.homework")}
                         </span>
                       </div>
                     )}

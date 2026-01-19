@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 
 export async function GET(
     req: Request,
@@ -7,6 +8,13 @@ export async function GET(
 ) {
     try {
         const resolvedParams = await params;
+        let userId = null;
+        try {
+            const authResult = await auth();
+            userId = authResult.userId;
+        } catch (error) {
+            // User is not authenticated, which is fine for content listing
+        }
 
         // Get chapters
         const chapters = await db.chapter.findMany({
@@ -33,14 +41,41 @@ export async function GET(
                 isPublished: true
             },
             include: {
-                quizResults: {
+                quizResults: userId ? {
+                    where: {
+                        studentId: userId
+                    },
                     select: {
                         id: true,
                         score: true,
                         totalPoints: true,
                         percentage: true
                     }
-                }
+                } : false
+            },
+            orderBy: {
+                position: "asc"
+            }
+        });
+
+        // Get published homeworks
+        const homeworks = await db.homework.findMany({
+            where: {
+                courseId: resolvedParams.courseId,
+                isPublished: true
+            },
+            include: {
+                homeworkResults: userId ? {
+                    where: {
+                        studentId: userId
+                    },
+                    select: {
+                        id: true,
+                        score: true,
+                        totalPoints: true,
+                        percentage: true
+                    }
+                } : false
             },
             orderBy: {
                 position: "asc"
@@ -56,6 +91,10 @@ export async function GET(
             ...quizzes.map(quiz => ({
                 ...quiz,
                 type: 'quiz' as const
+            })),
+            ...homeworks.map(homework => ({
+                ...homework,
+                type: 'homework' as const
             }))
         ].sort((a, b) => a.position - b.position);
 
