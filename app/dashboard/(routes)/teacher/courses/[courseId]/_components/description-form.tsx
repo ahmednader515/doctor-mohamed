@@ -81,7 +81,7 @@ export const DescriptionForm = ({
             </div>
             {!isEditing && (
                 <p className={cn(
-                    "text-sm mt-2 text-muted-foreground",
+                    "text-sm mt-2 text-muted-foreground break-words overflow-wrap-anywhere",
                     !initialData.description && "text-muted-foreground italic"
                 )}>
                     {initialData.description || t("teacher.courseEdit.forms.noDescription")}
@@ -100,6 +100,7 @@ export const DescriptionForm = ({
                                         <Textarea 
                                             disabled={isSubmitting}
                                             placeholder="e.g. 'هذه الكورس عن...'"
+                                            className="break-words overflow-wrap-anywhere"
                                             {...field}
                                         />
                                     </FormControl>

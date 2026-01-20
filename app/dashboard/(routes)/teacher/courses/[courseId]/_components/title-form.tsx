@@ -78,7 +78,7 @@ export const TitleForm = ({
                 </Button>
             </div>
             {!isEditing && (
-                <p className="text-sm mt-2 text-muted-foreground">
+                <p className="text-sm mt-2 text-muted-foreground break-words overflow-wrap-anywhere">
                     {initialData.title || t("teacher.courseEdit.forms.noTitle")}
                 </p>
             )}
@@ -95,6 +95,7 @@ export const TitleForm = ({
                                         <Input 
                                             disabled={isSubmitting}
                                             placeholder="e.g. 'تطوير الويب المتقدم'"
+                                            className="break-words overflow-wrap-anywhere"
                                             {...field}
                                         />
                                     </FormControl>

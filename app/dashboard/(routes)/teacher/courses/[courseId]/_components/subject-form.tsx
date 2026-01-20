@@ -122,7 +122,7 @@ export const SubjectForm = ({
             </div>
             {!isEditing && (
                 <div className="space-y-1">
-                    <p className="text-sm mt-2 text-muted-foreground">
+                    <p className="text-sm mt-2 text-muted-foreground break-words overflow-wrap-anywhere">
                         {initialData.subject || t("teacher.courseEdit.forms.noSubject")}
                     </p>
                     {currentGrade && initialData.subject && (

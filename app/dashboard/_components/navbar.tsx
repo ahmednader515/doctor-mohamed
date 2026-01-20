@@ -7,10 +7,10 @@ export const Navbar = () => {
     return (
         <div className="p-4 border-b h-full flex items-center bg-card shadow-sm">
             <MobileSidebar />
-            <div className="hidden md:flex items-center rtl:mr-4 ltr:ml-4">
+            <div className="flex items-center rtl:mr-4 ltr:ml-4">
                 <Logo />
             </div>
-            <div className="flex items-center gap-x-4 rtl:mr-auto ltr:ml-auto">
+            <div className="flex items-center gap-x-1 md:gap-x-4 rtl:mr-auto ltr:ml-auto">
                 <LanguageSwitcher />
                 <NavbarRoutes />
             </div>

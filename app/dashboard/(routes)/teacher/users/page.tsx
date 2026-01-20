@@ -78,6 +78,14 @@ const UsersPage = () => {
     });
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    // Pagination state for each grade
+    const [grade1DisplayCount, setGrade1DisplayCount] = useState(25);
+    const [grade2DisplayCount, setGrade2DisplayCount] = useState(25);
+    const [grade3DisplayCount, setGrade3DisplayCount] = useState(25);
+    // Search terms for each grade table
+    const [grade1SearchTerm, setGrade1SearchTerm] = useState("");
+    const [grade2SearchTerm, setGrade2SearchTerm] = useState("");
+    const [grade3SearchTerm, setGrade3SearchTerm] = useState("");
 
     useEffect(() => {
         fetchUsers();
@@ -192,9 +200,28 @@ const UsersPage = () => {
     const staffUsers = filteredUsers.filter(user => user.role === "TEACHER" || user.role === "ADMIN");
 
     // Group students by grade level
-    const grade1Students = studentUsers.filter(user => user.grade === "الصف الأول الثانوي");
-    const grade2Students = studentUsers.filter(user => user.grade === "الصف الثاني الثانوي");
-    const grade3Students = studentUsers.filter(user => user.grade === "الصف الثالث الثانوي");
+    const grade1StudentsAll = studentUsers.filter(user => user.grade === "الصف الأول الثانوي");
+    const grade2StudentsAll = studentUsers.filter(user => user.grade === "الصف الثاني الثانوي");
+    const grade3StudentsAll = studentUsers.filter(user => user.grade === "الصف الثالث الثانوي");
+
+    // Apply search filters for each grade table
+    const grade1Students = grade1StudentsAll.filter(user =>
+        user.fullName.toLowerCase().includes(grade1SearchTerm.toLowerCase()) ||
+        user.phoneNumber.includes(grade1SearchTerm)
+    );
+    const grade2Students = grade2StudentsAll.filter(user =>
+        user.fullName.toLowerCase().includes(grade2SearchTerm.toLowerCase()) ||
+        user.phoneNumber.includes(grade2SearchTerm)
+    );
+    const grade3Students = grade3StudentsAll.filter(user =>
+        user.fullName.toLowerCase().includes(grade3SearchTerm.toLowerCase()) ||
+        user.phoneNumber.includes(grade3SearchTerm)
+    );
+
+    // Paginated results
+    const grade1StudentsPaginated = grade1Students.slice(0, grade1DisplayCount);
+    const grade2StudentsPaginated = grade2Students.slice(0, grade2DisplayCount);
+    const grade3StudentsPaginated = grade3Students.slice(0, grade3DisplayCount);
 
     // Debug logging
     console.log("All users:", users);
@@ -405,25 +432,38 @@ const UsersPage = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle>الصف الأول الثانوي</CardTitle>
+                        <div className="flex items-center space-x-2">
+                            <Search className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder={t("teacher.users.searchPlaceholder")}
+                                value={grade1SearchTerm}
+                                onChange={(e) => {
+                                    setGrade1SearchTerm(e.target.value);
+                                    setGrade1DisplayCount(25);
+                                }}
+                                className="max-w-sm"
+                            />
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {grade1Students.length > 0 ? (
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {grade1Students.map((user) => (
+                            <>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {grade1StudentsPaginated.map((user) => (
                                     <TableRow key={user.id}>
                                         <TableCell className="font-medium">
                                             {user.fullName}
@@ -577,6 +617,17 @@ const UsersPage = () => {
                                     </TableBody>
                                 </Table>
                             </div>
+                            {grade1Students.length > grade1DisplayCount && (
+                                <div className="mt-4 flex justify-center">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setGrade1DisplayCount(grade1DisplayCount + 25)}
+                                    >
+                                        {t("common.showMore")}
+                                    </Button>
+                                </div>
+                            )}
+                        </>
                         ) : (
                             <div className="text-center py-8 text-muted-foreground">
                                 لا يوجد طلاب في هذا الصف
@@ -589,25 +640,38 @@ const UsersPage = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle>الصف الثاني الثانوي</CardTitle>
+                        <div className="flex items-center space-x-2">
+                            <Search className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder={t("teacher.users.searchPlaceholder")}
+                                value={grade2SearchTerm}
+                                onChange={(e) => {
+                                    setGrade2SearchTerm(e.target.value);
+                                    setGrade2DisplayCount(25);
+                                }}
+                                className="max-w-sm"
+                            />
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {grade2Students.length > 0 ? (
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {grade2Students.map((user) => (
+                            <>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {grade2StudentsPaginated.map((user) => (
                                                 <TableRow key={user.id}>
                                                     <TableCell className="font-medium">
                                                         {user.fullName}
@@ -761,6 +825,17 @@ const UsersPage = () => {
                                     </TableBody>
                                 </Table>
                             </div>
+                            {grade2Students.length > grade2DisplayCount && (
+                                <div className="mt-4 flex justify-center">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setGrade2DisplayCount(grade2DisplayCount + 25)}
+                                    >
+                                        {t("common.showMore")}
+                                    </Button>
+                                </div>
+                            )}
+                        </>
                         ) : (
                             <div className="text-center py-8 text-muted-foreground">
                                 لا يوجد طلاب في هذا الصف
@@ -773,25 +848,38 @@ const UsersPage = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle>الصف الثالث الثانوي</CardTitle>
+                        <div className="flex items-center space-x-2">
+                            <Search className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder={t("teacher.users.searchPlaceholder")}
+                                value={grade3SearchTerm}
+                                onChange={(e) => {
+                                    setGrade3SearchTerm(e.target.value);
+                                    setGrade3DisplayCount(25);
+                                }}
+                                className="max-w-sm"
+                            />
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {grade3Students.length > 0 ? (
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
-                                            <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {grade3Students.map((user) => (
+                            <>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {grade3StudentsPaginated.map((user) => (
                                                 <TableRow key={user.id}>
                                                     <TableCell className="font-medium">
                                                         {user.fullName}
@@ -945,6 +1033,17 @@ const UsersPage = () => {
                                     </TableBody>
                                 </Table>
                             </div>
+                            {grade3Students.length > grade3DisplayCount && (
+                                <div className="mt-4 flex justify-center">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setGrade3DisplayCount(grade3DisplayCount + 25)}
+                                    >
+                                        {t("common.showMore")}
+                                    </Button>
+                                </div>
+                            )}
+                        </>
                         ) : (
                             <div className="text-center py-8 text-muted-foreground">
                                 لا يوجد طلاب في هذا الصف

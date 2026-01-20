@@ -163,6 +163,8 @@ export default function QuizResultPage({
                          router.push(`/courses/${courseId}/chapters/${nextContent.id}`);
                      } else if (nextContent.type === 'quiz') {
                          router.push(`/courses/${courseId}/quizzes/${nextContent.id}`);
+                     } else if (nextContent.type === 'homework') {
+                         router.push(`/courses/${courseId}/homeworks/${nextContent.id}`);
                      }
                  } else {
                      // If no next content, go to dashboard

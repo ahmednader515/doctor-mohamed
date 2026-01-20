@@ -35,6 +35,7 @@ interface QuizResult {
     user: {
         fullName: string;
         phoneNumber: string;
+        grade: string | null;
     };
     quizId: string;
     quiz: {
@@ -77,6 +78,14 @@ const GradesPage = () => {
     const [selectedQuiz, setSelectedQuiz] = useState<string>("");
     const [selectedResult, setSelectedResult] = useState<QuizResult | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    // Pagination state for each grade
+    const [grade1DisplayCount, setGrade1DisplayCount] = useState(25);
+    const [grade2DisplayCount, setGrade2DisplayCount] = useState(25);
+    const [grade3DisplayCount, setGrade3DisplayCount] = useState(25);
+    // Search terms for each grade table
+    const [grade1SearchTerm, setGrade1SearchTerm] = useState("");
+    const [grade2SearchTerm, setGrade2SearchTerm] = useState("");
+    const [grade3SearchTerm, setGrade3SearchTerm] = useState("");
 
     useEffect(() => {
         fetchCourses();
@@ -138,6 +147,33 @@ const GradesPage = () => {
         
         return matchesSearch && matchesCourse && matchesQuiz;
     });
+
+    // Group results by student grade
+    const grade1ResultsAll = filteredResults.filter(result => result.user.grade === "الصف الأول الثانوي");
+    const grade2ResultsAll = filteredResults.filter(result => result.user.grade === "الصف الثاني الثانوي");
+    const grade3ResultsAll = filteredResults.filter(result => result.user.grade === "الصف الثالث الثانوي");
+
+    // Apply search filters for each grade table
+    const grade1Results = grade1ResultsAll.filter(result => 
+        result.user.fullName.toLowerCase().includes(grade1SearchTerm.toLowerCase()) ||
+        result.quiz.title.toLowerCase().includes(grade1SearchTerm.toLowerCase()) ||
+        result.quiz.course.title.toLowerCase().includes(grade1SearchTerm.toLowerCase())
+    );
+    const grade2Results = grade2ResultsAll.filter(result => 
+        result.user.fullName.toLowerCase().includes(grade2SearchTerm.toLowerCase()) ||
+        result.quiz.title.toLowerCase().includes(grade2SearchTerm.toLowerCase()) ||
+        result.quiz.course.title.toLowerCase().includes(grade2SearchTerm.toLowerCase())
+    );
+    const grade3Results = grade3ResultsAll.filter(result => 
+        result.user.fullName.toLowerCase().includes(grade3SearchTerm.toLowerCase()) ||
+        result.quiz.title.toLowerCase().includes(grade3SearchTerm.toLowerCase()) ||
+        result.quiz.course.title.toLowerCase().includes(grade3SearchTerm.toLowerCase())
+    );
+
+    // Paginated results
+    const grade1ResultsPaginated = grade1Results.slice(0, grade1DisplayCount);
+    const grade2ResultsPaginated = grade2Results.slice(0, grade2DisplayCount);
+    const grade3ResultsPaginated = grade3Results.slice(0, grade3DisplayCount);
 
     const getGradeColor = (percentage: number) => {
         if (percentage >= 90) return "text-green-600";
@@ -283,70 +319,299 @@ const GradesPage = () => {
                 </CardContent>
             </Card>
 
-            {/* Results Table */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t("teacher.grades.table.title")}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.student")}</TableHead>
-                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.quiz")}</TableHead>
-                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.course")}</TableHead>
-                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.score")}</TableHead>
-                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.percentage")}</TableHead>
-                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.submittedAt")}</TableHead>
-                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.actions")}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredResults.map((result) => {
-                                const gradeBadge = getGradeBadge(result.percentage);
-                                return (
-                                    <TableRow key={result.id}>
-                                        <TableCell className="font-medium">
-                                            {result.user.fullName}
-                                        </TableCell>
-                                        <TableCell>
-                                            {result.quiz.title}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline">
-                                                {result.quiz.course.title}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className="font-bold">
-                                                {result.score}/{result.totalPoints}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge {...gradeBadge}>
-                                                {result.percentage.toFixed(1)}%
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            {format(new Date(result.submittedAt), "dd/MM/yyyy", { locale: ar })}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button 
-                                                size="sm" 
-                                                variant="outline"
-                                                onClick={() => handleViewResult(result)}
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                                {t("teacher.grades.table.viewDetails")}
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+            {/* Results Tables by Grade */}
+            <>
+                {/* Grade 1 Results Table */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>الصف الأول الثانوي</CardTitle>
+                        <div className="flex items-center space-x-2">
+                            <Search className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder={t("teacher.grades.filters.searchPlaceholder")}
+                                value={grade1SearchTerm}
+                                onChange={(e) => {
+                                    setGrade1SearchTerm(e.target.value);
+                                    setGrade1DisplayCount(25);
+                                }}
+                                className="max-w-sm"
+                            />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        {grade1Results.length > 0 ? (
+                            <>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.student")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.quiz")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.course")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.score")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.percentage")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.submittedAt")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.actions")}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {grade1ResultsPaginated.map((result) => {
+                                                const gradeBadge = getGradeBadge(result.percentage);
+                                                return (
+                                                    <TableRow key={result.id}>
+                                                        <TableCell className="font-medium">
+                                                            {result.user.fullName}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {result.quiz.title}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge variant="outline">
+                                                                {result.quiz.course.title}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <span className="font-bold">
+                                                                {result.score}/{result.totalPoints}
+                                                            </span>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge {...gradeBadge}>
+                                                                {result.percentage.toFixed(1)}%
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {format(new Date(result.submittedAt), "dd/MM/yyyy", { locale: ar })}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Button 
+                                                                size="sm" 
+                                                                variant="outline"
+                                                                onClick={() => handleViewResult(result)}
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                                {t("teacher.grades.table.viewDetails")}
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                                {grade1Results.length > grade1DisplayCount && (
+                                    <div className="mt-4 flex justify-center">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setGrade1DisplayCount(grade1DisplayCount + 25)}
+                                        >
+                                            {t("common.showMore") || "عرض المزيد"}
+                                        </Button>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                                لا يوجد نتائج في هذا الصف
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Grade 2 Results Table */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>الصف الثاني الثانوي</CardTitle>
+                        <div className="flex items-center space-x-2">
+                            <Search className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder={t("teacher.grades.filters.searchPlaceholder")}
+                                value={grade2SearchTerm}
+                                onChange={(e) => {
+                                    setGrade2SearchTerm(e.target.value);
+                                    setGrade2DisplayCount(25);
+                                }}
+                                className="max-w-sm"
+                            />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        {grade2Results.length > 0 ? (
+                            <>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.student")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.quiz")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.course")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.score")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.percentage")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.submittedAt")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.actions")}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {grade2ResultsPaginated.map((result) => {
+                                                const gradeBadge = getGradeBadge(result.percentage);
+                                                return (
+                                                    <TableRow key={result.id}>
+                                                        <TableCell className="font-medium">
+                                                            {result.user.fullName}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {result.quiz.title}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge variant="outline">
+                                                                {result.quiz.course.title}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <span className="font-bold">
+                                                                {result.score}/{result.totalPoints}
+                                                            </span>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge {...gradeBadge}>
+                                                                {result.percentage.toFixed(1)}%
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {format(new Date(result.submittedAt), "dd/MM/yyyy", { locale: ar })}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Button 
+                                                                size="sm" 
+                                                                variant="outline"
+                                                                onClick={() => handleViewResult(result)}
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                                {t("teacher.grades.table.viewDetails")}
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                                {grade2Results.length > grade2DisplayCount && (
+                                    <div className="mt-4 flex justify-center">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setGrade2DisplayCount(grade2DisplayCount + 25)}
+                                        >
+                                            {t("common.showMore") || "عرض المزيد"}
+                                        </Button>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                                لا يوجد نتائج في هذا الصف
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Grade 3 Results Table */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>الصف الثالث الثانوي</CardTitle>
+                        <div className="flex items-center space-x-2">
+                            <Search className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder={t("teacher.grades.filters.searchPlaceholder")}
+                                value={grade3SearchTerm}
+                                onChange={(e) => {
+                                    setGrade3SearchTerm(e.target.value);
+                                    setGrade3DisplayCount(25);
+                                }}
+                                className="max-w-sm"
+                            />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        {grade3Results.length > 0 ? (
+                            <>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.student")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.quiz")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.course")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.score")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.percentage")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.submittedAt")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.actions")}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {grade3ResultsPaginated.map((result) => {
+                                                const gradeBadge = getGradeBadge(result.percentage);
+                                                return (
+                                                    <TableRow key={result.id}>
+                                                        <TableCell className="font-medium">
+                                                            {result.user.fullName}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {result.quiz.title}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge variant="outline">
+                                                                {result.quiz.course.title}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <span className="font-bold">
+                                                                {result.score}/{result.totalPoints}
+                                                            </span>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge {...gradeBadge}>
+                                                                {result.percentage.toFixed(1)}%
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {format(new Date(result.submittedAt), "dd/MM/yyyy", { locale: ar })}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Button 
+                                                                size="sm" 
+                                                                variant="outline"
+                                                                onClick={() => handleViewResult(result)}
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                                {t("teacher.grades.table.viewDetails")}
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                                {grade3Results.length > grade3DisplayCount && (
+                                    <div className="mt-4 flex justify-center">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setGrade3DisplayCount(grade3DisplayCount + 25)}
+                                        >
+                                            {t("common.showMore") || "عرض المزيد"}
+                                        </Button>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                                لا يوجد نتائج في هذا الصف
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </>
 
             {/* Result Details Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

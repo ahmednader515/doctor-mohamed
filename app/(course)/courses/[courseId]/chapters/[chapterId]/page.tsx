@@ -21,8 +21,8 @@ interface Chapter {
   documentName: string | null;
   nextChapterId?: string;
   previousChapterId?: string;
-  nextContentType?: 'chapter' | 'quiz' | null;
-  previousContentType?: 'chapter' | 'quiz' | null;
+  nextContentType?: 'chapter' | 'quiz' | 'homework' | null;
+  previousContentType?: 'chapter' | 'quiz' | 'homework' | null;
   attachments?: {
     id: string;
     name: string;
@@ -211,6 +211,8 @@ const ChapterPage = () => {
     if (chapter?.nextChapterId) {
       if (chapter.nextContentType === 'quiz') {
         router.push(`/courses/${routeParams.courseId}/quizzes/${chapter.nextChapterId}`);
+      } else if (chapter.nextContentType === 'homework') {
+        router.push(`/courses/${routeParams.courseId}/homeworks/${chapter.nextChapterId}`);
       } else {
         router.push(`/courses/${routeParams.courseId}/chapters/${chapter.nextChapterId}`);
       }
@@ -221,6 +223,8 @@ const ChapterPage = () => {
     if (chapter?.previousChapterId) {
       if (chapter.previousContentType === 'quiz') {
         router.push(`/courses/${routeParams.courseId}/quizzes/${chapter.previousChapterId}`);
+      } else if (chapter.previousContentType === 'homework') {
+        router.push(`/courses/${routeParams.courseId}/homeworks/${chapter.previousChapterId}`);
       } else {
         router.push(`/courses/${routeParams.courseId}/chapters/${chapter.previousChapterId}`);
       }
@@ -307,12 +311,12 @@ const ChapterPage = () => {
 
           {/* Chapter Information */}
           <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">{chapter.title}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <h1 className="text-2xl font-bold break-words overflow-wrap-anywhere flex-1 min-w-0">{chapter.title}</h1>
               <Button
                 variant="outline"
                 onClick={toggleCompletion}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 flex-shrink-0 self-start sm:self-auto"
               >
                 {isCompleted ? (
                   <>
@@ -328,8 +332,8 @@ const ChapterPage = () => {
               </Button>
             </div>
             
-            <div className="prose max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: chapter.description || "" }} />
+            <div className="prose max-w-none break-words overflow-wrap-anywhere">
+              <div className="break-words overflow-wrap-anywhere" dangerouslySetInnerHTML={{ __html: chapter.description || "" }} />
             </div>
             
             {/* Attachments Section */}
@@ -344,7 +348,7 @@ const ChapterPage = () => {
                     <div key={attachment.id} className="flex items-center p-3 w-full bg-secondary/50 border-secondary/50 border text-secondary-foreground rounded-md">
                       <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
                       <div className="flex flex-col min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate">
+                        <p className="text-sm font-medium break-words overflow-wrap-anywhere">
                           {attachment.name || getFilenameFromUrl(attachment.url)}
                         </p>
                         <p className="text-xs text-muted-foreground">مستند الدرس</p>
@@ -383,7 +387,7 @@ const ChapterPage = () => {
                 <div className="flex items-center p-3 w-full bg-secondary/50 border-secondary/50 border text-secondary-foreground rounded-md">
                   <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
                   <div className="flex flex-col min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-sm font-medium break-words overflow-wrap-anywhere">
                       {chapter.documentName || getFilenameFromUrl(chapter.documentUrl || '')}
                     </p>
                     <p className="text-xs text-muted-foreground">مستند الدرس</p>

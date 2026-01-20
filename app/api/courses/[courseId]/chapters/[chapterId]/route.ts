@@ -44,8 +44,8 @@ export async function GET(
       return new NextResponse("Chapter not found", { status: 404 });
     }
 
-    // Get all content (chapters and quizzes) for this course
-    const [chapters, quizzes] = await db.$transaction([
+    // Get all content (chapters, quizzes, and homeworks) for this course
+    const [chapters, quizzes, homeworks] = await db.$transaction([
       db.chapter.findMany({
         where: {
           courseId: courseId,
@@ -71,15 +71,29 @@ export async function GET(
         orderBy: {
           position: "asc"
         }
+      }),
+      db.homework.findMany({
+        where: {
+          courseId: courseId,
+          isPublished: true
+        },
+        select: {
+          id: true,
+          position: true
+        },
+        orderBy: {
+          position: "asc"
+        }
       })
     ]);
 
     // Add type to each item and combine
     const chaptersWithType = chapters.map(chapter => ({ ...chapter, type: 'chapter' as const }));
     const quizzesWithType = quizzes.map(quiz => ({ ...quiz, type: 'quiz' as const }));
+    const homeworksWithType = homeworks.map(homework => ({ ...homework, type: 'homework' as const }));
 
     // Combine and sort by position
-    const sortedContent = [...chaptersWithType, ...quizzesWithType].sort((a, b) => a.position - b.position);
+    const sortedContent = [...chaptersWithType, ...quizzesWithType, ...homeworksWithType].sort((a, b) => a.position - b.position);
 
     // Find current chapter index
     const currentIndex = sortedContent.findIndex(content => 

@@ -151,7 +151,7 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
   return (
     <div className="h-full border-l flex flex-col overflow-y-auto shadow-lg w-72 md:w-80">
       <div className="p-8 flex flex-col border-b">
-        <h1 className="font-semibold">{courseTitle || course?.title}</h1>
+        <h1 className="font-semibold break-words overflow-wrap-anywhere">{courseTitle || course?.title}</h1>
       </div>
       <div className="flex flex-col w-full">
         {courseContent.map((content) => {
@@ -168,7 +168,7 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
             <div
               key={content.id}
               className={cn(
-                "flex items-center gap-x-2 text-sm font-[500] rtl:pr-4 ltr:pl-4 py-4 transition cursor-pointer",
+                "flex items-start gap-x-2 text-sm font-[500] rtl:pr-4 ltr:pl-4 py-4 transition cursor-pointer",
                 isSelected 
                   ? "bg-slate-200 text-slate-900"
                   : "text-slate-500 hover:bg-slate-300/20 hover:text-slate-600",
@@ -176,25 +176,31 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
               )}
               onClick={() => onClick(content)}
             >
-              {isCompleted ? (
-                <CheckCircle className="h-4 w-4 text-emerald-600" />
-              ) : (
-                <Circle className="h-4 w-4" />
-              )}
-              <span className="rtl:text-right ltr:text-left flex-grow mr-1">
-                {content.title}
-                {content.type === 'quiz' && (
-                  <span className="ml-2 text-xs text-green-600">({t("course.quiz")})</span>
+              <div className="flex-shrink-0 mt-0.5">
+                {isCompleted ? (
+                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                ) : (
+                  <Circle className="h-4 w-4" />
                 )}
-                {content.type === 'homework' && (
-                  <span className="ml-2 text-xs text-blue-600">({t("course.homework")})</span>
-                )}
-              </span>
-              {content.type === 'chapter' && content.isFree && (
-                <span className="ml-4 px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
-                  {t("course.free")}
+              </div>
+              <div className="flex-1 min-w-0 flex flex-col gap-1">
+                <span className="rtl:text-right ltr:text-left break-words overflow-wrap-anywhere">
+                  {content.title}
                 </span>
-              )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {content.type === 'quiz' && (
+                    <span className="text-xs text-green-600">({t("course.quiz")})</span>
+                  )}
+                  {content.type === 'homework' && (
+                    <span className="text-xs text-blue-600">({t("course.homework")})</span>
+                  )}
+                  {content.type === 'chapter' && content.isFree && (
+                    <span className="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
+                      {t("course.free")}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           );
         })}

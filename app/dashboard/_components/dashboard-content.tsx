@@ -54,9 +54,9 @@ export const DashboardContent = ({
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{t("dashboard.welcome")}</h1>
-        <p className="text-muted-foreground">{t("dashboard.successStartsHere")}</p>
+      <div className="mb-6">
+        <h1 className="text-xl md:text-2xl font-bold mb-1">{t("dashboard.welcome")}</h1>
+        <p className="text-sm md:text-base text-muted-foreground">{t("dashboard.successStartsHere")}</p>
       </div>
 
       {/* Stats and Balance Row */}

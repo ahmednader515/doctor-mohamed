@@ -33,9 +33,10 @@ export async function PUT(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // Separate chapters and quizzes
+        // Separate chapters, quizzes, and homeworks
         const chapters = list.filter((item: any) => item.type === "chapter");
         const quizzes = list.filter((item: any) => item.type === "quiz");
+        const homeworks = list.filter((item: any) => item.type === "homework");
 
         // Update chapters
         for (const item of chapters) {
@@ -48,6 +49,14 @@ export async function PUT(
         // Update quizzes
         for (const item of quizzes) {
             await db.quiz.update({
+                where: { id: item.id },
+                data: { position: item.position }
+            });
+        }
+
+        // Update homeworks
+        for (const item of homeworks) {
+            await db.homework.update({
                 where: { id: item.id },
                 data: { position: item.position }
             });

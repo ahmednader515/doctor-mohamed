@@ -863,18 +863,22 @@
         "list": {
           "chapter": "Chapter",
           "quiz": "Quiz",
+          "homework": "Homework",
           "free": "Free",
           "published": "Published",
           "draft": "Draft",
           "editVideo": "Edit Video",
           "addVideo": "Add Video",
           "editQuiz": "Edit Quiz",
-          "addQuiz": "Add Quiz"
+          "addQuiz": "Add Quiz",
+          "editHomework": "Edit Homework",
+          "addHomework": "Add Homework"
         },
         "toasts": {
           "chapterCreated": "Chapter created",
           "chapterDeleted": "Chapter deleted",
           "quizDeleted": "Quiz deleted",
+          "homeworkDeleted": "Homework deleted",
           "reordered": "Content reordered",
           "error": "An error occurred"
         }
@@ -1289,6 +1293,7 @@
     "searchOption": "Search for option...",
     "noOptions": "No options found.",
     "notAvailable": "Not Available",
+    "showMore": "Show More",
     "switchToEnglish": "Switch to English",
     "arabic": "Arabic",
     "saving": "Saving..."

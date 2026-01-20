@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Chapter, Course, Quiz } from "@prisma/client";
+import { Chapter, Course, Quiz, Homework } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/lib/contexts/language-context";
 
 interface CourseContentFormProps {
-    initialData: Course & { chapters: Chapter[]; quizzes: Quiz[] };
+    initialData: Course & { chapters: Chapter[]; quizzes: Quiz[]; homeworks: Homework[] };
     courseId: string;
 }
 
@@ -43,15 +43,18 @@ export const CourseContentForm = ({
         }
     }
 
-    const onDelete = async (id: string, type: "chapter" | "quiz") => {
+    const onDelete = async (id: string, type: "chapter" | "quiz" | "homework") => {
         try {
             setIsUpdating(true);
             if (type === "chapter") {
                 await axios.delete(`/api/courses/${courseId}/chapters/${id}`);
                 toast.success(t("teacher.courseEdit.content.toasts.chapterDeleted"));
-            } else {
+            } else if (type === "quiz") {
                 await axios.delete(`/api/teacher/quizzes/${id}`);
                 toast.success(t("teacher.courseEdit.content.toasts.quizDeleted"));
+            } else if (type === "homework") {
+                await axios.delete(`/api/admin/homeworks/${id}`);
+                toast.success(t("teacher.courseEdit.content.toasts.homeworkDeleted") || "تم حذف الواجب");
             }
             router.refresh();
         } catch {
@@ -61,7 +64,7 @@ export const CourseContentForm = ({
         }
     }
 
-    const onReorder = async (updateData: { id: string; position: number; type: "chapter" | "quiz" }[]) => {
+    const onReorder = async (updateData: { id: string; position: number; type: "chapter" | "quiz" | "homework" }[]) => {
         try {
             setIsUpdating(true);
             await axios.put(`/api/courses/${courseId}/reorder`, {
@@ -76,15 +79,17 @@ export const CourseContentForm = ({
         }
     }
 
-    const onEdit = (id: string, type: "chapter" | "quiz") => {
+    const onEdit = (id: string, type: "chapter" | "quiz" | "homework") => {
         if (type === "chapter") {
             router.push(`/dashboard/teacher/courses/${courseId}/chapters/${id}`);
-        } else {
+        } else if (type === "quiz") {
             router.push(`/dashboard/teacher/quizzes/${id}/edit`);
+        } else if (type === "homework") {
+            router.push(`/dashboard/teacher/homeworks/${id}`);
         }
     }
 
-    // Combine chapters and quizzes for display
+    // Combine chapters, quizzes, and homeworks for display
     const courseItems = [
         ...initialData.chapters.map(chapter => ({
             id: chapter.id,
@@ -100,6 +105,13 @@ export const CourseContentForm = ({
             position: quiz.position,
             isPublished: quiz.isPublished,
             type: "quiz" as const
+        })),
+        ...initialData.homeworks.map(homework => ({
+            id: homework.id,
+            title: homework.title,
+            position: homework.position,
+            isPublished: homework.isPublished,
+            type: "homework" as const
         }))
     ].sort((a, b) => a.position - b.position);
 
@@ -120,6 +132,7 @@ export const CourseContentForm = ({
                         placeholder={t("teacher.courseEdit.content.chapterPlaceholder")}
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
+                        className="break-words overflow-wrap-anywhere"
                     />
                     <div className="flex gap-2">
                         <Button

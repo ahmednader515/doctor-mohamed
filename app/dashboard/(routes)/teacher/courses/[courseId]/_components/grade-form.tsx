@@ -111,7 +111,7 @@ export const GradeForm = ({
                 </Button>
             </div>
             {!isEditing && (
-                <p className="text-sm mt-2 text-muted-foreground">
+                <p className="text-sm mt-2 text-muted-foreground break-words overflow-wrap-anywhere">
                     {initialData.grade || t("teacher.courseEdit.forms.noGrade")}
                 </p>
             )}

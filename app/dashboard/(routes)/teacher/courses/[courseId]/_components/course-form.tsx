@@ -115,6 +115,7 @@ export const CourseForm = ({
                                         <Input
                                             disabled={isLoading}
                                             placeholder="e.g. 'تطوير الويب '"
+                                            className="break-words overflow-wrap-anywhere"
                                             {...field}
                                         />
                                     </FormControl>
@@ -132,6 +133,7 @@ export const CourseForm = ({
                                         <Textarea
                                             disabled={isLoading}
                                             placeholder="e.g. 'هذه الكورس سوف تعلمك...'"
+                                            className="break-words overflow-wrap-anywhere"
                                             {...field}
                                         />
                                     </FormControl>

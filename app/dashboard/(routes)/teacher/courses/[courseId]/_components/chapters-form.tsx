@@ -100,6 +100,7 @@ export const ChaptersForm = ({
                         placeholder="e.g. 'المقدمة في الكورس'"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
+                        className="break-words overflow-wrap-anywhere"
                     />
                     <Button
                         onClick={onCreate}

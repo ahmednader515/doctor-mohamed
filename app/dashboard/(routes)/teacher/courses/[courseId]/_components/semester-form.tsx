@@ -86,7 +86,7 @@ export const SemesterForm = ({
                 </Button>
             </div>
             {!isEditing && (
-                <p className="text-sm mt-2 text-muted-foreground">
+                <p className="text-sm mt-2 text-muted-foreground break-words overflow-wrap-anywhere">
                     {initialData.semester || t("teacher.courseEdit.forms.noSemester")}
                 </p>
             )}

@@ -55,8 +55,8 @@ export default function QuizPage({
     const [navigation, setNavigation] = useState<{
         nextContentId: string | null;
         previousContentId: string | null;
-        nextContentType: 'chapter' | 'quiz' | null;
-        previousContentType: 'chapter' | 'quiz' | null;
+        nextContentType: 'chapter' | 'quiz' | 'homework' | null;
+        previousContentType: 'chapter' | 'quiz' | 'homework' | null;
     } | null>(null);
     const [redirectToResult, setRedirectToResult] = useState(false);
 
@@ -171,6 +171,8 @@ export default function QuizPage({
                 router.push(`/courses/${courseId}/chapters/${navigation.nextContentId}`);
             } else if (navigation.nextContentType === 'quiz') {
                 router.push(`/courses/${courseId}/quizzes/${navigation.nextContentId}`);
+            } else if (navigation.nextContentType === 'homework') {
+                router.push(`/courses/${courseId}/homeworks/${navigation.nextContentId}`);
             }
             router.refresh();
         }
@@ -182,6 +184,8 @@ export default function QuizPage({
                 router.push(`/courses/${courseId}/chapters/${navigation.previousContentId}`);
             } else if (navigation.previousContentType === 'quiz') {
                 router.push(`/courses/${courseId}/quizzes/${navigation.previousContentId}`);
+            } else if (navigation.previousContentType === 'homework') {
+                router.push(`/courses/${courseId}/homeworks/${navigation.previousContentId}`);
             }
             router.refresh();
         }
@@ -255,8 +259,8 @@ export default function QuizPage({
                     {/* Quiz Info */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>{quiz.title}</CardTitle>
-                            <CardDescription>{quiz.description}</CardDescription>
+                            <CardTitle className="break-words overflow-wrap-anywhere">{quiz.title}</CardTitle>
+                            <CardDescription className="break-words overflow-wrap-anywhere">{quiz.description}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="w-full bg-muted rounded-full h-2">
@@ -277,7 +281,7 @@ export default function QuizPage({
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="text-lg">{currentQuestionData.text}</div>
+                            <div className="text-lg break-words overflow-wrap-anywhere">{currentQuestionData.text}</div>
 
                             {/* Question Image */}
                             {currentQuestionData.imageUrl && (
@@ -296,9 +300,9 @@ export default function QuizPage({
                                     onValueChange={(value) => handleAnswerChange(currentQuestionData.id, value)}
                                 >
                                     {(Array.isArray(currentQuestionData.options) ? currentQuestionData.options : parseQuizOptions(currentQuestionData.options || null)).map((option: string, index: number) => (
-                                        <div key={index} className="flex items-center space-x-2">
-                                            <RadioGroupItem value={option} id={`option-${index}`} />
-                                            <Label htmlFor={`option-${index}`}>{option}</Label>
+                                        <div key={index} className="flex items-start space-x-2">
+                                            <RadioGroupItem value={option} id={`option-${index}`} className="mt-1 flex-shrink-0" />
+                                            <Label htmlFor={`option-${index}`} className="break-words overflow-wrap-anywhere flex-1">{option}</Label>
                                         </div>
                                     ))}
                                 </RadioGroup>
@@ -326,6 +330,7 @@ export default function QuizPage({
                                     value={answers.find(a => a.questionId === currentQuestionData.id)?.answer || ""}
                                     onChange={(e) => handleAnswerChange(currentQuestionData.id, e.target.value)}
                                     rows={4}
+                                    className="break-words overflow-wrap-anywhere"
                                 />
                             )}
                         </CardContent>

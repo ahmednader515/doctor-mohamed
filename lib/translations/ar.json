@@ -2,7 +2,7 @@
   "navigation": {
     "signIn": "تسجيل الدخول",
     "signUp": "انشاء الحساب",
-    "dashboard": "الصفحة الرئيسية",
+    "dashboard": "لوحة التحكم",
     "logout": "تسجيل الخروج"
   },
   "auth": {
@@ -127,7 +127,7 @@
     "signUpNow": "سجل الآن"
   },
   "dashboard": {
-    "welcome": "مرحباً بك في الصفحة الرئيسية",
+    "welcome": "مرحباً بك في لوحة التحكم ",
     "successStartsHere": "معنا النجاح ليه طريق واضح",
     "currentBalance": "الرصيد الحالي",
     "purchasedCourses": "الكورسات المشتراة",
@@ -863,18 +863,22 @@
         "list": {
           "chapter": "درس",
           "quiz": "امتحان",
+          "homework": "واجب",
           "free": "مجاني",
           "published": "تم النشر",
           "draft": "مسودة",
           "editVideo": "تعديل فيديو",
           "addVideo": "اضافة فيديو",
           "editQuiz": "تعديل امتحان",
-          "addQuiz": "اضافة امتحان"
+          "addQuiz": "اضافة امتحان",
+          "editHomework": "تعديل الواجب",
+          "addHomework": "اضافة الواجب"
         },
         "toasts": {
           "chapterCreated": "تم انشاء الدرس",
           "chapterDeleted": "تم حذف الدرس",
           "quizDeleted": "تم حذف الامتحان",
+          "homeworkDeleted": "تم حذف الواجب",
           "reordered": "تم ترتيب المحتوى",
           "error": "حدث خطأ"
         }
@@ -1288,6 +1292,7 @@
     "searchOption": "ابحث عن خيار...",
     "noOptions": "لا يوجد خيارات.",
     "notAvailable": "غير متاح",
+    "showMore": "عرض المزيد",
     "switchToEnglish": "التبديل إلى العربي",
     "arabic": "عربي",
     "saving": "جاري الحفظ..."

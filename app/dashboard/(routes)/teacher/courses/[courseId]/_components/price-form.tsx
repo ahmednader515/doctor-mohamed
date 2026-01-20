@@ -80,7 +80,7 @@ export const PriceForm = ({
             </div>
             {!isEditing && (
                 <p className={cn(
-                    "text-sm mt-2 text-muted-foreground",
+                    "text-sm mt-2 text-muted-foreground break-words overflow-wrap-anywhere",
                     !initialData.price && initialData.price !== 0 && "text-muted-foreground italic"
                 )}>
                     {initialData.price === 0
@@ -106,6 +106,7 @@ export const PriceForm = ({
                                             step="0.01"
                                             disabled={isSubmitting}
                                             placeholder="ضع سعر للكورس"
+                                            className="break-words overflow-wrap-anywhere"
                                             value={field.value || ''}
                                             onChange={(e) => {
                                                 const value = e.target.value;

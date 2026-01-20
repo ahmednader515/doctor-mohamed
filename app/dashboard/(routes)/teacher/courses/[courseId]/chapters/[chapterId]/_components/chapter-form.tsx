@@ -214,7 +214,7 @@ export const ChapterForm = ({
                     </div>
                     {!isEditingTitle && (
                         <p className={cn(
-                            "text-sm mt-2",
+                            "text-sm mt-2 break-words overflow-wrap-anywhere",
                             !initialData.title && "text-muted-foreground italic"
                         )}>
                             {initialData.title || t("common.noOptions")}
@@ -235,6 +235,7 @@ export const ChapterForm = ({
                                                 <Input
                                                     disabled={isSubmittingTitle}
                                                     placeholder="e.g. 'Introduction to the course'"
+                                                    className="break-words overflow-wrap-anywhere"
                                                     {...field}
                                                 />
                                             </FormControl>

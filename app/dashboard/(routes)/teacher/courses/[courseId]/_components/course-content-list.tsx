@@ -13,15 +13,15 @@ interface CourseItem {
     title: string;
     position: number;
     isPublished: boolean;
-    type: "chapter" | "quiz";
+    type: "chapter" | "quiz" | "homework";
     isFree?: boolean; // Only for chapters
 }
 
 interface CourseContentListProps {
     items: CourseItem[];
-    onReorder: (updateData: { id: string; position: number; type: "chapter" | "quiz" }[]) => void;
-    onEdit: (id: string, type: "chapter" | "quiz") => void;
-    onDelete: (id: string, type: "chapter" | "quiz") => void;
+    onReorder: (updateData: { id: string; position: number; type: "chapter" | "quiz" | "homework" }[]) => void;
+    onEdit: (id: string, type: "chapter" | "quiz" | "homework") => void;
+    onDelete: (id: string, type: "chapter" | "quiz" | "homework") => void;
 }
 
 export const CourseContentList = ({
@@ -32,11 +32,14 @@ export const CourseContentList = ({
 }: CourseContentListProps) => {
     const { t } = useLanguage();
 
-    const getActionLabel = (type: "chapter" | "quiz", isPublished: boolean) => {
+    const getActionLabel = (type: "chapter" | "quiz" | "homework", isPublished: boolean) => {
         if (type === "chapter") {
             return isPublished ? t("teacher.courseEdit.content.list.editVideo") : t("teacher.courseEdit.content.list.addVideo");
+        } else if (type === "quiz") {
+            return isPublished ? t("teacher.courseEdit.content.list.editQuiz") : t("teacher.courseEdit.content.list.addQuiz");
+        } else {
+            return isPublished ? t("teacher.courseEdit.content.list.editHomework") || "تعديل الواجب" : t("teacher.courseEdit.content.list.addHomework") || "إضافة الواجب";
         }
-        return isPublished ? t("teacher.courseEdit.content.list.editQuiz") : t("teacher.courseEdit.content.list.addQuiz");
     };
     const onDragEnd = (result: DropResult) => {
         if (!result.destination) return;
@@ -92,14 +95,14 @@ export const CourseContentList = ({
                                             <div className="hidden sm:flex items-center gap-x-2">
                                                 <span>{item.title}</span>
                                                 <Badge variant="outline" className="text-xs">
-                                                    {item.type === "chapter" ? t("teacher.courseEdit.content.list.chapter") : t("teacher.courseEdit.content.list.quiz")}
+                                                    {item.type === "chapter" ? t("teacher.courseEdit.content.list.chapter") : item.type === "quiz" ? t("teacher.courseEdit.content.list.quiz") : t("teacher.courseEdit.content.list.homework") || "واجب"}
                                                 </Badge>
                                             </div>
                                             
                                             {/* Mobile: Type badge and status badges */}
                                             <div className="flex flex-wrap items-center gap-2 sm:hidden">
                                                 <Badge variant="outline" className="text-xs">
-                                                    {item.type === "chapter" ? t("teacher.courseEdit.content.list.chapter") : t("teacher.courseEdit.content.list.quiz")}
+                                                    {item.type === "chapter" ? t("teacher.courseEdit.content.list.chapter") : item.type === "quiz" ? t("teacher.courseEdit.content.list.quiz") : t("teacher.courseEdit.content.list.homework") || "واجب"}
                                                 </Badge>
                                                 {item.type === "chapter" && item.isFree && (
                                                     <Badge className="text-xs">

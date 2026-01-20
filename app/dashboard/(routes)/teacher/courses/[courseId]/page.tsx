@@ -32,6 +32,11 @@ export default async function CourseIdPage({
                     position: "asc",
                 },
             },
+            homeworks: {
+                orderBy: {
+                    position: "asc",
+                },
+            },
         }
     });
 

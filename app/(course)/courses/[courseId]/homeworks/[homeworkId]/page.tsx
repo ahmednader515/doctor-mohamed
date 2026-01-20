@@ -202,8 +202,8 @@ export default function HomeworkPage({
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>{homework.title}</CardTitle>
-                            <CardDescription>{homework.description}</CardDescription>
+                            <CardTitle className="break-words overflow-wrap-anywhere">{homework.title}</CardTitle>
+                            <CardDescription className="break-words overflow-wrap-anywhere">{homework.description}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="w-full bg-muted rounded-full h-2">
@@ -223,7 +223,7 @@ export default function HomeworkPage({
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="text-lg">{currentQuestionData.text}</div>
+                            <div className="text-lg break-words overflow-wrap-anywhere">{currentQuestionData.text}</div>
 
                             {currentQuestionData.imageUrl && (
                                 <div className="flex justify-center">
@@ -241,9 +241,9 @@ export default function HomeworkPage({
                                     onValueChange={(value) => handleAnswerChange(currentQuestionData.id, value)}
                                 >
                                     {(Array.isArray(currentQuestionData.options) ? currentQuestionData.options : parseQuizOptions(currentQuestionData.options || null)).map((option: string, index: number) => (
-                                        <div key={index} className="flex items-center space-x-2">
-                                            <RadioGroupItem value={option} id={`option-${index}`} />
-                                            <Label htmlFor={`option-${index}`}>{option}</Label>
+                                        <div key={index} className="flex items-start space-x-2">
+                                            <RadioGroupItem value={option} id={`option-${index}`} className="mt-1 flex-shrink-0" />
+                                            <Label htmlFor={`option-${index}`} className="break-words overflow-wrap-anywhere flex-1">{option}</Label>
                                         </div>
                                     ))}
                                 </RadioGroup>
@@ -271,6 +271,7 @@ export default function HomeworkPage({
                                     value={answers.find(a => a.questionId === currentQuestionData.id)?.answer || ""}
                                     onChange={(e) => handleAnswerChange(currentQuestionData.id, e.target.value)}
                                     rows={4}
+                                    className="break-words overflow-wrap-anywhere"
                                 />
                             )}
                         </CardContent>

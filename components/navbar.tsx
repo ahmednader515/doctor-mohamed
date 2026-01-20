@@ -28,13 +28,13 @@ export const Navbar = () => {
               alt="Logo"
               width={100}
               height={100}
-              className="w-[100px] h-[100px] object-contain ml-2"
+              className="w-[120px] h-[120px] md:w-[100px] md:h-[100px] object-contain ml-2"
               unoptimized
             />
           </Link>
 
           {/* Right side items */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 md:gap-4">
             <LanguageSwitcher />
             {!session ? (
               <>
@@ -55,16 +55,16 @@ export const Navbar = () => {
               </>
             ) : (
               <>
-                <Button variant="ghost" asChild>
+                <Button variant="ghost" asChild className="text-xs md:text-sm">
                   <Link href="/dashboard">{t("navigation.dashboard")}</Link>
                 </Button>
                 <Button 
                   size="sm" 
                   variant="ghost" 
                   onClick={handleLogout}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors duration-200 ease-in-out"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors duration-200 ease-in-out text-xs md:text-sm"
                 >
-                  <LogOut className="h-4 w-4 rtl:ml-2 ltr:mr-2"/>
+                  <LogOut className="h-3 w-3 md:h-4 md:w-4 rtl:ml-1 ltr:mr-1 md:rtl:ml-2 md:ltr:mr-2"/>
                   {t("navigation.logout")}
                 </Button>
               </>

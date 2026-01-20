@@ -27,7 +27,8 @@ export async function GET(req: Request) {
                 user: {
                     select: {
                         fullName: true,
-                        phoneNumber: true
+                        phoneNumber: true,
+                        grade: true
                     }
                 },
                 quiz: {
