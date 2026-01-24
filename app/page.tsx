@@ -7,7 +7,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Navbar } from "@/components/navbar";
 import { ScrollProgress } from "@/components/scroll-progress";
-import { RecaptchaGate } from "@/components/recaptcha-gate";
 import { useEffect, useState } from "react";
 import { db } from "@/lib/db"; // Import db client
 import { useSession } from "next-auth/react";
@@ -138,8 +137,7 @@ export default function HomePage() {
   };
 
   return (
-    <RecaptchaGate storageKey="recaptcha_homepage_verified">
-      <div className="h-full w-full bg-background">
+    <div className="h-full w-full bg-background">
         <Navbar />
         <ScrollProgress />
       {/* Hero Section */}
@@ -586,6 +584,5 @@ export default function HomePage() {
       </section>
 
       </div>
-    </RecaptchaGate>
   );
 } 

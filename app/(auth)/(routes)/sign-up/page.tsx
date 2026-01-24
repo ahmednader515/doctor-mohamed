@@ -14,7 +14,6 @@ import { Check, X, Eye, EyeOff, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/lib/contexts/language-context";
 import ReCAPTCHA from "react-google-recaptcha";
-import { RecaptchaGate } from "@/components/recaptcha-gate";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -129,8 +128,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <RecaptchaGate storageKey="recaptcha_signup_verified">
-      <div className="flex min-h-screen bg-background overflow-y-auto">
+    <div className="flex min-h-screen bg-background overflow-y-auto">
       <div className="absolute top-4 left-4 z-10">
         <Button variant="ghost" size="lg" asChild>
           <Link href="/">
@@ -418,6 +416,5 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
-    </RecaptchaGate>
   );
 } 

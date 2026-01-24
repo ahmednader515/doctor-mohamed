@@ -50,7 +50,7 @@ export async function PATCH(req: NextRequest) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const { fullName, phoneNumber, parentPhoneNumber } = await req.json();
+        const { fullName, phoneNumber, parentPhoneNumber, grade, subject, semester } = await req.json();
 
         // Get existing user
         const existingUser = await db.user.findUnique({
@@ -100,7 +100,10 @@ export async function PATCH(req: NextRequest) {
             data: {
                 ...(fullName && { fullName }),
                 ...(phoneNumber && { phoneNumber }),
-                ...(parentPhoneNumber !== undefined && { parentPhoneNumber: parentPhoneNumber || null })
+                ...(parentPhoneNumber !== undefined && { parentPhoneNumber: parentPhoneNumber || null }),
+                ...(grade !== undefined && { grade: grade || null }),
+                ...(subject !== undefined && { subject: subject || null }),
+                ...(semester !== undefined && { semester: semester || null })
             },
             select: {
                 id: true,

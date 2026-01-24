@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { User, Save, Loader2, Key, Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/lib/contexts/language-context";
 import { useSession } from "next-auth/react";
@@ -32,6 +34,10 @@ export default function ProfilePage() {
         fullName: "",
         phoneNumber: "",
         parentPhoneNumber: "",
+        grade: "",
+        subject: "",
+        subjects: [] as string[],
+        semester: "",
     });
     const [passwordData, setPasswordData] = useState({
         currentPassword: "",
@@ -56,10 +62,19 @@ export default function ProfilePage() {
                     ...data,
                     hasPassword: data.hasPassword !== undefined ? data.hasPassword : false
                 });
+                // Parse subject if it's comma-separated
+                const subjects = data.subject?.includes(",") 
+                    ? data.subject.split(",").map((s: string) => s.trim())
+                    : data.subject ? [data.subject] : [];
+                
                 setFormData({
                     fullName: data.fullName || "",
                     phoneNumber: data.phoneNumber || "",
-                    parentPhoneNumber: data.parentPhoneNumber || "",
+                    parentPhoneNumber: data.parentPhoneNumber ?? "",
+                    grade: data.grade || "",
+                    subject: data.subject || "",
+                    subjects: subjects,
+                    semester: data.semester || "",
                 });
             }
         } catch (error) {
@@ -75,20 +90,50 @@ export default function ProfilePage() {
 
         setSaving(true);
         try {
+            // Prepare subject - use comma-separated if multiple subjects, otherwise single value
+            const subjectValue = formData.subjects.length > 0 
+                ? formData.subjects.join(",")
+                : formData.subject;
+
             const response = await fetch("/api/user/profile", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    fullName: formData.fullName,
+                    phoneNumber: formData.phoneNumber,
+                    parentPhoneNumber: formData.parentPhoneNumber,
+                    grade: formData.grade || null,
+                    subject: subjectValue || null,
+                    semester: formData.semester || null,
+                }),
             });
 
             if (response.ok) {
                 const updatedData = await response.json();
+                
+                // Parse subject if it's comma-separated
+                const updatedSubjects = updatedData.subject?.includes(",") 
+                    ? updatedData.subject.split(",").map((s: string) => s.trim())
+                    : updatedData.subject ? [updatedData.subject] : [];
+                
                 setProfile({
                     ...updatedData,
                     hasPassword: updatedData.hasPassword !== undefined ? updatedData.hasPassword : profile.hasPassword
                 });
+                
+                // Update formData with the response
+                setFormData({
+                    fullName: updatedData.fullName || "",
+                    phoneNumber: updatedData.phoneNumber || "",
+                    parentPhoneNumber: updatedData.parentPhoneNumber ?? "",
+                    grade: updatedData.grade || "",
+                    subject: updatedData.subject || "",
+                    subjects: updatedSubjects,
+                    semester: updatedData.semester || "",
+                });
+                
                 await update(); // Update session
                 toast.success(t("student.profile.updateSuccess"));
             } else {
@@ -200,6 +245,7 @@ export default function ProfilePage() {
                                 id="fullName"
                                 value={formData.fullName}
                                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                disabled={saving}
                             />
                         </div>
                         <div className="space-y-2">
@@ -208,6 +254,7 @@ export default function ProfilePage() {
                                 id="phoneNumber"
                                 value={formData.phoneNumber}
                                 onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                                disabled={saving}
                             />
                         </div>
                         <div className="space-y-2">
@@ -216,21 +263,9 @@ export default function ProfilePage() {
                                 id="parentPhoneNumber"
                                 value={formData.parentPhoneNumber}
                                 onChange={(e) => setFormData({ ...formData, parentPhoneNumber: e.target.value })}
+                                disabled={saving}
                             />
                         </div>
-                        <Button onClick={handleSave} disabled={saving} className="w-full">
-                            {saving ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    {t("common.saving")}
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="h-4 w-4 mr-2" />
-                                    {t("student.profile.save")}
-                                </>
-                            )}
-                        </Button>
                     </CardContent>
                 </Card>
 
@@ -242,19 +277,102 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
-                            <Label>{t("student.profile.grade")}</Label>
-                            <Input value={profile.grade || t("student.profile.notSet")} disabled />
+                            <Label htmlFor="grade">{t("student.profile.grade")}</Label>
+                            <Select
+                                value={formData.grade}
+                                onValueChange={(value) => {
+                                    // Reset subjects when grade changes
+                                    if (value === "الصف الاول الثانوي") {
+                                        setFormData((prev) => ({ ...prev, grade: value, subject: "", subjects: [] }));
+                                    } else {
+                                        setFormData((prev) => ({ ...prev, grade: value, subject: "", subjects: [] }));
+                                    }
+                                }}
+                                disabled={saving}
+                            >
+                                <SelectTrigger className="h-10">
+                                    <SelectValue placeholder={t("student.profile.notSet")} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="الصف الاول الثانوي">الصف الاول الثانوي</SelectItem>
+                                    <SelectItem value="الصف الثاني الثانوي">الصف الثاني الثانوي</SelectItem>
+                                    <SelectItem value="الصف الثالث الثانوي">الصف الثالث الثانوي</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <div className="space-y-2">
-                            <Label>{t("student.profile.subject")}</Label>
-                            <Input value={profile.subject || t("student.profile.notSet")} disabled />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>{t("student.profile.semester")}</Label>
-                            <Input value={profile.semester || t("student.profile.notSet")} disabled />
-                        </div>
+                        {formData.grade && (
+                            <div className="space-y-2">
+                                <Label htmlFor="subject">{t("student.profile.subject")}</Label>
+                                {formData.grade === "الصف الاول الثانوي" ? (
+                                    <Select
+                                        value={formData.subject}
+                                        onValueChange={(value) => setFormData((prev) => ({ ...prev, subject: value, subjects: [] }))}
+                                        disabled={saving || !formData.grade}
+                                    >
+                                        <SelectTrigger className="h-10">
+                                            <SelectValue placeholder={t("student.profile.notSet")} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                ) : (formData.grade === "الصف الثاني الثانوي" || formData.grade === "الصف الثالث الثانوي") ? (
+                                    <MultiSelect
+                                        options={[
+                                            { label: "كيمياء", value: "كيمياء" },
+                                            { label: "فيزياء", value: "فيزياء" },
+                                        ]}
+                                        selected={formData.subjects}
+                                        onChange={(selected) => {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                subjects: selected,
+                                                subject: selected.join(",")
+                                            }));
+                                        }}
+                                        placeholder={t("student.profile.notSet")}
+                                        disabled={saving}
+                                    />
+                                ) : null}
+                            </div>
+                        )}
+                        {formData.grade && formData.grade !== "الصف الثالث الثانوي" && (
+                            <div className="space-y-2">
+                                <Label htmlFor="semester">{t("student.profile.semester")}</Label>
+                                <Select
+                                    value={formData.semester}
+                                    onValueChange={(value) => setFormData((prev) => ({ ...prev, semester: value }))}
+                                    disabled={saving}
+                                >
+                                    <SelectTrigger className="h-10">
+                                        <SelectValue placeholder={t("student.profile.notSet")} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="الترم الاول">الترم الاول</SelectItem>
+                                        <SelectItem value="الترم الثاني">الترم الثاني</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
+            </div>
+
+            {/* Save Button - Between the two sections */}
+            <div className="flex justify-center">
+                <Button onClick={handleSave} disabled={saving} size="lg" className="min-w-[200px]">
+                    {saving ? (
+                        <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            {t("common.saving")}
+                        </>
+                    ) : (
+                        <>
+                            <Save className="h-4 w-4 mr-2" />
+                            {t("student.profile.save")}
+                        </>
+                    )}
+                </Button>
             </div>
 
             {/* Password Change */}
