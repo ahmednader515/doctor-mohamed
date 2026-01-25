@@ -942,7 +942,13 @@
       "uploadSuccess": "تم رفع الفيديو بنجاح",
       "youtubeSuccess": "تم إضافة فيديو YouTube بنجاح",
       "youtubeError": "يرجى إدخال رابط YouTube",
-      "uploadError": "حدث خطأ ما"
+      "uploadError": "حدث خطأ ما",
+      "maxViews": {
+        "title": "عدد مرات المشاهدة المسموحة",
+        "label": "عدد مرات المشاهدة المسموحة",
+        "hint": "عدد المرات التي يمكن للطالب مشاهدة هذا الدرس",
+        "views": "مرة"
+      }
     }
   },
   "admin": {

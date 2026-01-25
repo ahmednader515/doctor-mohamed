@@ -10,6 +10,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { User, Save, Loader2, Key, Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/lib/contexts/language-context";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -27,6 +28,7 @@ interface UserProfile {
 export default function ProfilePage() {
     const { t } = useLanguage();
     const { data: session, update } = useSession();
+    const router = useRouter();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -135,6 +137,7 @@ export default function ProfilePage() {
                 });
                 
                 await update(); // Update session
+                router.refresh(); // Refresh server components to reflect updated user data
                 toast.success(t("student.profile.updateSuccess"));
             } else {
                 const error = await response.text();

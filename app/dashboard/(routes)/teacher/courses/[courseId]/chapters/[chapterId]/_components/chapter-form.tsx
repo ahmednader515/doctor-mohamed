@@ -3,11 +3,10 @@
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Eye, Pencil, EyeOff, LayoutDashboard, Files } from "lucide-react";
+import { Pencil, LayoutDashboard, Files, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { useLanguage } from "@/lib/contexts/language-context";
 
 import {
@@ -34,12 +33,21 @@ interface ChapterAttachment {
     createdAt: Date | string;
 }
 
+interface ChapterAttachmentForForm {
+    id: string;
+    name: string;
+    url: string;
+    position: number;
+    createdAt: Date;
+}
+
 interface ChapterFormProps {
     initialData: {
         title: string;
         description: string | null;
         isFree: boolean;
         isPublished: boolean;
+        maxViews?: number;
         attachments: ChapterAttachment[];
     };
     courseId: string;
@@ -62,6 +70,10 @@ const accessSchema = z.object({
     isFree: z.boolean().default(false),
 });
 
+const maxViewsSchema = z.object({
+    maxViews: z.string(),
+});
+
 export const ChapterForm = ({
     initialData,
     courseId,
@@ -71,7 +83,7 @@ export const ChapterForm = ({
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [isEditingDescription, setIsEditingDescription] = useState(false);
     const [isEditingAccess, setIsEditingAccess] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isEditingMaxViews, setIsEditingMaxViews] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
     const router = useRouter();
@@ -101,9 +113,17 @@ export const ChapterForm = ({
         }
     });
 
+    const maxViewsForm = useForm<{ maxViews: string }>({
+        resolver: zodResolver(maxViewsSchema),
+        defaultValues: {
+            maxViews: initialData.maxViews?.toString() ?? ""
+        }
+    });
+
     const { isSubmitting: isSubmittingTitle, isValid: isValidTitle } = titleForm.formState;
     const { isSubmitting: isSubmittingDescription, isValid: isValidDescription } = descriptionForm.formState;
     const { isSubmitting: isSubmittingAccess, isValid: isValidAccess } = accessForm.formState;
+    const { isSubmitting: isSubmittingMaxViews, isValid: isValidMaxViews } = maxViewsForm.formState;
 
     const onSubmitTitle = async (values: z.infer<typeof titleSchema>) => {
         try {
@@ -170,34 +190,47 @@ export const ChapterForm = ({
         }
     }
 
-    const onPublish = async () => {
+    const onSubmitMaxViews = async (values: { maxViews: string }) => {
         try {
-            setIsLoading(true);
-            
-            await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}/publish`);
-            
-            toast.success(initialData.isPublished ? t("teacher.courseEdit.forms.unpublishSuccess") : t("teacher.courseEdit.forms.publishSuccess"));
+            // Convert empty string to null, or parse the number
+            const maxViewsValue = values.maxViews === "" || values.maxViews === undefined || values.maxViews === null
+                ? null
+                : (() => {
+                    const numValue = parseInt(values.maxViews);
+                    return isNaN(numValue) ? null : numValue;
+                })();
+
+            await fetch(`/api/courses/${courseId}/chapters/${chapterId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ maxViews: maxViewsValue }),
+            });
+
+            toast.success(t("teacher.chapterEdit.updateSuccess"));
+            setIsEditingMaxViews(false);
             router.refresh();
-        } catch {
+        } catch (error) {
+            console.error("[CHAPTER_MAX_VIEWS]", error);
             toast.error(t("teacher.chapterEdit.updateError"));
-        } finally {
-            setIsLoading(false);
         }
     }
+
 
     if (!isMounted) {
         return null;
     }
 
     return (
-        <div className="space-y-10">
-            <div className="flex items-center gap-x-2">
+        <div className="flex flex-col space-y-10">
+            <div className="flex items-center gap-x-2 order-1">
                 <IconBadge icon={LayoutDashboard} />
                 <h2 className="text-xl">
                     {t("teacher.chapterEdit.setupTitle")}
                 </h2>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 order-2">
                 <div className="border bg-card rounded-md p-4">
                     <div className="font-medium flex items-center justify-between">
                         {t("teacher.chapterEdit.chapterTitle")}
@@ -319,7 +352,7 @@ export const ChapterForm = ({
                 </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 order-3">
                 <div className="flex items-center gap-x-2">
                     <IconBadge icon={Eye} />
                     <h2 className="text-xl">
@@ -389,7 +422,7 @@ export const ChapterForm = ({
                 </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 order-4">
                 <div className="flex items-center gap-x-2">
                     <IconBadge icon={Files} />
                     <h2 className="text-xl">
@@ -397,44 +430,85 @@ export const ChapterForm = ({
                     </h2>
                 </div>
                 <AttachmentsForm
-                    initialData={{ attachments: initialData.attachments || [] }}
+                    initialData={{ 
+                        attachments: (initialData.attachments || []).map(att => ({
+                            ...att,
+                            createdAt: att.createdAt instanceof Date ? att.createdAt : new Date(att.createdAt)
+                        })) as ChapterAttachmentForForm[]
+                    }}
                     courseId={courseId}
                     chapterId={chapterId}
                 />
             </div>
 
-            <div className="border bg-card rounded-md p-4">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <h3 className="text-lg font-semibold">
-                            {initialData.isPublished ? t("teacher.chapterEdit.published") : t("teacher.chapterEdit.unpublished")}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                            {initialData.isPublished
-                                ? t("teacher.chapterEdit.publishedDescription")
-                                : t("teacher.chapterEdit.unpublishedDescription")}
-                        </p>
+            <div className="space-y-4 order-5">
+                <div className="flex items-center gap-x-2">
+                    <IconBadge icon={Eye} />
+                    <h2 className="text-xl">
+                        {t("teacher.chapterEdit.maxViews.title")}
+                    </h2>
+                </div>
+                <div className="border bg-card rounded-md p-4">
+                    <div className="font-medium flex items-center justify-between">
+                        {t("teacher.chapterEdit.maxViews.label")}
+                        <Button onClick={() => setIsEditingMaxViews(!isEditingMaxViews)} variant="ghost">
+                            {isEditingMaxViews ? (
+                                <>{t("common.cancel")}</>
+                            ) : (
+                                <>
+                                    <Pencil className="h-4 w-4 mr-2" />
+                                    {t("common.edit")}
+                                </>
+                            )}
+                        </Button>
                     </div>
-                    <Button
-                        onClick={onPublish}
-                        disabled={isLoading}
-                        variant={initialData.isPublished ? "outline" : "default"}
-                        className="w-full sm:w-auto px-8 py-6 text-base font-semibold"
-                    >
-                        {initialData.isPublished ? (
-                            <>
-                                <EyeOff className="h-4 w-4 mr-2" />
-                                {t("teacher.chapterEdit.unpublishChapter")}
-                            </>
-                        ) : (
-                            <>
-                                <Eye className="h-4 w-4 mr-2" />
-                                {t("teacher.chapterEdit.publishChapter")}
-                            </>
-                        )}
-                    </Button>
+                    {!isEditingMaxViews && (
+                        <p className="text-sm mt-2">
+                            {initialData.maxViews || 1} {t("teacher.chapterEdit.maxViews.views")}
+                        </p>
+                    )}
+                    {isEditingMaxViews && (
+                        <Form {...maxViewsForm}>
+                            <form
+                                onSubmit={maxViewsForm.handleSubmit(onSubmitMaxViews)}
+                                className="space-y-4 mt-4"
+                            >
+                                <FormField
+                                    control={maxViewsForm.control}
+                                    name="maxViews"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    disabled={isSubmittingMaxViews}
+                                                    min="0"
+                                                    max="100"
+                                                    {...field}
+                                                    value={field.value ?? ""}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                {t("teacher.chapterEdit.maxViews.hint")}
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="flex items-center gap-x-2">
+                                    <Button
+                                        disabled={!isValidMaxViews || isSubmittingMaxViews}
+                                        type="submit"
+                                    >
+                                        {t("common.save")}
+                                    </Button>
+                                </div>
+                            </form>
+                        </Form>
+                    )}
                 </div>
             </div>
+
         </div>
     )
 } 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, CheckCircle2, Circle, Lock, FileText, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle2, Circle, Lock, FileText, Download, Eye, EyeOff } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { PlyrVideoPlayer } from "@/components/plyr-video-player";
@@ -23,6 +23,9 @@ interface Chapter {
   previousChapterId?: string;
   nextContentType?: 'chapter' | 'quiz' | 'homework' | null;
   previousContentType?: 'chapter' | 'quiz' | 'homework' | null;
+  maxViews?: number | null;
+  viewCount?: number | null;
+  hasExceededViews?: boolean;
   attachments?: {
     id: string;
     name: string;
@@ -141,6 +144,16 @@ const ChapterPage = () => {
     const fetchData = async () => {
       console.log("🔍 ChapterPage fetchData started");
       try {
+        // Reset progress when opening chapter (so it counts again)
+        try {
+          await axios.delete(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}/progress`);
+        } catch (resetError) {
+          // Ignore error if progress doesn't exist (404 is fine)
+          if ((resetError as AxiosError).response?.status !== 404) {
+            console.log("Failed to reset progress:", resetError);
+          }
+        }
+
         const [chapterResponse, progressResponse, accessResponse] = await Promise.all([
           axios.get(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}`),
           axios.get(`/api/courses/${routeParams.courseId}/progress`),
@@ -154,7 +167,7 @@ const ChapterPage = () => {
         });
         
         setChapter(chapterResponse.data);
-        setIsCompleted(chapterResponse.data.userProgress?.[0]?.isCompleted || false);
+        setIsCompleted(false); // Always set to false when opening chapter
         setCourseProgress(progressResponse.data.progress);
         setHasAccess(accessResponse.data.hasAccess);
       } catch (error) {
@@ -183,27 +196,61 @@ const ChapterPage = () => {
     try {
       if (isCompleted) {
         await axios.delete(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}/progress`);
+        setIsCompleted(false);
+        // Refresh chapter data to update view count
+        const updatedChapterResponse = await axios.get(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}`);
+        setChapter(updatedChapterResponse.data);
       } else {
-        await axios.put(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}/progress`);
+        const response = await axios.put(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}/progress`);
+        setIsCompleted(true);
+        // Refresh chapter data to update view count
+        const updatedChapterResponse = await axios.get(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}`);
+        setChapter(updatedChapterResponse.data);
       }
-      setIsCompleted(!isCompleted);
       router.refresh();
     } catch (error) {
-      console.error("Error toggling completion:", error);
-      toast.error("فشل تحديث التقدم");
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 403) {
+        toast.error("تم الوصول إلى الحد الأقصى لعدد مرات المشاهدة");
+        // Refresh chapter data to get updated status
+        try {
+          const updatedChapterResponse = await axios.get(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}`);
+          setChapter(updatedChapterResponse.data);
+        } catch (refreshError) {
+          console.error("Error refreshing chapter data:", refreshError);
+        }
+      } else {
+        console.error("Error toggling completion:", error);
+        toast.error("فشل تحديث التقدم");
+      }
     }
   };
 
   const onEnd = async () => {
     try {
       if (!isCompleted) {
-        await axios.put(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}/progress`);
+        const response = await axios.put(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}/progress`);
         setIsCompleted(true);
+        // Refresh chapter data to update view count
+        const updatedChapterResponse = await axios.get(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}`);
+        setChapter(updatedChapterResponse.data);
         router.refresh();
       }
     } catch (error) {
-      console.error("Error marking chapter as completed:", error);
-      toast.error("فشل تحديث التقدم");
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 403) {
+        toast.error("تم الوصول إلى الحد الأقصى لعدد مرات المشاهدة");
+        // Refresh chapter data to get updated status
+        try {
+          const updatedChapterResponse = await axios.get(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}`);
+          setChapter(updatedChapterResponse.data);
+        } catch (refreshError) {
+          console.error("Error refreshing chapter data:", refreshError);
+        }
+      } else {
+        console.error("Error marking chapter as completed:", error);
+        toast.error("فشل تحديث التقدم");
+      }
     }
   };
 
@@ -262,6 +309,27 @@ const ChapterPage = () => {
     );
   }
 
+  // Check if student has exceeded max views
+  if (chapter.hasExceededViews && chapter.maxViews !== null && chapter.maxViews !== undefined) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-md mx-auto p-6">
+          <EyeOff className="h-12 w-12 mx-auto text-muted-foreground" />
+          <h2 className="text-2xl font-semibold">تم الوصول إلى الحد الأقصى للمشاهدات</h2>
+          <p className="text-muted-foreground">
+            لقد استنفدت عدد مرات المشاهدة المسموحة لهذا الدرس ({chapter.maxViews} مرة)
+          </p>
+          <p className="text-sm text-muted-foreground">
+            عدد مرات المشاهدة: {chapter.viewCount} / {chapter.maxViews}
+          </p>
+          <Button onClick={() => router.push(`/courses/${routeParams.courseId}`)} variant="outline">
+            العودة إلى الكورس
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full">
       <div className="max-w-5xl mx-auto p-6">
@@ -274,6 +342,30 @@ const ChapterPage = () => {
             </div>
             <Progress value={courseProgress} className="h-2" />
           </div>
+
+          {/* View Count Information */}
+          {chapter.maxViews !== null && chapter.maxViews !== undefined && (
+            <div className="p-4 border rounded-lg bg-card">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm font-medium">عدد مرات المشاهدة</span>
+                </div>
+                <div className="text-sm">
+                  <span className="font-semibold">{chapter.viewCount ?? 0}</span>
+                  <span className="text-muted-foreground"> / {chapter.maxViews}</span>
+                </div>
+              </div>
+              {chapter.maxViews > 0 && (
+                <div className="mt-2">
+                  <Progress 
+                    value={((chapter.viewCount ?? 0) / chapter.maxViews) * 100} 
+                    className="h-2" 
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Video Player Section */}
           <div className="aspect-video relative bg-black rounded-lg overflow-hidden">

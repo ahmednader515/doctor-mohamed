@@ -44,6 +44,30 @@ export async function GET(
       return new NextResponse("Chapter not found", { status: 404 });
     }
 
+    // Get view count information for students
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { role: true }
+    });
+
+    let viewCount = 0;
+    let maxViews: number | null = null;
+    let hasExceededViews = false;
+
+    // Only check maxViews for students (USER role)
+    // maxViews of null or 0 means unlimited views
+    if (user?.role === "USER" && chapter.maxViews !== null && chapter.maxViews !== undefined && chapter.maxViews > 0) {
+      maxViews = chapter.maxViews;
+      viewCount = await db.chapterView.count({
+        where: {
+          studentId: userId,
+          chapterId: chapterId
+        }
+      });
+
+      hasExceededViews = viewCount >= chapter.maxViews;
+    }
+
     // Get all content (chapters, quizzes, and homeworks) for this course
     const [chapters, quizzes, homeworks] = await db.$transaction([
       db.chapter.findMany({
@@ -115,6 +139,10 @@ export async function GET(
       previousChapterId: previousContent?.id || null,
       nextContentType: nextContent?.type || null,
       previousContentType: previousContent?.type || null,
+      // Add view count information for students
+      maxViews: user?.role === "USER" ? maxViews : null,
+      viewCount: user?.role === "USER" ? viewCount : null,
+      hasExceededViews: user?.role === "USER" ? hasExceededViews : false,
     };
 
     return NextResponse.json(response);

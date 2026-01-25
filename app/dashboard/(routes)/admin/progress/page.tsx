@@ -12,6 +12,7 @@ import { Search, Eye, BookOpen, CheckCircle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useLanguage } from "@/lib/contexts/language-context";
+import { isFirstGrade, isSecondGrade, isThirdGrade } from "@/lib/utils/grade-utils";
 
 interface User {
     id: string;
@@ -129,9 +130,9 @@ const ProgressPage = () => {
     const studentUsers = filteredUsers.filter(user => user.role === "USER");
     
     // Group students by grade level
-    const grade1StudentsAll = studentUsers.filter(user => user.grade === "الصف الأول الثانوي");
-    const grade2StudentsAll = studentUsers.filter(user => user.grade === "الصف الثاني الثانوي");
-    const grade3StudentsAll = studentUsers.filter(user => user.grade === "الصف الثالث الثانوي");
+    const grade1StudentsAll = studentUsers.filter(user => isFirstGrade(user.grade));
+    const grade2StudentsAll = studentUsers.filter(user => isSecondGrade(user.grade));
+    const grade3StudentsAll = studentUsers.filter(user => isThirdGrade(user.grade));
 
     // Apply search filters for each grade table
     const grade1Students = grade1StudentsAll.filter(user =>

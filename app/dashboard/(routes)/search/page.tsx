@@ -42,6 +42,9 @@ export default async function SearchPage({
       ? user.subject.split(",").map(s => s.trim()).filter(s => s.length > 0)
       : [];
 
+    // For الصف الثالث الثانوي, don't filter by semester (it doesn't have one)
+    const isThirdGrade = user?.grade === "الصف الثالث الثانوي";
+
     const courses = await db.course.findMany({
         where: {
             isPublished: true,
@@ -58,8 +61,8 @@ export default async function SearchPage({
             ...(user?.grade ? {
                 grade: user.grade,
             } : {}),
-            // Filter by student's semester if they have one
-            ...(user?.semester ? {
+            // Filter by student's semester only if they have one AND it's not الصف الثالث الثانوي
+            ...(user?.semester && !isThirdGrade ? {
                 semester: user.semester,
             } : {}),
         },
@@ -81,8 +84,6 @@ export default async function SearchPage({
         orderBy: {
             createdAt: "desc",
         }
-    ,
-        cacheStrategy: process.env.NODE_ENV === "production" ? { ttl: 60 } : undefined,
     });
 
     const coursesWithProgress = await Promise.all(

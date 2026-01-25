@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 
 export async function GET(req: NextRequest) {
     try {
@@ -115,6 +116,10 @@ export async function PATCH(req: NextRequest) {
                 semester: true
             }
         });
+
+        // Revalidate search page and dashboard to reflect updated user data
+        revalidatePath("/dashboard/search");
+        revalidatePath("/dashboard");
 
         return NextResponse.json(updatedUser);
     } catch (error) {

@@ -29,6 +29,7 @@ model User {
   balanceTransactions     BalanceTransaction[]
   quizResults             QuizResult[]
   homeworkResults         HomeworkResult[]
+  chapterViews            ChapterView[]
   createdPurchaseCodes    PurchaseCode[] @relation("CodeCreator")
   usedPurchaseCodes       PurchaseCode[] @relation("CodeUser")
 }
@@ -87,12 +88,14 @@ model Chapter {
   position Int
   isPublished Boolean @default(false)
   isFree Boolean @default(false)
+  maxViews Int @default(1) // Maximum number of times a student can view this chapter
 
   courseId String
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   userProgress UserProgress[]
   attachments ChapterAttachment[] // New relation for multiple documents
+  chapterViews ChapterView[] // Track chapter views
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -127,6 +130,20 @@ model UserProgress {
     chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
     @@unique([userId, chapterId])
+    @@index([chapterId])
+}
+
+model ChapterView {
+    id String @id @default(uuid())
+    studentId String
+    chapterId String
+    viewedAt DateTime @default(now())
+    user User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+    chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([studentId, chapterId])
     @@index([chapterId])
 }
 

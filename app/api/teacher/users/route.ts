@@ -33,6 +33,8 @@ export async function GET(req: NextRequest) {
                 role: true,
                 balance: true,
                 grade: true,
+                semester: true,
+                subject: true,
                 createdAt: true,
                 updatedAt: true,
                 _count: {

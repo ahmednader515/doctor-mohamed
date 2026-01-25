@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, Edit, Search, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/contexts/language-context";
+import { isFirstGrade, isSecondGrade, isThirdGrade } from "@/lib/utils/grade-utils";
 
 interface User {
     id: string;
@@ -94,9 +95,9 @@ const TeacherPasswordsPage = () => {
     const studentUsers = filteredUsers.filter(user => user.role === "USER");
     
     // Group students by grade level
-    const grade1StudentsAll = studentUsers.filter(user => user.grade === "الصف الأول الثانوي");
-    const grade2StudentsAll = studentUsers.filter(user => user.grade === "الصف الثاني الثانوي");
-    const grade3StudentsAll = studentUsers.filter(user => user.grade === "الصف الثالث الثانوي");
+    const grade1StudentsAll = studentUsers.filter(user => isFirstGrade(user.grade));
+    const grade2StudentsAll = studentUsers.filter(user => isSecondGrade(user.grade));
+    const grade3StudentsAll = studentUsers.filter(user => isThirdGrade(user.grade));
 
     // Apply search filters for each grade table
     const grade1Students = grade1StudentsAll.filter(user =>

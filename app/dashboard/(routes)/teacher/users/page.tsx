@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/contexts/language-context";
+import { isFirstGrade, isSecondGrade, isThirdGrade } from "@/lib/utils/grade-utils";
 import {
     Dialog,
     DialogContent,
@@ -48,6 +49,8 @@ interface User {
     role: string;
     balance: number;
     grade: string | null;
+    semester: string | null;
+    subject: string | null;
     createdAt: string;
     updatedAt: string;
     _count: {
@@ -62,6 +65,9 @@ interface EditUserData {
     phoneNumber: string;
     parentPhoneNumber: string;
     role: string;
+    grade?: string | null;
+    semester?: string | null;
+    subject?: string | null;
 }
 
 const UsersPage = () => {
@@ -74,7 +80,10 @@ const UsersPage = () => {
         fullName: "",
         phoneNumber: "",
         parentPhoneNumber: "",
-        role: ""
+        role: "",
+        grade: null,
+        semester: null,
+        subject: null
     });
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -119,7 +128,10 @@ const UsersPage = () => {
             fullName: user.fullName,
             phoneNumber: user.phoneNumber,
             parentPhoneNumber: user.parentPhoneNumber,
-            role: user.role
+            role: user.role,
+            grade: user.grade || null,
+            semester: user.semester || null,
+            subject: user.subject || null
         });
         setIsEditDialogOpen(true);
     };
@@ -200,9 +212,9 @@ const UsersPage = () => {
     const staffUsers = filteredUsers.filter(user => user.role === "TEACHER" || user.role === "ADMIN");
 
     // Group students by grade level
-    const grade1StudentsAll = studentUsers.filter(user => user.grade === "الصف الأول الثانوي");
-    const grade2StudentsAll = studentUsers.filter(user => user.grade === "الصف الثاني الثانوي");
-    const grade3StudentsAll = studentUsers.filter(user => user.grade === "الصف الثالث الثانوي");
+    const grade1StudentsAll = studentUsers.filter(user => isFirstGrade(user.grade));
+    const grade2StudentsAll = studentUsers.filter(user => isSecondGrade(user.grade));
+    const grade3StudentsAll = studentUsers.filter(user => isThirdGrade(user.grade));
 
     // Apply search filters for each grade table
     const grade1Students = grade1StudentsAll.filter(user =>
@@ -224,11 +236,35 @@ const UsersPage = () => {
     const grade3StudentsPaginated = grade3Students.slice(0, grade3DisplayCount);
 
     // Debug logging
-    console.log("All users:", users);
-    console.log("Filtered users:", filteredUsers);
-    console.log("Student users:", studentUsers);
-    console.log("Staff users:", staffUsers);
-    console.log("Admin users:", filteredUsers.filter(user => user.role === "ADMIN"));
+    console.log("All users count:", users.length);
+    console.log("Student users count:", studentUsers.length);
+    
+    // Check all unique grade values
+    const uniqueGrades = [...new Set(studentUsers.map(u => u.grade).filter(Boolean))];
+    console.log("Unique grade values in database:", uniqueGrades);
+    console.log("Looking for grade:", "الصف الأول الثانوي");
+    console.log("Grade comparison test:", uniqueGrades.map(g => ({
+        original: g,
+        trimmed: g?.trim(),
+        matches: g?.trim() === "الصف الأول الثانوي",
+        charCodes: g?.split('').map(c => c.charCodeAt(0))
+    })));
+    
+    // Show students with grade that might match
+    const potentialGrade1 = studentUsers.filter(u => {
+        const grade = u.grade?.trim() || "";
+        return grade.includes("الأول") || grade.includes("اول");
+    });
+    console.log("Students with 'الأول' or 'اول' in grade:", potentialGrade1.map(u => ({
+        name: u.fullName,
+        grade: u.grade,
+        gradeCharCodes: u.grade?.split('').map(c => c.charCodeAt(0))
+    })));
+    
+    console.log("Grade 1 students count:", grade1StudentsAll.length);
+    console.log("Grade 1 students:", grade1StudentsAll.map(u => ({ name: u.fullName, grade: u.grade })));
+    console.log("Grade 2 students count:", grade2StudentsAll.length);
+    console.log("Grade 3 students count:", grade3StudentsAll.length);
 
     if (loading) {
         return (
@@ -550,6 +586,95 @@ const UsersPage = () => {
                                                                 />
                                                             </div>
                                                             <div className="grid grid-cols-4 items-center gap-4">
+                                                                <Label htmlFor="grade" className="text-right">
+                                                                    {t("auth.grade")}
+                                                                </Label>
+                                                                <Select
+                                                                    value={editData.grade || ""}
+                                                                    onValueChange={(value) => {
+                                                                        const newGrade = value || null;
+                                                                        setEditData({
+                                                                            ...editData, 
+                                                                            grade: newGrade, 
+                                                                            subject: null,
+                                                                            semester: newGrade === "الصف الثالث الثانوي" ? null : editData.semester
+                                                                        });
+                                                                    }}
+                                                                >
+                                                                    <SelectTrigger className="col-span-3">
+                                                                        <SelectValue placeholder={t("auth.gradePlaceholder")} />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="الصف الاول الثانوي">الصف الاول الثانوي</SelectItem>
+                                                                        <SelectItem value="الصف الثاني الثانوي">الصف الثاني الثانوي</SelectItem>
+                                                                        <SelectItem value="الصف الثالث الثانوي">الصف الثالث الثانوي</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                            {editData.grade !== "الصف الثالث الثانوي" && (
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="semester" className="text-right">
+                                                                        {t("auth.semester")}
+                                                                    </Label>
+                                                                    <Select
+                                                                        value={editData.semester || ""}
+                                                                        onValueChange={(value) => setEditData({...editData, semester: value || null})}
+                                                                    >
+                                                                        <SelectTrigger className="col-span-3">
+                                                                            <SelectValue placeholder={t("auth.semesterPlaceholder")} />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="الترم الاول">الترم الاول</SelectItem>
+                                                                            <SelectItem value="الترم الثاني">الترم الثاني</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </div>
+                                                            )}
+                                                            {editData.grade === "الصف الثالث الثانوي" && (
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="semester" className="text-right">
+                                                                        {t("auth.semester")}
+                                                                    </Label>
+                                                                    <Input
+                                                                        id="semester"
+                                                                        value=""
+                                                                        disabled
+                                                                        className="col-span-3"
+                                                                        placeholder="غير متاح للصف الثالث الثانوي"
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                            <div className="grid grid-cols-4 items-center gap-4">
+                                                                <Label htmlFor="subject" className="text-right">
+                                                                    {t("auth.subject")}
+                                                                </Label>
+                                                                <Select
+                                                                    value={editData.subject || ""}
+                                                                    onValueChange={(value) => setEditData({...editData, subject: value || null})}
+                                                                    disabled={!editData.grade}
+                                                                >
+                                                                    <SelectTrigger className="col-span-3">
+                                                                        <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {editData.grade === "الصف الاول الثانوي" ? (
+                                                                            <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                                        ) : editData.grade === "الصف الثاني الثانوي" || editData.grade === "الصف الثالث الثانوي" ? (
+                                                                            <>
+                                                                                <SelectItem value="كيمياء">كيمياء</SelectItem>
+                                                                                <SelectItem value="فيزياء">فيزياء</SelectItem>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <SelectItem value="كيمياء">كيمياء</SelectItem>
+                                                                                <SelectItem value="فيزياء">فيزياء</SelectItem>
+                                                                                <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                                            </>
+                                                                        )}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                            <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="role" className="text-right">
                                                                     {t("teacher.users.table.role")}
                                                                 </Label>
@@ -758,6 +883,95 @@ const UsersPage = () => {
                                                                             />
                                                                         </div>
                                                                         <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="grade" className="text-right">
+                                                                                {t("auth.grade")}
+                                                                            </Label>
+                                                                            <Select
+                                                                                value={editData.grade || ""}
+                                                                                onValueChange={(value) => {
+                                                                        const newGrade = value || null;
+                                                                        setEditData({
+                                                                            ...editData, 
+                                                                            grade: newGrade, 
+                                                                            subject: null,
+                                                                            semester: newGrade === "الصف الثالث الثانوي" ? null : editData.semester
+                                                                        });
+                                                                    }}
+                                                                            >
+                                                                                <SelectTrigger className="col-span-3">
+                                                                                    <SelectValue placeholder={t("auth.gradePlaceholder")} />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                    <SelectItem value="الصف الاول الثانوي">الصف الاول الثانوي</SelectItem>
+                                                                                    <SelectItem value="الصف الثاني الثانوي">الصف الثاني الثانوي</SelectItem>
+                                                                                    <SelectItem value="الصف الثالث الثانوي">الصف الثالث الثانوي</SelectItem>
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                        </div>
+                                                                        {editData.grade !== "الصف الثالث الثانوي" && (
+                                                                            <div className="grid grid-cols-4 items-center gap-4">
+                                                                                <Label htmlFor="semester" className="text-right">
+                                                                                    {t("auth.semester")}
+                                                                                </Label>
+                                                                                <Select
+                                                                                    value={editData.semester || ""}
+                                                                                    onValueChange={(value) => setEditData({...editData, semester: value || null})}
+                                                                                >
+                                                                                    <SelectTrigger className="col-span-3">
+                                                                                        <SelectValue placeholder={t("auth.semesterPlaceholder")} />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        <SelectItem value="الترم الاول">الترم الاول</SelectItem>
+                                                                                        <SelectItem value="الترم الثاني">الترم الثاني</SelectItem>
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            </div>
+                                                                        )}
+                                                                        {editData.grade === "الصف الثالث الثانوي" && (
+                                                                            <div className="grid grid-cols-4 items-center gap-4">
+                                                                                <Label htmlFor="semester" className="text-right">
+                                                                                    {t("auth.semester")}
+                                                                                </Label>
+                                                                                <Input
+                                                                                    id="semester"
+                                                                                    value=""
+                                                                                    disabled
+                                                                                    className="col-span-3"
+                                                                                    placeholder="غير متاح للصف الثالث الثانوي"
+                                                                                />
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="subject" className="text-right">
+                                                                                {t("auth.subject")}
+                                                                            </Label>
+                                                                            <Select
+                                                                                value={editData.subject || ""}
+                                                                                onValueChange={(value) => setEditData({...editData, subject: value || null})}
+                                                                                disabled={!editData.grade}
+                                                                            >
+                                                                                <SelectTrigger className="col-span-3">
+                                                                                    <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                    {editData.grade === "الصف الاول الثانوي" ? (
+                                                                                        <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                                                    ) : editData.grade === "الصف الثاني الثانوي" || editData.grade === "الصف الثالث الثانوي" ? (
+                                                                                        <>
+                                                                                            <SelectItem value="كيمياء">كيمياء</SelectItem>
+                                                                                            <SelectItem value="فيزياء">فيزياء</SelectItem>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <SelectItem value="كيمياء">كيمياء</SelectItem>
+                                                                                            <SelectItem value="فيزياء">فيزياء</SelectItem>
+                                                                                            <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                                                        </>
+                                                                                    )}
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                        </div>
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
                                                                             <Label htmlFor="role" className="text-right">
                                                                                 {t("teacher.users.table.role")}
                                                                             </Label>
@@ -964,6 +1178,95 @@ const UsersPage = () => {
                                                                                 onChange={(e) => setEditData({...editData, parentPhoneNumber: e.target.value})}
                                                                                 className="col-span-3"
                                                                             />
+                                                                        </div>
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="grade" className="text-right">
+                                                                                {t("auth.grade")}
+                                                                            </Label>
+                                                                            <Select
+                                                                                value={editData.grade || ""}
+                                                                                onValueChange={(value) => {
+                                                                        const newGrade = value || null;
+                                                                        setEditData({
+                                                                            ...editData, 
+                                                                            grade: newGrade, 
+                                                                            subject: null,
+                                                                            semester: newGrade === "الصف الثالث الثانوي" ? null : editData.semester
+                                                                        });
+                                                                    }}
+                                                                            >
+                                                                                <SelectTrigger className="col-span-3">
+                                                                                    <SelectValue placeholder={t("auth.gradePlaceholder")} />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                    <SelectItem value="الصف الاول الثانوي">الصف الاول الثانوي</SelectItem>
+                                                                                    <SelectItem value="الصف الثاني الثانوي">الصف الثاني الثانوي</SelectItem>
+                                                                                    <SelectItem value="الصف الثالث الثانوي">الصف الثالث الثانوي</SelectItem>
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                        </div>
+                                                                        {editData.grade !== "الصف الثالث الثانوي" && (
+                                                                            <div className="grid grid-cols-4 items-center gap-4">
+                                                                                <Label htmlFor="semester" className="text-right">
+                                                                                    {t("auth.semester")}
+                                                                                </Label>
+                                                                                <Select
+                                                                                    value={editData.semester || ""}
+                                                                                    onValueChange={(value) => setEditData({...editData, semester: value || null})}
+                                                                                >
+                                                                                    <SelectTrigger className="col-span-3">
+                                                                                        <SelectValue placeholder={t("auth.semesterPlaceholder")} />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        <SelectItem value="الترم الاول">الترم الاول</SelectItem>
+                                                                                        <SelectItem value="الترم الثاني">الترم الثاني</SelectItem>
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            </div>
+                                                                        )}
+                                                                        {editData.grade === "الصف الثالث الثانوي" && (
+                                                                            <div className="grid grid-cols-4 items-center gap-4">
+                                                                                <Label htmlFor="semester" className="text-right">
+                                                                                    {t("auth.semester")}
+                                                                                </Label>
+                                                                                <Input
+                                                                                    id="semester"
+                                                                                    value=""
+                                                                                    disabled
+                                                                                    className="col-span-3"
+                                                                                    placeholder="غير متاح للصف الثالث الثانوي"
+                                                                                />
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                                            <Label htmlFor="subject" className="text-right">
+                                                                                {t("auth.subject")}
+                                                                            </Label>
+                                                                            <Select
+                                                                                value={editData.subject || ""}
+                                                                                onValueChange={(value) => setEditData({...editData, subject: value || null})}
+                                                                                disabled={!editData.grade}
+                                                                            >
+                                                                                <SelectTrigger className="col-span-3">
+                                                                                    <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                    {editData.grade === "الصف الاول الثانوي" ? (
+                                                                                        <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                                                    ) : editData.grade === "الصف الثاني الثانوي" || editData.grade === "الصف الثالث الثانوي" ? (
+                                                                                        <>
+                                                                                            <SelectItem value="كيمياء">كيمياء</SelectItem>
+                                                                                            <SelectItem value="فيزياء">فيزياء</SelectItem>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <SelectItem value="كيمياء">كيمياء</SelectItem>
+                                                                                            <SelectItem value="فيزياء">فيزياء</SelectItem>
+                                                                                            <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                                                        </>
+                                                                                    )}
+                                                                                </SelectContent>
+                                                                            </Select>
                                                                         </div>
                                                                         <div className="grid grid-cols-4 items-center gap-4">
                                                                             <Label htmlFor="role" className="text-right">

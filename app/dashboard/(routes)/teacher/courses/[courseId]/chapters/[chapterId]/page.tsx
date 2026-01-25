@@ -22,7 +22,13 @@ export default async function ChapterPage({
             id: chapterId,
             courseId: courseId
         },
-        include: {
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            isFree: true,
+            isPublished: true,
+            maxViews: true,
             attachments: {
                 orderBy: {
                     position: 'asc',

@@ -13,6 +13,7 @@ import { Search, Eye, Award, TrendingUp, Users, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useLanguage } from "@/lib/contexts/language-context";
+import { isFirstGrade, isSecondGrade, isThirdGrade } from "@/lib/utils/grade-utils";
 
 interface Course {
     id: string;
@@ -149,9 +150,9 @@ const GradesPage = () => {
     });
 
     // Group results by student grade
-    const grade1ResultsAll = filteredResults.filter(result => result.user.grade === "الصف الأول الثانوي");
-    const grade2ResultsAll = filteredResults.filter(result => result.user.grade === "الصف الثاني الثانوي");
-    const grade3ResultsAll = filteredResults.filter(result => result.user.grade === "الصف الثالث الثانوي");
+    const grade1ResultsAll = filteredResults.filter(result => isFirstGrade(result.user.grade));
+    const grade2ResultsAll = filteredResults.filter(result => isSecondGrade(result.user.grade));
+    const grade3ResultsAll = filteredResults.filter(result => isThirdGrade(result.user.grade));
 
     // Apply search filters for each grade table
     const grade1Results = grade1ResultsAll.filter(result => 

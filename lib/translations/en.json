@@ -942,7 +942,13 @@
       "uploadSuccess": "Video uploaded successfully",
       "youtubeSuccess": "YouTube video added successfully",
       "youtubeError": "Please enter a YouTube link",
-      "uploadError": "An error occurred"
+      "uploadError": "An error occurred",
+      "maxViews": {
+        "title": "Maximum Views Allowed",
+        "label": "Maximum Views Allowed",
+        "hint": "Number of times a student can view this chapter",
+        "views": "times"
+      }
     }
   },
   "admin": {
