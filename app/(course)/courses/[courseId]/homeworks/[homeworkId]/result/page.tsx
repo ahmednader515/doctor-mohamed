@@ -19,7 +19,7 @@ interface HomeworkAnswer {
         text: string;
         type: string;
         points: number;
-        options?: string | null;
+        options?: string | string[] | null;
         imageUrl?: string | null;
     };
 }
@@ -62,14 +62,27 @@ export default function HomeworkResultPage({
                 const data = await response.json();
                 const parsedData = {
                     ...data,
-                    answers: data.answers.map((answer: any) => ({
-                        ...answer,
-                        question: {
-                            ...answer.question,
-                            options: answer.question.options ? parseQuizOptions(answer.question.options) : null
+                    answers: data.answers.map((answer: any) => {
+                        // Parse options if they exist and are not already an array
+                        let parsedOptions = answer.question.options;
+                        if (parsedOptions && !Array.isArray(parsedOptions)) {
+                            if (typeof parsedOptions === 'string') {
+                                parsedOptions = parseQuizOptions(parsedOptions);
+                            } else {
+                                parsedOptions = null;
+                            }
                         }
-                    }))
+                        
+                        return {
+                            ...answer,
+                            question: {
+                                ...answer.question,
+                                options: parsedOptions
+                            }
+                        };
+                    })
                 };
+                console.log("Fetched result data:", parsedData);
                 setResult(parsedData);
             } else {
                 // If no result endpoint, try to get from sessionStorage (stored after submission)
@@ -97,7 +110,17 @@ export default function HomeworkResultPage({
             const storedResult = sessionStorage.getItem(`homework-result-${homeworkId}`);
             if (storedResult) {
                 const data = JSON.parse(storedResult);
-                setResult(data);
+                const parsedData = {
+                    ...data,
+                    answers: data.answers.map((answer: any) => ({
+                        ...answer,
+                        question: {
+                            ...answer.question,
+                            options: answer.question.options ? parseQuizOptions(answer.question.options) : null
+                        }
+                    }))
+                };
+                setResult(parsedData);
             }
         } finally {
             setLoading(false);
@@ -136,44 +159,80 @@ export default function HomeworkResultPage({
     };
 
     const renderQuestionChoices = (answer: HomeworkAnswer) => {
-        if (answer.question.type === "MULTIPLE_CHOICE" && answer.question.options && Array.isArray(answer.question.options)) {
-            return (
+        // Only render for multiple choice questions
+        if (answer.question.type !== "MULTIPLE_CHOICE") {
+            return null;
+        }
+        
+        // Get options - they should already be parsed from fetchResult
+        let options = answer.question.options;
+        
+        // If options is null, undefined, or empty, return null
+        if (!options) {
+            return null;
+        }
+        
+        // If it's already an array, use it directly
+        if (!Array.isArray(options)) {
+            // If it's a string, try to parse it
+            if (typeof options === 'string') {
+                options = parseQuizOptions(options);
+            } else {
+                return null;
+            }
+        }
+        
+        // Final check - must be a non-empty array
+        if (!Array.isArray(options) || options.length === 0) {
+            return null;
+        }
+        
+        // Render the choices
+        return (
                 <div className="space-y-2 mt-3">
                     <h5 className="font-medium text-sm">الخيارات:</h5>
                     <div className="space-y-1">
-                        {answer.question.options.map((option: string, optionIndex: number) => (
-                            <div
-                                key={optionIndex}
-                                className={`p-2 rounded border ${
-                                    option === answer.studentAnswer
-                                        ? answer.isCorrect
+                        {options.map((option: string, optionIndex: number) => {
+                            // Normalize strings for comparison (trim whitespace)
+                            const normalizedOption = option.trim();
+                            const normalizedStudentAnswer = answer.studentAnswer.trim();
+                            const normalizedCorrectAnswer = answer.correctAnswer.trim();
+                            
+                            const isStudentAnswer = normalizedOption === normalizedStudentAnswer;
+                            const isCorrectAnswer = normalizedOption === normalizedCorrectAnswer;
+                            
+                            return (
+                                <div
+                                    key={optionIndex}
+                                    className={`p-2 rounded border ${
+                                        isStudentAnswer
+                                            ? answer.isCorrect
+                                                ? "bg-green-50 border-green-200"
+                                                : "bg-red-50 border-red-200"
+                                            : isCorrectAnswer
                                             ? "bg-green-50 border-green-200"
-                                            : "bg-red-50 border-red-200"
-                                        : option === answer.correctAnswer
-                                        ? "bg-green-50 border-green-200"
-                                        : "bg-gray-50"
-                                }`}
-                            >
-                                <span className="text-sm">
-                                    {optionIndex + 1}. {option}
-                                    {option === answer.studentAnswer && (
-                                        <Badge variant={answer.isCorrect ? "default" : "destructive"} className="mr-2">
-                                            إجابتك
-                                        </Badge>
-                                    )}
-                                    {option === answer.correctAnswer && option !== answer.studentAnswer && (
-                                        <Badge variant="default" className="mr-2">
-                                            الإجابة الصحيحة
-                                        </Badge>
-                                    )}
-                                </span>
-                            </div>
-                        ))}
+                                            : "bg-gray-50"
+                                    }`}
+                                >
+                                    <span className="text-sm">
+                                        {optionIndex + 1}. {option}
+                                        {isStudentAnswer && (
+                                            <Badge variant={answer.isCorrect ? "default" : "destructive"} className="mr-2">
+                                                إجابتك
+                                            </Badge>
+                                        )}
+                                        {isCorrectAnswer && !isStudentAnswer && (
+                                            <Badge variant="default" className="mr-2">
+                                                الإجابة الصحيحة
+                                            </Badge>
+                                        )}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             );
-        }
-        return null;
     };
 
     if (loading) {

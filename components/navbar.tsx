@@ -26,9 +26,9 @@ export const Navbar = () => {
             <Image
               src="/logo.png"
               alt="Logo"
-              width={100}
-              height={100}
-              className="w-[120px] h-[120px] md:w-[100px] md:h-[100px] object-contain ml-2"
+              width={80}
+              height={80}
+              className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain ml-2"
               unoptimized
             />
           </Link>

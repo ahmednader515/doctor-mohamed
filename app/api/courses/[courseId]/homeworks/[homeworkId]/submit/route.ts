@@ -166,7 +166,7 @@ export async function POST(
                     text: answer.question.text,
                     type: answer.question.type,
                     points: answer.question.points,
-                    options: answer.question.options,
+                    options: answer.question.options ? parseQuizOptions(answer.question.options) : null,
                     imageUrl: answer.question.imageUrl,
                     position: answer.question.position
                 }
