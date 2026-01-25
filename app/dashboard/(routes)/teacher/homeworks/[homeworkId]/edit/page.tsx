@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { UploadDropzone } from "@/lib/uploadthing";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface Course {
     id: string;
@@ -28,6 +29,15 @@ interface Chapter {
 }
 
 interface Quiz {
+    id: string;
+    title: string;
+    description: string;
+    courseId: string;
+    position: number;
+    isPublished: boolean;
+}
+
+interface Homework {
     id: string;
     title: string;
     description: string;
@@ -57,41 +67,42 @@ interface Question {
 interface CourseItem {
     id: string;
     title: string;
-    type: "chapter" | "quiz";
+    type: "chapter" | "quiz" | "homework";
     position: number;
     isPublished: boolean;
 }
 
-const EditQuizPage = () => {
+const EditHomeworkPage = () => {
+    const { t } = useLanguage();
     const router = useRouter();
     const params = useParams();
-    const quizId = params.quizId as string;
+    const homeworkId = params.homeworkId as string;
     const pathname = usePathname();
     const dashboardPath = pathname.includes("/dashboard/admin/")
-        ? "/dashboard/admin/quizzes"
-        : "/dashboard/teacher/quizzes";
+        ? "/dashboard/admin/homeworks"
+        : "/dashboard/teacher/homeworks";
     
     const [courses, setCourses] = useState<Course[]>([]);
     const [selectedCourse, setSelectedCourse] = useState<string>("");
-    const [quizTitle, setQuizTitle] = useState("");
-    const [quizDescription, setQuizDescription] = useState("");
-    const [quizTimer, setQuizTimer] = useState<number | null>(null);
-    const [quizMaxAttempts, setQuizMaxAttempts] = useState<number>(1);
+    const [homeworkTitle, setHomeworkTitle] = useState("");
+    const [homeworkDescription, setHomeworkDescription] = useState("");
+    const [homeworkTimer, setHomeworkTimer] = useState<number | null>(null);
+    const [homeworkMaxAttempts, setHomeworkMaxAttempts] = useState<number>(1);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [selectedPosition, setSelectedPosition] = useState<number>(1);
     const [courseItems, setCourseItems] = useState<CourseItem[]>([]);
     const [chapters, setChapters] = useState<Chapter[]>([]);
     const [isLoadingCourseItems, setIsLoadingCourseItems] = useState(false);
-    const [isUpdatingQuiz, setIsUpdatingQuiz] = useState(false);
-    const [isLoadingQuiz, setIsLoadingQuiz] = useState(true);
+    const [isUpdatingHomework, setIsUpdatingHomework] = useState(false);
+    const [isLoadingHomework, setIsLoadingHomework] = useState(true);
     const [uploadingImages, setUploadingImages] = useState<{ [key: string]: boolean }>({});
     const [listeningQuestionId, setListeningQuestionId] = useState<string | null>(null);
     const recognitionRef = useRef<any>(null);
 
     useEffect(() => {
         fetchCourses();
-        fetchQuiz();
-    }, [quizId]);
+        fetchHomework();
+    }, [homeworkId]);
 
     useEffect(() => {
         return () => {
@@ -114,19 +125,19 @@ const EditQuizPage = () => {
         }
     };
 
-    const fetchQuiz = async () => {
+    const fetchHomework = async () => {
         try {
-            const response = await fetch(`/api/teacher/quizzes/${quizId}`);
+            const response = await fetch(`/api/teacher/homeworks/${homeworkId}`);
             if (response.ok) {
-                const quiz: Quiz = await response.json();
-                setQuizTitle(quiz.title);
-                setQuizDescription(quiz.description);
-                setQuizTimer(quiz.timer || null);
-                setQuizMaxAttempts(quiz.maxAttempts || 1);
-                setSelectedCourse(quiz.courseId);
+                const homework: Homework = await response.json();
+                setHomeworkTitle(homework.title);
+                setHomeworkDescription(homework.description);
+                setHomeworkTimer(homework.timer || null);
+                setHomeworkMaxAttempts(homework.maxAttempts || 1);
+                setSelectedCourse(homework.courseId);
                 
                 // Convert stored string correctAnswer values back to indices for multiple choice questions
-                const processedQuestions = quiz.questions.map(question => {
+                const processedQuestions = homework.questions.map(question => {
                     if (question.type === "MULTIPLE_CHOICE" && question.options) {
                         const validOptions = question.options.filter(option => option.trim() !== "");
                         const correctAnswerIndex = validOptions.findIndex(option => option === question.correctAnswer);
@@ -139,18 +150,18 @@ const EditQuizPage = () => {
                 });
                 
                 setQuestions(processedQuestions);
-                setSelectedPosition(quiz.position);
-                await fetchCourseItems(quiz.courseId);
+                setSelectedPosition(homework.position);
+                await fetchCourseItems(homework.courseId);
             } else {
-                toast.error("حدث خطأ أثناء تحميل الامتحان");
+                toast.error(t("teacher.homeworks.edit.errors.loadError") || "حدث خطأ أثناء تحميل الواجب");
                 router.push(dashboardPath);
             }
         } catch (error) {
-            console.error("Error fetching quiz:", error);
-            toast.error("حدث خطأ أثناء تحميل الامتحان");
+            console.error("Error fetching homework:", error);
+            toast.error(t("teacher.homeworks.edit.errors.loadError") || "حدث خطأ أثناء تحميل الواجب");
             router.push(dashboardPath);
         } finally {
-            setIsLoadingQuiz(false);
+            setIsLoadingHomework(false);
         }
     };
 
@@ -160,15 +171,17 @@ const EditQuizPage = () => {
             // Clear existing items first
             setCourseItems([]);
             
-            const [chaptersResponse, quizzesResponse] = await Promise.all([
+            const [chaptersResponse, quizzesResponse, homeworksResponse] = await Promise.all([
                 fetch(`/api/courses/${courseId}/chapters`),
-                fetch(`/api/courses/${courseId}/quizzes`)
+                fetch(`/api/courses/${courseId}/quizzes`),
+                fetch(`/api/courses/${courseId}/homeworks`)
             ]);
             
             const chaptersData = chaptersResponse.ok ? await chaptersResponse.json() : [];
             const quizzesData = quizzesResponse.ok ? await quizzesResponse.json() : [];
+            const homeworksData = homeworksResponse.ok ? await homeworksResponse.json() : [];
             
-            // Combine chapters and existing quizzes for display
+            // Combine chapters, quizzes, and existing homeworks for display
             const items: CourseItem[] = [
                 ...chaptersData.map((chapter: Chapter) => ({
                     id: chapter.id,
@@ -183,6 +196,13 @@ const EditQuizPage = () => {
                     type: "quiz" as const,
                     position: quiz.position,
                     isPublished: quiz.isPublished
+                })),
+                ...homeworksData.map((homework: Homework) => ({
+                    id: homework.id,
+                    title: homework.title,
+                    type: "homework" as const,
+                    position: homework.position,
+                    isPublished: homework.isPublished
                 }))
             ];
             
@@ -192,10 +212,10 @@ const EditQuizPage = () => {
             setCourseItems(items);
             setChapters(chaptersData);
             
-            // Update the selected position to reflect the actual position of the quiz in the list
-            const quizInList = items.find(item => item.id === quizId);
-            if (quizInList) {
-                setSelectedPosition(quizInList.position);
+            // Update the selected position to reflect the actual position of the homework in the list
+            const homeworkInList = items.find(item => item.id === homeworkId);
+            if (homeworkInList) {
+                setSelectedPosition(homeworkInList.position);
             }
         } catch (error) {
             console.error("Error fetching course items:", error);
@@ -231,7 +251,7 @@ const EditQuizPage = () => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-            toast.error("المتصفح لا يدعم الإملاء الصوتي");
+            toast.error(t("teacher.homeworks.create.errors.speechNotSupported") || "المتصفح لا يدعم الإملاء الصوتي");
             return;
         }
 
@@ -272,7 +292,7 @@ const EditQuizPage = () => {
 
             recognition.onerror = (event: any) => {
                 console.error("[SPEECH_RECOGNITION_ERROR]", event.error);
-                toast.error("تعذر التعرف على الصوت");
+                toast.error(t("teacher.homeworks.create.errors.speechRecognitionError") || "تعذر التعرف على الصوت");
             };
 
             recognition.onend = () => {
@@ -284,15 +304,15 @@ const EditQuizPage = () => {
             recognition.start();
         } catch (error) {
             console.error("[SPEECH_RECOGNITION]", error);
-            toast.error("تعذر بدء التسجيل الصوتي");
+            toast.error(t("teacher.homeworks.create.errors.speechStartError") || "تعذر بدء التسجيل الصوتي");
             stopListening();
         }
     };
 
-    const handleUpdateQuiz = async () => {
+    const handleUpdateHomework = async () => {
         stopListening();
-        if (!selectedCourse || !quizTitle.trim()) {
-            toast.error("يرجى إدخال جميع البيانات المطلوبة");
+        if (!selectedCourse || !homeworkTitle.trim()) {
+            toast.error(t("teacher.homeworks.create.errors.requiredFields") || "يرجى إدخال جميع البيانات المطلوبة");
             return;
         }
 
@@ -304,7 +324,7 @@ const EditQuizPage = () => {
             
             // Validate question text - optional if image is uploaded
             if ((!question.text || question.text.trim() === "") && (!question.imageUrl || question.imageUrl.trim() === "")) {
-                validationErrors.push(`السؤال ${i + 1}: نص السؤال مطلوب`);
+                validationErrors.push(t("teacher.homeworks.create.errors.questionTextOrImageRequired", { number: i + 1 }) || `السؤال ${i + 1}: نص السؤال أو الصورة مطلوبة`);
                 continue;
             }
 
@@ -312,30 +332,30 @@ const EditQuizPage = () => {
             if (question.type === "MULTIPLE_CHOICE") {
                 const validOptions = question.options?.filter(option => option.trim() !== "") || [];
                 if (validOptions.length === 0) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب إضافة خيار واحد على الأقل`);
+                    validationErrors.push(t("teacher.homeworks.create.errors.questionOptionsRequired", { number: i + 1 }) || `السؤال ${i + 1}: يجب إضافة خيار واحد على الأقل`);
                     continue;
                 }
                 
                 // Check if correct answer index is valid
                 if (typeof question.correctAnswer !== 'number' || question.correctAnswer < 0 || question.correctAnswer >= validOptions.length) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
+                    validationErrors.push(t("teacher.homeworks.create.errors.questionCorrectAnswerRequired", { number: i + 1 }) || `السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
                     continue;
                 }
             } else if (question.type === "TRUE_FALSE") {
                 if (!question.correctAnswer || (question.correctAnswer !== "true" && question.correctAnswer !== "false")) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
+                    validationErrors.push(t("teacher.homeworks.create.errors.questionCorrectAnswerRequired", { number: i + 1 }) || `السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
                     continue;
                 }
             } else if (question.type === "SHORT_ANSWER") {
                 if (!question.correctAnswer || question.correctAnswer.toString().trim() === "") {
-                    validationErrors.push(`السؤال ${i + 1}: الإجابة الصحيحة مطلوبة`);
+                    validationErrors.push(t("teacher.homeworks.create.errors.questionCorrectAnswerTextRequired", { number: i + 1 }) || `السؤال ${i + 1}: الإجابة الصحيحة مطلوبة`);
                     continue;
                 }
             }
 
             // Check if points are valid
             if (question.points <= 0) {
-                validationErrors.push(`السؤال ${i + 1}: الدرجات يجب أن تكون أكبر من صفر`);
+                validationErrors.push(t("teacher.homeworks.create.errors.questionPointsRequired", { number: i + 1 }) || `السؤال ${i + 1}: الدرجات يجب أن تكون أكبر من صفر`);
                 continue;
             }
         }
@@ -347,7 +367,7 @@ const EditQuizPage = () => {
 
         // Additional validation: ensure no questions are empty
         if (questions.length === 0) {
-            toast.error("يجب إضافة سؤال واحد على الأقل");
+            toast.error(t("teacher.homeworks.create.errors.atLeastOneQuestion") || "يجب إضافة سؤال واحد على الأقل");
             return;
         }
 
@@ -364,36 +384,36 @@ const EditQuizPage = () => {
             return question;
         });
 
-        setIsUpdatingQuiz(true);
+        setIsUpdatingHomework(true);
         try {
-            const response = await fetch(`/api/teacher/quizzes/${quizId}`, {
+            const response = await fetch(`/api/teacher/homeworks/${homeworkId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    title: quizTitle,
-                    description: quizDescription,
+                    title: homeworkTitle,
+                    description: homeworkDescription,
                     courseId: selectedCourse,
                     questions: cleanedQuestions,
                     position: selectedPosition,
-                    timer: quizTimer,
-                    maxAttempts: quizMaxAttempts,
+                    timer: homeworkTimer,
+                    maxAttempts: homeworkMaxAttempts,
                 }),
             });
 
             if (response.ok) {
-                toast.success("تم تحديث الامتحان بنجاح");
+                toast.success(t("teacher.homeworks.edit.success") || "تم تحديث الواجب بنجاح");
                 router.push(dashboardPath);
             } else {
                 const error = await response.json();
-                toast.error(error.message || "حدث خطأ أثناء تحديث الامتحان");
+                toast.error(error.message || t("teacher.homeworks.edit.errors.updateError") || "حدث خطأ أثناء تحديث الواجب");
             }
         } catch (error) {
-            console.error("Error updating quiz:", error);
-            toast.error("حدث خطأ أثناء تحديث الامتحان");
+            console.error("Error updating homework:", error);
+            toast.error(t("teacher.homeworks.edit.errors.updateError") || "حدث خطأ أثناء تحديث الواجب");
         } finally {
-            setIsUpdatingQuiz(false);
+            setIsUpdatingHomework(false);
         }
     };
 
@@ -426,11 +446,11 @@ const EditQuizPage = () => {
     const handleDragEnd = async (result: any) => {
         if (!result.destination) return;
 
-        // Handle dragging the quiz being edited
-        if (result.draggableId === quizId) {
-            // Calculate the position for the quiz based on where it was dropped
-            const newQuizPosition = result.destination.index + 1;
-            setSelectedPosition(newQuizPosition);
+        // Handle dragging the homework being edited
+        if (result.draggableId === homeworkId) {
+            // Calculate the position for the homework based on where it was dropped
+            const newHomeworkPosition = result.destination.index + 1;
+            setSelectedPosition(newHomeworkPosition);
             
             // Reorder the items array to reflect the new position
             const reorderedItems = Array.from(courseItems);
@@ -459,23 +479,23 @@ const EditQuizPage = () => {
                 });
 
                 if (response.ok) {
-                    toast.success("تم ترتيب الامتحان بنجاح");
+                    toast.success(t("teacher.homeworks.edit.positionSuccess") || "تم ترتيب الواجب بنجاح");
                 } else {
-                    toast.error("حدث خطأ أثناء ترتيب الامتحان");
+                    toast.error(t("teacher.homeworks.edit.positionError") || "حدث خطأ أثناء ترتيب الواجب");
                 }
             } catch (error) {
-                console.error("Error reordering quiz:", error);
-                toast.error("حدث خطأ أثناء ترتيب الامتحان");
+                console.error("Error reordering homework:", error);
+                toast.error(t("teacher.homeworks.edit.positionError") || "حدث خطأ أثناء ترتيب الواجب");
             }
         }
         // For other items, we don't want to reorder them, so we ignore the drag
         // The drag and drop library will handle the visual feedback, but we don't update state
     };
 
-    if (isLoadingQuiz) {
+    if (isLoadingHomework) {
         return (
             <div className="p-6">
-                <div className="text-center">جاري التحميل...</div>
+                <div className="text-center">{t("common.loading") || "جاري التحميل..."}</div>
             </div>
         );
     }
@@ -484,28 +504,28 @@ const EditQuizPage = () => {
         <div className="p-4 md:p-6 space-y-4 md:space-y-6 overflow-x-hidden">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-                    تعديل الامتحان
+                    {t("teacher.homeworks.edit.title") || "تعديل الواجب"}
                 </h1>
                 <Button variant="outline" onClick={() => router.push(dashboardPath)} className="w-full sm:w-auto">
-                    العودة إلى الامتحانات
+                    {t("teacher.homeworks.edit.backToHomeworks") || "العودة إلى الواجبات"}
                 </Button>
             </div>
 
             <div className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>اختر الكورس</Label>
+                        <Label>{t("teacher.homeworks.create.selectCourse") || "اختر الكورس"}</Label>
                         <Select value={selectedCourse} onValueChange={(value) => {
                             setSelectedCourse(value);
                             // Clear previous data immediately
                             setCourseItems([]);
-                            // Don't reset position when changing course - keep the quiz's current position
+                            // Don't reset position when changing course - keep the homework's current position
                             if (value) {
                                 fetchCourseItems(value);
                             }
                         }}>
                             <SelectTrigger>
-                                <SelectValue placeholder="اختر كورس..." />
+                                <SelectValue placeholder={t("teacher.homeworks.create.selectCoursePlaceholder") || "اختر كورس..."} />
                             </SelectTrigger>
                             <SelectContent>
                                 {courses.map((course) => (
@@ -517,11 +537,11 @@ const EditQuizPage = () => {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label>عنوان الامتحان</Label>
+                        <Label>{t("teacher.homeworks.create.homeworkTitle") || "عنوان الواجب"}</Label>
                         <Input
-                            value={quizTitle}
-                            onChange={(e) => setQuizTitle(e.target.value)}
-                            placeholder="أدخل عنوان الامتحان"
+                            value={homeworkTitle}
+                            onChange={(e) => setHomeworkTitle(e.target.value)}
+                            placeholder={t("teacher.homeworks.create.homeworkTitlePlaceholder") || "أدخل عنوان الواجب"}
                         />
                     </div>
                 </div>
@@ -529,18 +549,18 @@ const EditQuizPage = () => {
                 {selectedCourse && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>ترتيب الامتحان في الكورس</CardTitle>
+                            <CardTitle>{t("teacher.homeworks.create.position.title") || "ترتيب الواجب في الكورس"}</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                اسحب الامتحان إلى الموقع المطلوب بين الدروس والامتحانات الموجودة
+                                {t("teacher.homeworks.create.position.description") || "اسحب الواجب إلى الموقع المطلوب بين الدروس والامتحانات والواجبات الموجودة"}
                             </p>
                             <p className="text-sm text-blue-600">
-                                الموقع المحدد: {selectedPosition}
+                                {t("teacher.homeworks.create.position.selectedPosition", { position: selectedPosition }) || `الموقع المحدد: ${selectedPosition}`}
                             </p>
                         </CardHeader>
                         <CardContent>
                             {isLoadingCourseItems ? (
                                 <div className="text-center py-8">
-                                    <div className="text-muted-foreground">جاري تحميل محتوى الكورس...</div>
+                                    <div className="text-muted-foreground">{t("teacher.homeworks.create.position.loading") || "جاري تحميل محتوى الكورس..."}</div>
                                 </div>
                             ) : courseItems.length > 0 ? (
                                 <DragDropContext onDragEnd={handleDragEnd}>
@@ -559,23 +579,25 @@ const EditQuizPage = () => {
                                                                 {...provided.draggableProps}
                                                                 className={`p-3 border rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 w-full ${
                                                                     snapshot.isDragging ? "bg-blue-50" : "bg-white"
-                                                                } ${item.id === quizId ? "border-2 border-dashed border-blue-300 bg-blue-50" : ""}`}
+                                                                } ${item.id === homeworkId ? "border-2 border-dashed border-blue-300 bg-blue-50" : ""}`}
                                                             >
                                                                 <div className="flex items-start sm:items-center space-x-3 min-w-0 flex-1 w-full sm:w-auto">
-                                                                    <div {...provided.dragHandleProps} className={`flex-shrink-0 ${item.id === quizId ? "cursor-grab active:cursor-grabbing" : ""}`}>
-                                                                        <GripVertical className={`h-4 w-4 ${item.id === quizId ? "text-blue-600" : "text-gray-300 cursor-not-allowed"}`} />
+                                                                    <div {...provided.dragHandleProps} className={`flex-shrink-0 ${item.id === homeworkId ? "cursor-grab active:cursor-grabbing" : ""}`}>
+                                                                        <GripVertical className={`h-4 w-4 ${item.id === homeworkId ? "text-blue-600" : "text-gray-300 cursor-not-allowed"}`} />
                                                                     </div>
                                                                     <div className="min-w-0 flex-1 w-full">
-                                                                        <div className={`font-medium break-words overflow-wrap-anywhere ${item.id === quizId ? "text-blue-800" : ""}`}>
+                                                                        <div className={`font-medium break-words overflow-wrap-anywhere ${item.id === homeworkId ? "text-blue-800" : ""}`}>
                                                                             {item.title}
                                                                         </div>
-                                                                        <div className={`text-sm ${item.id === quizId ? "text-blue-600" : "text-muted-foreground"}`}>
-                                                                            {item.type === "chapter" ? "درس" : "امتحان"}
+                                                                        <div className={`text-sm ${item.id === homeworkId ? "text-blue-600" : "text-muted-foreground"}`}>
+                                                                            {item.type === "chapter" ? t("teacher.homeworks.create.position.chapter") || "درس" : 
+                                             item.type === "quiz" ? t("teacher.homeworks.create.position.quiz") || "امتحان" : 
+                                             t("teacher.homeworks.create.position.homework") || "واجب"}
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <Badge variant={item.id === quizId ? "outline" : (item.isPublished ? "default" : "secondary")} className={`flex-shrink-0 ${item.id === quizId ? "border-blue-300 text-blue-700" : ""}`}>
-                                                                    {item.id === quizId ? "قيد التعديل" : (item.isPublished ? "منشور" : "مسودة")}
+                                                                <Badge variant={item.id === homeworkId ? "outline" : (item.isPublished ? "default" : "secondary")} className={`flex-shrink-0 ${item.id === homeworkId ? "border-blue-300 text-blue-700" : ""}`}>
+                                                                    {item.id === homeworkId ? t("teacher.homeworks.edit.editing") || "قيد التعديل" : (item.isPublished ? t("teacher.homeworks.status.published") || "منشور" : t("teacher.homeworks.status.draft") || "مسودة")}
                                                                 </Badge>
                                                             </div>
                                                         )}
@@ -590,18 +612,18 @@ const EditQuizPage = () => {
                             ) : (
                                 <div className="text-center py-8">
                                     <p className="text-muted-foreground mb-4">
-                                        لا توجد دروس أو امتحانات في هذه الكورس. سيتم إضافة الامتحان في الموقع الأول.
+                                        {t("teacher.homeworks.create.position.empty") || "لا توجد دروس أو امتحانات أو واجبات في هذه الكورس. سيتم إضافة الواجب في الموقع الأول."}
                                     </p>
                                     <div className="p-3 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
                                         <div className="flex items-center justify-center space-x-3">
                                             <div>
                                                 <div className="font-medium text-blue-800">
-                                                    {quizTitle || "امتحان جديد"}
+                                                    {homeworkTitle || t("teacher.homeworks.create.newHomework") || "واجب جديد"}
                                                 </div>
-                                                <div className="text-sm text-blue-600">امتحان</div>
+                                                <div className="text-sm text-blue-600">{t("teacher.homeworks.create.position.homework") || "واجب"}</div>
                                             </div>
                                             <Badge variant="outline" className="border-blue-300 text-blue-700">
-                                                قيد التعديل
+                                                {t("teacher.homeworks.edit.editing") || "قيد التعديل"}
                                             </Badge>
                                         </div>
                                     </div>
@@ -612,47 +634,47 @@ const EditQuizPage = () => {
                 )}
 
                 <div className="space-y-2">
-                    <Label>وصف الامتحان</Label>
+                    <Label>{t("teacher.homeworks.create.description") || "وصف الواجب"}</Label>
                     <Textarea
-                        value={quizDescription}
-                        onChange={(e) => setQuizDescription(e.target.value)}
-                        placeholder="أدخل وصف الامتحان"
+                        value={homeworkDescription}
+                        onChange={(e) => setHomeworkDescription(e.target.value)}
+                        placeholder={t("teacher.homeworks.create.descriptionPlaceholder") || "أدخل وصف الواجب"}
                         rows={3}
                     />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>مدة الامتحان (بالدقائق)</Label>
+                        <Label>{t("teacher.homeworks.create.timer.label") || "مدة الواجب (بالدقائق)"}</Label>
                         <Input
                             type="number"
-                            value={quizTimer || ""}
-                            onChange={(e) => setQuizTimer(e.target.value ? parseInt(e.target.value) : null)}
-                            placeholder="اترك فارغاً لعدم تحديد مدة"
+                            value={homeworkTimer || ""}
+                            onChange={(e) => setHomeworkTimer(e.target.value ? parseInt(e.target.value) : null)}
+                            placeholder={t("teacher.homeworks.create.timer.placeholder") || "اترك فارغاً لعدم تحديد مدة"}
                             min="1"
                         />
                         <p className="text-sm text-muted-foreground">
-                            اترك الحقل فارغاً إذا كنت لا تريد تحديد مدة للامتحان
+                            {t("teacher.homeworks.create.timer.hint") || "اترك الحقل فارغاً إذا كنت لا تريد تحديد مدة للواجب"}
                         </p>
                     </div>
                     <div className="space-y-2">
-                        <Label>عدد المحاولات المسموحة</Label>
+                        <Label>{t("teacher.homeworks.create.maxAttempts.label") || "عدد المحاولات المسموحة"}</Label>
                         <Input
                             type="number"
-                            value={quizMaxAttempts}
-                            onChange={(e) => setQuizMaxAttempts(parseInt(e.target.value))}
+                            value={homeworkMaxAttempts}
+                            onChange={(e) => setHomeworkMaxAttempts(parseInt(e.target.value))}
                             min="1"
                             max="10"
                         />
                         <p className="text-sm text-muted-foreground">
-                            عدد المرات التي يمكن للطالب إعادة الامتحان
+                            {t("teacher.homeworks.create.maxAttempts.hint") || "عدد المرات التي يمكن للطالب إعادة الواجب"}
                         </p>
                     </div>
                 </div>
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <Label>الأسئلة</Label>
+                        <Label>{t("teacher.homeworks.create.questions.label") || "الأسئلة"}</Label>
                     </div>
 
                     {questions.map((question, index) => (
@@ -660,8 +682,8 @@ const EditQuizPage = () => {
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <CardTitle className="text-lg">السؤال {index + 1}</CardTitle>
-                                        {(!question.text.trim() || 
+                                        <CardTitle className="text-lg">{t("teacher.homeworks.create.questions.questionNumber", { number: index + 1 }) || `السؤال ${index + 1}`}</CardTitle>
+                                        {((!question.text.trim() && !question.imageUrl) || 
                                             (question.type === "MULTIPLE_CHOICE" && 
                                              (!question.options || question.options.filter(opt => opt.trim() !== "").length === 0)) ||
                                             (question.type === "TRUE_FALSE" && 
@@ -669,7 +691,7 @@ const EditQuizPage = () => {
                                             (question.type === "SHORT_ANSWER" && 
                                              (typeof question.correctAnswer !== 'string' || question.correctAnswer.trim() === ""))) && (
                                             <Badge variant="destructive" className="text-xs">
-                                                غير مكتمل
+                                                {t("teacher.homeworks.create.questions.incomplete") || "غير مكتمل"}
                                             </Badge>
                                         )}
                                     </div>
@@ -687,15 +709,15 @@ const EditQuizPage = () => {
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <Label>
-                                            نص السؤال
+                                            {t("teacher.homeworks.create.questions.questionText") || "نص السؤال"}
                                             {question.imageUrl && (
-                                                <span className="text-muted-foreground text-xs font-normal"> (اختياري)</span>
+                                                <span className="text-muted-foreground text-xs font-normal"> ({t("common.optional") || "اختياري"})</span>
                                             )}
                                         </Label>
                                         <div className="flex items-center gap-2">
                                             {listeningQuestionId === question.id && (
                                                 <span className="text-xs text-blue-600">
-                                                    جاري الاستماع...
+                                                    {t("teacher.homeworks.create.questions.listening") || "جاري الاستماع..."}
                                                 </span>
                                             )}
                                             <Button
@@ -708,7 +730,7 @@ const EditQuizPage = () => {
                                             >
                                                 <Mic className="h-4 w-4" />
                                                 <span className="sr-only">
-                                                    {listeningQuestionId === question.id ? "إيقاف التسجيل الصوتي" : "بدء التسجيل الصوتي"}
+                                                    {listeningQuestionId === question.id ? t("teacher.homeworks.create.questions.stopRecording") || "إيقاف التسجيل الصوتي" : t("teacher.homeworks.create.questions.startRecording") || "بدء التسجيل الصوتي"}
                                                 </span>
                                             </Button>
                                         </div>
@@ -716,12 +738,12 @@ const EditQuizPage = () => {
                                     <Textarea
                                         value={question.text}
                                         onChange={(e) => updateQuestion(index, "text", e.target.value)}
-                                        placeholder="أدخل نص السؤال"
+                                        placeholder={t("teacher.homeworks.create.questions.questionTextPlaceholder") || "أدخل نص السؤال"}
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>صورة السؤال (اختياري)</Label>
+                                    <Label>{t("teacher.homeworks.create.questions.questionImage") || "صورة السؤال (اختياري)"}</Label>
                                     <div className="space-y-2">
                                         {question.imageUrl ? (
                                             <div className="relative">
@@ -747,12 +769,12 @@ const EditQuizPage = () => {
                                                     onClientUploadComplete={(res) => {
                                                         if (res && res[0]) {
                                                             updateQuestion(index, "imageUrl", res[0].url);
-                                                            toast.success("تم رفع الصورة بنجاح");
+                                                            toast.success(t("teacher.homeworks.create.questions.imageUploadSuccess") || "تم رفع الصورة بنجاح");
                                                         }
                                                         setUploadingImages(prev => ({ ...prev, [index]: false }));
                                                     }}
                                                     onUploadError={(error: Error) => {
-                                                        toast.error(`حدث خطأ أثناء رفع الصورة: ${error.message}`);
+                                                        toast.error(t("teacher.homeworks.create.questions.imageUploadError", { error: error.message }) || `حدث خطأ أثناء رفع الصورة: ${error.message}`);
                                                         setUploadingImages(prev => ({ ...prev, [index]: false }));
                                                     }}
                                                     onUploadBegin={() => {
@@ -766,7 +788,7 @@ const EditQuizPage = () => {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label>نوع السؤال</Label>
+                                        <Label>{t("teacher.homeworks.create.questions.questionType") || "نوع السؤال"}</Label>
                                         <Select
                                             value={question.type}
                                             onValueChange={(value: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SHORT_ANSWER") =>
@@ -777,14 +799,14 @@ const EditQuizPage = () => {
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="MULTIPLE_CHOICE">اختيار من متعدد</SelectItem>
-                                                <SelectItem value="TRUE_FALSE">صح أو خطأ</SelectItem>
-                                                <SelectItem value="SHORT_ANSWER">إجابة قصيرة</SelectItem>
+                                                <SelectItem value="MULTIPLE_CHOICE">{t("teacher.homeworks.create.questions.multipleChoice") || "اختيار من متعدد"}</SelectItem>
+                                                <SelectItem value="TRUE_FALSE">{t("teacher.homeworks.create.questions.trueFalse") || "صح أو خطأ"}</SelectItem>
+                                                <SelectItem value="SHORT_ANSWER">{t("teacher.homeworks.create.questions.shortAnswer") || "إجابة قصيرة"}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>الدرجات</Label>
+                                        <Label>{t("teacher.homeworks.create.questions.points") || "الدرجات"}</Label>
                                         <Input
                                             type="number"
                                             value={question.points}
@@ -796,23 +818,17 @@ const EditQuizPage = () => {
 
                                 {question.type === "MULTIPLE_CHOICE" && (
                                     <div className="space-y-2">
-                                        <Label>الخيارات</Label>
+                                        <Label>{t("teacher.homeworks.create.questions.options") || "الخيارات"}</Label>
                                         {(question.options || ["", "", "", ""]).map((option, optionIndex) => (
                                             <div key={optionIndex} className="flex items-center space-x-2">
                                                 <Input
                                                     value={option}
                                                     onChange={(e) => {
                                                         const newOptions = [...(question.options || ["", "", "", ""])];
-                                                        const oldOptionValue = newOptions[optionIndex];
                                                         newOptions[optionIndex] = e.target.value;
                                                         updateQuestion(index, "options", newOptions);
-                                                        
-                                                        // If this option was the correct answer, update the correct answer to the new value
-                                                        if (question.correctAnswer === oldOptionValue) {
-                                                            updateQuestion(index, "correctAnswer", optionIndex);
-                                                        }
                                                     }}
-                                                    placeholder={`الخيار ${optionIndex + 1}`}
+                                                    placeholder={t("teacher.homeworks.create.questions.optionPlaceholder", { number: optionIndex + 1 }) || `الخيار ${optionIndex + 1}`}
                                                 />
                                                 <input
                                                     type="radio"
@@ -827,17 +843,17 @@ const EditQuizPage = () => {
 
                                 {question.type === "TRUE_FALSE" && (
                                     <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة</Label>
+                                        <Label>{t("teacher.homeworks.create.questions.correctAnswer") || "الإجابة الصحيحة"}</Label>
                                         <Select
                                             value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
                                             onValueChange={(value) => updateQuestion(index, "correctAnswer", value)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="اختر الإجابة الصحيحة" />
+                                                <SelectValue placeholder={t("teacher.homeworks.create.questions.selectCorrectAnswer") || "اختر الإجابة الصحيحة"} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="true">صح</SelectItem>
-                                                <SelectItem value="false">خطأ</SelectItem>
+                                                <SelectItem value="true">{t("teacher.homeworks.create.questions.true") || "صح"}</SelectItem>
+                                                <SelectItem value="false">{t("teacher.homeworks.create.questions.false") || "خطأ"}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -845,11 +861,11 @@ const EditQuizPage = () => {
 
                                 {question.type === "SHORT_ANSWER" && (
                                     <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة</Label>
+                                        <Label>{t("teacher.homeworks.create.questions.correctAnswer") || "الإجابة الصحيحة"}</Label>
                                         <Input
                                             value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
                                             onChange={(e) => updateQuestion(index, "correctAnswer", e.target.value)}
-                                            placeholder="أدخل الإجابة الصحيحة"
+                                            placeholder={t("teacher.homeworks.create.questions.correctAnswerPlaceholder") || "أدخل الإجابة الصحيحة"}
                                         />
                                     </div>
                                 )}
@@ -860,7 +876,7 @@ const EditQuizPage = () => {
                     <div className="flex justify-center pt-4">
                         <Button type="button" variant="outline" onClick={addQuestion} className="w-full sm:w-auto">
                             <Plus className="h-4 w-4 mr-2" />
-                            إضافة سؤال
+                            {t("teacher.homeworks.create.questions.addQuestion") || "إضافة سؤال"}
                         </Button>
                     </div>
                 </div>
@@ -870,13 +886,13 @@ const EditQuizPage = () => {
                         variant="outline"
                         onClick={() => router.push(dashboardPath)}
                     >
-                        إلغاء
+                        {t("common.cancel") || "إلغاء"}
                     </Button>
                     <Button
-                        onClick={handleUpdateQuiz}
-                        disabled={isUpdatingQuiz || questions.length === 0}
+                        onClick={handleUpdateHomework}
+                        disabled={isUpdatingHomework || questions.length === 0}
                     >
-                        {isUpdatingQuiz ? "جاري التحديث..." : "تحديث الامتحان"}
+                        {isUpdatingHomework ? t("common.updating") || "جاري التحديث..." : t("teacher.homeworks.edit.update") || "تحديث الواجب"}
                     </Button>
                 </div>
             </div>
@@ -884,4 +900,5 @@ const EditQuizPage = () => {
     );
 };
 
-export default EditQuizPage; 
+export default EditHomeworkPage;
+

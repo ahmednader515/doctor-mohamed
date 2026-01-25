@@ -3,17 +3,23 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { parseQuizOptions, stringifyQuizOptions } from "@/lib/utils";
 
-export async function GET(req: Request) {
+export async function GET(
+    req: Request,
+    { params }: { params: Promise<{ homeworkId: string }> }
+) {
     try {
-        const { userId } = await auth();
+        const { userId, user } = await auth();
+        const resolvedParams = await params;
+
+        console.log("[TEACHER_HOMEWORK_GET] Fetching homework:", resolvedParams.homeworkId, "for user:", userId);
 
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Get all homeworks (all teachers can see all homeworks)
-        const homeworks = await db.homework.findMany({
-            where: {},
+        // Get the homework; all teachers can see all homeworks (same as list endpoint)
+        const homework = await db.homework.findFirst({
+            where: { id: resolvedParams.homeworkId },
             include: {
                 course: {
                     select: {
@@ -36,80 +42,83 @@ export async function GET(req: Request) {
                         position: 'asc'
                     }
                 }
-            },
-            orderBy: {
-                position: "asc"
             }
         });
 
-        // Parse options for multiple choice questions
-        const homeworksWithParsedOptions = homeworks.map(homework => ({
-            ...homework,
-            questions: homework.questions.map(question => ({
-                ...question,
-                options: parseQuizOptions(question.options)
-            }))
-        }));
+        if (!homework) {
+            console.log("[TEACHER_HOMEWORK_GET] Homework not found for ID:", resolvedParams.homeworkId);
+            return NextResponse.json({ error: "Homework not found" }, { status: 404 });
+        }
 
-        return NextResponse.json(homeworksWithParsedOptions);
+        console.log("[TEACHER_HOMEWORK_GET] Homework found:", homework.id, "with", homework.questions.length, "questions");
+
+        // Parse options for multiple choice questions
+        const homeworkWithParsedOptions = {
+            ...homework,
+            questions: homework.questions.map(question => {
+                try {
+                    return {
+                        ...question,
+                        options: parseQuizOptions(question.options)
+                    };
+                } catch (parseError) {
+                    console.log("[TEACHER_HOMEWORK_GET] Error parsing options for question:", question.id, parseError);
+                    return {
+                        ...question,
+                        options: question.options ? JSON.parse(question.options) : null
+                    };
+                }
+            })
+        };
+
+        return NextResponse.json(homeworkWithParsedOptions);
     } catch (error) {
-        console.log("[TEACHER_HOMEWORKS_GET]", error);
+        console.log("[TEACHER_HOMEWORK_GET] Error details:", error);
+        console.log("[TEACHER_HOMEWORK_GET] Error stack:", (error as Error).stack);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }
 
-export async function POST(req: Request) {
+export async function PATCH(
+    req: Request,
+    { params }: { params: Promise<{ homeworkId: string }> }
+) {
     try {
         const { userId, user } = await auth();
-        const { title, description, courseId, questions, position, timer, maxAttempts } = await req.json();
+        const resolvedParams = await params;
+        const { title, description, questions, position, timer, maxAttempts, courseId } = await req.json();
 
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const isAdmin = user?.role === "ADMIN";
+        // Get the current homework to know its course and owner
+        const currentHomework = await db.homework.findUnique({
+            where: { id: resolvedParams.homeworkId },
+            select: { courseId: true, position: true, course: { select: { userId: true } } }
+        });
+
+        if (!currentHomework) {
+            return NextResponse.json({ error: "Homework not found" }, { status: 404 });
+        }
+
+        // Admin or teacher can modify (all teachers can edit all homeworks)
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
+        // Use the courseId from request if provided, otherwise use current homework's courseId
+        const targetCourseId = courseId || currentHomework.courseId;
 
         // Validate required fields
         if (!title || !title.trim()) {
             return NextResponse.json({ error: "Title is required" }, { status: 400 });
         }
 
-        if (!courseId) {
-            return NextResponse.json({ error: "Course ID is required" }, { status: 400 });
-        }
-
-        // Verify the course exists and belongs to the teacher (unless admin)
-        const course = await db.course.findUnique({
-            where: {
-                id: courseId,
-            },
-            select: {
-                id: true,
-                userId: true,
-            },
-        });
-
-        if (!course) {
-            return NextResponse.json({ error: "Course not found" }, { status: 404 });
-        }
-
-        const isTeacher = user?.role === "TEACHER";
-        if (!isAdmin && !isTeacher && course.userId !== userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-        }
-
-        // Get the next position if not provided
+        // Handle position - use current position if not provided or invalid
         let homeworkPosition = position;
         if (!homeworkPosition || homeworkPosition <= 0) {
-            const lastHomework = await db.homework.findFirst({
-                where: {
-                    courseId: courseId
-                },
-                orderBy: {
-                    position: 'desc'
-                }
-            });
-            homeworkPosition = lastHomework ? lastHomework.position + 1 : 1;
+            homeworkPosition = currentHomework.position;
         }
 
         // Validate questions
@@ -135,6 +144,7 @@ export async function POST(req: Request) {
                     return NextResponse.json({ error: `Question ${i + 1}: At least 2 valid options are required` }, { status: 400 });
                 }
 
+                // For multiple choice, correctAnswer should be an index
                 if (typeof question.correctAnswer !== 'number' || question.correctAnswer < 0 || question.correctAnswer >= validOptions.length) {
                     return NextResponse.json({ error: `Question ${i + 1}: Valid correct answer index is required` }, { status: 400 });
                 }
@@ -153,15 +163,21 @@ export async function POST(req: Request) {
             }
         }
 
-        // Create the homework
-        const homework = await db.homework.create({
+        // Note: Position reordering is now handled by the separate reorder API
+        // This API just updates the homework with the provided position
+
+        // Update the homework without questions first
+        const updatedHomework = await db.homework.update({
+            where: {
+                id: resolvedParams.homeworkId
+            },
             data: {
                 title,
                 description,
-                position: Number(homeworkPosition),
-                courseId,
+                courseId: targetCourseId, // Update courseId if changed
+                position: Number(homeworkPosition), // Explicitly cast to number
                 timer: timer || null,
-                maxAttempts: maxAttempts || 1,
+                maxAttempts: maxAttempts || 1
             },
             include: {
                 course: {
@@ -171,8 +187,15 @@ export async function POST(req: Request) {
                 }
             }
         });
-        
-        // Add the questions separately
+
+        // Delete existing questions
+        await db.homeworkQuestion.deleteMany({
+            where: {
+                homeworkId: resolvedParams.homeworkId
+            }
+        });
+
+        // Add questions separately
         if (questions.length > 0) {
             await db.homeworkQuestion.createMany({
                 data: questions.map((question: any, index: number) => {
@@ -191,16 +214,16 @@ export async function POST(req: Request) {
                         correctAnswer: correctAnswerValue,
                         points: question.points,
                         imageUrl: question.imageUrl || null,
-                        homeworkId: homework.id,
+                        homeworkId: resolvedParams.homeworkId,
                         position: index + 1
                     };
                 })
             });
         }
-        
-        // Fetch the homework with questions
+
+        // Fetch the updated homework with questions
         const homeworkWithQuestions = await db.homework.findUnique({
-            where: { id: homework.id },
+            where: { id: resolvedParams.homeworkId },
             include: {
                 course: {
                     select: {
@@ -216,7 +239,7 @@ export async function POST(req: Request) {
         });
 
         if (!homeworkWithQuestions) {
-            return NextResponse.json({ error: "Failed to create homework" }, { status: 500 });
+            return NextResponse.json({ error: "Failed to update homework" }, { status: 500 });
         }
 
         // Parse options for the response
@@ -230,7 +253,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json(homeworkWithParsedOptions);
     } catch (error) {
-        console.log("[TEACHER_HOMEWORKS_POST]", error);
+        console.log("[HOMEWORK_PATCH]", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }

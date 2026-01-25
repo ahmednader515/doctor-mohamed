@@ -48,10 +48,12 @@ export default function HomeworkResultPage({
     const [result, setResult] = useState<HomeworkResult | null>(null);
     const [homework, setHomework] = useState<Homework | null>(null);
     const [loading, setLoading] = useState(true);
+    const [willRedirectToDashboard, setWillRedirectToDashboard] = useState(false);
 
     useEffect(() => {
         fetchResult();
         fetchHomework();
+        checkNextContent();
     }, [homeworkId]);
 
     const fetchResult = async () => {
@@ -140,6 +142,66 @@ export default function HomeworkResultPage({
             }
         } catch (error) {
             console.error("Error fetching homework:", error);
+        }
+    };
+
+    const checkNextContent = async () => {
+        try {
+            const contentResponse = await fetch(`/api/courses/${courseId}/content`);
+            if (contentResponse.ok) {
+                const allContent = await contentResponse.json();
+                
+                // Find the current homework in the content array
+                const currentIndex = allContent.findIndex((content: any) => 
+                    content.id === homeworkId && content.type === 'homework'
+                );
+                
+                // If no next content, set flag to show dashboard button
+                if (currentIndex === -1 || currentIndex >= allContent.length - 1) {
+                    setWillRedirectToDashboard(true);
+                }
+            } else {
+                setWillRedirectToDashboard(true);
+            }
+        } catch (error) {
+            console.error("Error checking next content:", error);
+            setWillRedirectToDashboard(true);
+        }
+    };
+
+    const handleNextChapter = async () => {
+        try {
+            // Get all course content (chapters, quizzes, and homeworks) sorted by position
+            const contentResponse = await fetch(`/api/courses/${courseId}/content`);
+            if (contentResponse.ok) {
+                const allContent = await contentResponse.json();
+                
+                // Find the current homework in the content array
+                const currentIndex = allContent.findIndex((content: any) => 
+                    content.id === homeworkId && content.type === 'homework'
+                );
+                
+                if (currentIndex !== -1 && currentIndex < allContent.length - 1) {
+                    const nextContent = allContent[currentIndex + 1];
+                    if (nextContent.type === 'chapter') {
+                        router.push(`/courses/${courseId}/chapters/${nextContent.id}`);
+                    } else if (nextContent.type === 'quiz') {
+                        router.push(`/courses/${courseId}/quizzes/${nextContent.id}`);
+                    } else if (nextContent.type === 'homework') {
+                        router.push(`/courses/${courseId}/homeworks/${nextContent.id}`);
+                    }
+                } else {
+                    // If no next content, go to dashboard
+                    router.push(`/dashboard`);
+                }
+            } else {
+                // Fallback to dashboard
+                router.push(`/dashboard`);
+            }
+        } catch (error) {
+            console.error("Error navigating to next chapter:", error);
+            // Fallback to dashboard
+            router.push(`/dashboard`);
         }
     };
 
@@ -415,10 +477,10 @@ export default function HomeworkResultPage({
 
                     <div className="flex justify-center gap-4">
                         <Button
-                            onClick={() => router.push(`/courses/${courseId}`)}
+                            onClick={handleNextChapter}
                             className="bg-primary hover:bg-primary/90"
                         >
-                            العودة إلى الكورس
+                            {willRedirectToDashboard ? "الصفحة الرئيسية" : "الدرس التالي"}
                         </Button>
                     </div>
                 </div>

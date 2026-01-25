@@ -281,7 +281,8 @@ const CreateHomeworkPage = () => {
         for (let i = 0; i < questions.length; i++) {
             const question = questions[i];
             
-            if (!question.text || question.text.trim() === "") {
+            // Validate question text (optional if image is present)
+            if ((!question.text || question.text.trim() === "") && !question.imageUrl) {
                 validationErrors.push(t("teacher.homeworks.create.errors.questionTextRequired", { number: i + 1 }));
                 continue;
             }
@@ -411,18 +412,18 @@ const CreateHomeworkPage = () => {
     };
 
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6 overflow-x-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                     {t("teacher.homeworks.create.title")}
                 </h1>
-                <Button variant="outline" onClick={() => router.push(dashboardPath)}>
+                <Button variant="outline" onClick={() => router.push(dashboardPath)} className="w-full sm:w-auto">
                     {t("teacher.homeworks.create.backToHomeworks")}
                 </Button>
             </div>
 
-            <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>{t("teacher.homeworks.create.selectCourse")}</Label>
                         <Select value={selectedCourse} onValueChange={(value) => {
@@ -495,16 +496,16 @@ const CreateHomeworkPage = () => {
                                                             <div
                                                                 ref={provided.innerRef}
                                                                 {...provided.draggableProps}
-                                                                className={`p-3 border rounded-lg flex items-center justify-between ${
+                                                                className={`p-3 border rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between ${
                                                                     snapshot.isDragging ? "bg-blue-50" : "bg-white"
                                                                 } ${item.id === "new-homework" ? "border-2 border-dashed border-blue-300 bg-blue-50" : ""}`}
                                                             >
-                                                                <div className="flex items-center space-x-3">
-                                                                    <div {...provided.dragHandleProps} className={item.id === "new-homework" ? "cursor-grab active:cursor-grabbing" : ""}>
+                                                                <div className="flex items-start sm:items-center space-x-3 min-w-0 flex-1 w-full">
+                                                                    <div {...provided.dragHandleProps} className={item.id === "new-homework" ? "cursor-grab active:cursor-grabbing flex-shrink-0" : "flex-shrink-0"}>
                                                                         <GripVertical className={`h-4 w-4 ${item.id === "new-homework" ? "text-blue-600" : "text-gray-300 cursor-not-allowed"}`} />
                                                                     </div>
-                                                                    <div>
-                                                                        <div className={`font-medium ${item.id === "new-homework" ? "text-blue-800" : ""}`}>
+                                                                    <div className="min-w-0 flex-1 w-full">
+                                                                        <div className={`font-medium break-words overflow-wrap-anywhere ${item.id === "new-homework" ? "text-blue-800" : ""}`}>
                                                                             {item.title}
                                                                         </div>
                                                                         <div className={`text-sm ${item.id === "new-homework" ? "text-blue-600" : "text-muted-foreground"}`}>
@@ -561,7 +562,7 @@ const CreateHomeworkPage = () => {
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>{t("teacher.homeworks.create.timer.label")}</Label>
                         <Input
@@ -593,10 +594,6 @@ const CreateHomeworkPage = () => {
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <Label>{t("teacher.homeworks.create.questions.label")}</Label>
-                        <Button type="button" variant="outline" onClick={addQuestion}>
-                            <Plus className="h-4 w-4 mr-2" />
-                            {t("teacher.homeworks.create.questions.addQuestion")}
-                        </Button>
                     </div>
 
                     {questions.map((question, index) => (
@@ -605,7 +602,7 @@ const CreateHomeworkPage = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <CardTitle className="text-lg">{t("teacher.homeworks.create.questions.questionNumber", { number: index + 1 })}</CardTitle>
-                                        {(!question.text.trim() || !question.correctAnswer.toString().trim() || 
+                                        {((!question.text.trim() && !question.imageUrl) || !question.correctAnswer.toString().trim() || 
                                           (question.type === "MULTIPLE_CHOICE" && 
                                            (!question.options || question.options.filter(opt => opt.trim() !== "").length < 2))) && (
                                             <Badge variant="destructive" className="text-xs">
@@ -626,7 +623,12 @@ const CreateHomeworkPage = () => {
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <Label>{t("teacher.homeworks.create.questions.questionText")}</Label>
+                                        <Label>
+                                            {t("teacher.homeworks.create.questions.questionText")}
+                                            {question.imageUrl && (
+                                                <span className="text-muted-foreground text-xs font-normal"> ({t("common.optional") || "اختياري"})</span>
+                                            )}
+                                        </Label>
                                         <div className="flex items-center gap-2">
                                             {listeningQuestionId === question.id && (
                                                 <span className="text-xs text-blue-600">
@@ -699,7 +701,7 @@ const CreateHomeworkPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>{t("teacher.homeworks.create.questions.questionType")}</Label>
                                         <Select
@@ -785,6 +787,13 @@ const CreateHomeworkPage = () => {
                             </CardContent>
                         </Card>
                     ))}
+                    
+                    <div className="flex justify-center pt-4">
+                        <Button type="button" variant="outline" onClick={addQuestion} className="w-full sm:w-auto">
+                            <Plus className="h-4 w-4 mr-2" />
+                            {t("teacher.homeworks.create.questions.addQuestion")}
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex justify-end space-x-2">

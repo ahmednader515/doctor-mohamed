@@ -136,8 +136,9 @@ export async function PATCH(
         for (let i = 0; i < questions.length; i++) {
             const question = questions[i];
             
-            if (!question.text || !question.text.trim()) {
-                return NextResponse.json({ error: `Question ${i + 1}: Text is required` }, { status: 400 });
+            // Question text is optional if image is uploaded
+            if ((!question.text || !question.text.trim()) && (!question.imageUrl || !question.imageUrl.trim())) {
+                return NextResponse.json({ error: `Question ${i + 1}: Text or image is required` }, { status: 400 });
             }
 
             if (question.type === "MULTIPLE_CHOICE") {

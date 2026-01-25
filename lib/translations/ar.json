@@ -497,6 +497,7 @@
         "errors": {
           "requiredFields": "يرجى إدخال جميع البيانات المطلوبة",
           "questionTextRequired": "السؤال {number}: نص السؤال مطلوب",
+          "questionTextOrImageRequired": "السؤال {number}: نص السؤال أو الصورة مطلوبة",
           "questionOptionsRequired": "السؤال {number}: يجب إضافة خيار واحد على الأقل",
           "questionCorrectAnswerRequired": "السؤال {number}: يجب اختيار إجابة صحيحة",
           "questionCorrectAnswerTextRequired": "السؤال {number}: الإجابة الصحيحة مطلوبة",
@@ -511,6 +512,19 @@
         "cancel": "إلغاء",
         "creating": "جاري الحفظ...",
         "createHomework": "إنشاء الواجب"
+      },
+      "edit": {
+        "title": "تعديل الواجب",
+        "backToHomeworks": "العودة إلى الواجبات",
+        "editing": "قيد التعديل",
+        "update": "تحديث الواجب",
+        "positionSuccess": "تم ترتيب الواجب بنجاح",
+        "positionError": "حدث خطأ أثناء ترتيب الواجب",
+        "success": "تم تحديث الواجب بنجاح",
+        "errors": {
+          "loadError": "حدث خطأ أثناء تحميل الواجب",
+          "updateError": "حدث خطأ أثناء تحديث الواجب"
+        }
       }
     },
     "grades": {

@@ -497,6 +497,7 @@
         "errors": {
           "requiredFields": "Please enter all required data",
           "questionTextRequired": "Question {number}: Question text is required",
+          "questionTextOrImageRequired": "Question {number}: Question text or image is required",
           "questionOptionsRequired": "Question {number}: At least one option must be added",
           "questionCorrectAnswerRequired": "Question {number}: Correct answer must be selected",
           "questionCorrectAnswerTextRequired": "Question {number}: Correct answer is required",
@@ -511,6 +512,19 @@
         "cancel": "Cancel",
         "creating": "Saving...",
         "createHomework": "Create Homework"
+      },
+      "edit": {
+        "title": "Edit Homework",
+        "backToHomeworks": "Back to Homeworks",
+        "editing": "Editing",
+        "update": "Update Homework",
+        "positionSuccess": "Homework reordered successfully",
+        "positionError": "An error occurred while reordering homework",
+        "success": "Homework updated successfully",
+        "errors": {
+          "loadError": "An error occurred while loading homework",
+          "updateError": "An error occurred while updating homework"
+        }
       }
     },
     "grades": {
