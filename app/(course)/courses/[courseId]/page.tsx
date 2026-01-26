@@ -14,6 +14,9 @@ interface CourseContent {
     type: 'chapter' | 'quiz' | 'homework';
     position: number;
     isPublished: boolean;
+    userProgress?: {
+        isCompleted: boolean;
+    }[];
 }
 
 export default function CoursePage({
@@ -82,12 +85,67 @@ export default function CoursePage({
                 setCourseContent(contentData);
             }
 
-            // If user has access and there's content, redirect to first chapter
+            // If user has access and there's content, determine which chapter to redirect to
             if (userHasAccess && content.length > 0) {
-                const firstChapter = content.find((item: CourseContent) => item.type === 'chapter');
-                if (firstChapter) {
-                    router.replace(`/courses/${courseId}/chapters/${firstChapter.id}`);
+                // Find all chapters (only chapters, not quizzes or homeworks)
+                const chapters = content.filter((item: CourseContent) => item.type === 'chapter');
+                
+                console.log('📚 Course content:', {
+                    totalContent: content.length,
+                    chapters: chapters.length,
+                    chapterTypes: chapters.map(c => ({ id: c.id, title: c.title, type: c.type, position: c.position }))
+                });
+                
+                if (chapters.length === 0) {
+                    setLoading(false);
                     return;
+                }
+
+                // Sort chapters by position to ensure correct order
+                const sortedChapters = [...chapters].sort((a, b) => a.position - b.position);
+
+                // Find completed chapters (chapters with userProgress that is completed)
+                const completedChapters = sortedChapters.filter((chapter: CourseContent) => {
+                    const hasProgress = chapter.userProgress && chapter.userProgress.length > 0;
+                    const isCompleted = hasProgress && chapter.userProgress![0].isCompleted;
+                    return isCompleted;
+                });
+
+                console.log('✅ Completed chapters:', completedChapters.map(c => ({ id: c.id, title: c.title, position: c.position })));
+
+                let targetChapter: CourseContent | undefined;
+
+                if (completedChapters.length === 0) {
+                    // No progress: redirect to first chapter (by position)
+                    targetChapter = sortedChapters[0];
+                    console.log('🎯 No progress - selecting first chapter:', targetChapter.title, 'position:', targetChapter.position);
+                } else {
+                    // Find the last completed chapter by position
+                    const lastCompletedChapter = completedChapters.reduce((last: CourseContent, current: CourseContent) => {
+                        return current.position > last.position ? current : last;
+                    });
+
+                    console.log('📖 Last completed chapter:', lastCompletedChapter.title, 'position:', lastCompletedChapter.position);
+
+                    // Find the next chapter after the last completed one
+                    targetChapter = sortedChapters.find((chapter: CourseContent) => chapter.position > lastCompletedChapter.position);
+                    
+                    // If no next chapter exists, stay on the last completed chapter
+                    if (!targetChapter) {
+                        targetChapter = lastCompletedChapter;
+                        console.log('🔄 No next chapter - staying on last completed:', targetChapter.title);
+                    } else {
+                        console.log('➡️ Next chapter found:', targetChapter.title, 'position:', targetChapter.position);
+                    }
+                }
+
+                // Double-check that we're redirecting to a chapter, not a homework or quiz
+                if (targetChapter && targetChapter.type === 'chapter') {
+                    console.log('🚀 Redirecting to chapter:', targetChapter.id, targetChapter.title);
+                    router.replace(`/courses/${courseId}/chapters/${targetChapter.id}`);
+                    return;
+                } else {
+                    console.error('❌ Invalid target chapter:', targetChapter);
                 }
             }
 

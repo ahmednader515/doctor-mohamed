@@ -205,7 +205,26 @@ const ChapterPage = () => {
         setIsCompleted(true);
         // Refresh chapter data to update view count
         const updatedChapterResponse = await axios.get(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}`);
-        setChapter(updatedChapterResponse.data);
+        const updatedChapter = updatedChapterResponse.data;
+        setChapter(updatedChapter);
+        
+        // Wait a bit to ensure the database update is complete, then trigger sidebar refresh
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('course-sidebar-refresh'));
+        }, 200);
+        
+        // Wait a bit more for sidebar to refresh, then navigate
+        setTimeout(() => {
+          if (updatedChapter?.nextChapterId) {
+            if (updatedChapter.nextContentType === 'quiz') {
+              router.push(`/courses/${routeParams.courseId}/quizzes/${updatedChapter.nextChapterId}`);
+            } else if (updatedChapter.nextContentType === 'homework') {
+              router.push(`/courses/${routeParams.courseId}/homeworks/${updatedChapter.nextChapterId}`);
+            } else {
+              router.push(`/courses/${routeParams.courseId}/chapters/${updatedChapter.nextChapterId}`);
+            }
+          }
+        }, 700);
       }
       router.refresh();
     } catch (error) {
@@ -233,7 +252,27 @@ const ChapterPage = () => {
         setIsCompleted(true);
         // Refresh chapter data to update view count
         const updatedChapterResponse = await axios.get(`/api/courses/${routeParams.courseId}/chapters/${routeParams.chapterId}`);
-        setChapter(updatedChapterResponse.data);
+        const updatedChapter = updatedChapterResponse.data;
+        setChapter(updatedChapter);
+        
+        // Wait a bit to ensure the database update is complete, then trigger sidebar refresh
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('course-sidebar-refresh'));
+        }, 200);
+        
+        // Wait a bit more for sidebar to refresh, then navigate
+        setTimeout(() => {
+          if (updatedChapter?.nextChapterId) {
+            if (updatedChapter.nextContentType === 'quiz') {
+              router.push(`/courses/${routeParams.courseId}/quizzes/${updatedChapter.nextChapterId}`);
+            } else if (updatedChapter.nextContentType === 'homework') {
+              router.push(`/courses/${routeParams.courseId}/homeworks/${updatedChapter.nextChapterId}`);
+            } else {
+              router.push(`/courses/${routeParams.courseId}/chapters/${updatedChapter.nextChapterId}`);
+            }
+          }
+        }, 700);
+        
         router.refresh();
       }
     } catch (error) {

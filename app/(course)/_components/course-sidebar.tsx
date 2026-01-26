@@ -101,6 +101,18 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
     fetchCourseData();
   }, [fetchCourseData]);
 
+  // Listen for custom event to refresh sidebar
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchCourseData();
+    };
+
+    window.addEventListener('course-sidebar-refresh', handleRefresh);
+    return () => {
+      window.removeEventListener('course-sidebar-refresh', handleRefresh);
+    };
+  }, [fetchCourseData]);
+
   useEffect(() => {
     // Update selected content based on current path
     const currentContentId = pathname?.split("/").pop();
@@ -156,13 +168,27 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
       <div className="flex flex-col w-full">
         {courseContent.map((content) => {
           const isSelected = selectedContentId === content.id;
+          // Check completion status - userProgress is an array, check if any entry has isCompleted: true
           const isCompleted = content.type === 'chapter' 
-            ? content.userProgress?.[0]?.isCompleted || false
+            ? (content.userProgress && content.userProgress.length > 0 && content.userProgress[0]?.isCompleted === true)
             : (content.type === 'quiz' 
                 ? content.quizResults && content.quizResults.length > 0
                 : (content.type === 'homework'
                     ? content.homeworkResults && content.homeworkResults.length > 0
                     : false));
+          
+          // Debug log for selected chapter
+          if (isSelected && content.type === 'chapter') {
+            console.log('🔍 Sidebar - Selected chapter completion status:', {
+              chapterId: content.id,
+              title: content.title,
+              userProgress: content.userProgress,
+              userProgressLength: content.userProgress?.length,
+              userProgressFirstItem: content.userProgress?.[0],
+              isCompletedFirstCheck: content.userProgress?.[0]?.isCompleted,
+              isCompleted
+            });
+          }
           
           return (
             <div
@@ -178,7 +204,7 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
             >
               <div className="flex-shrink-0 mt-0.5">
                 {isCompleted ? (
-                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                  <CheckCircle className={cn("h-4 w-4", isSelected ? "text-slate-700" : "text-emerald-600")} />
                 ) : (
                   <Circle className="h-4 w-4" />
                 )}

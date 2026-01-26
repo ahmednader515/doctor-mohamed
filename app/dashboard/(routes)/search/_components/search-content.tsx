@@ -132,7 +132,7 @@ export const SearchContent = ({ title, coursesWithProgress }: SearchContentProps
                                     variant="default"
                                     asChild
                                 >
-                                    <Link href={course.chapters.length > 0 ? `/courses/${course.id}/chapters/${course.chapters[0].id}` : `/courses/${course.id}`}>
+                                    <Link href={`/courses/${course.id}`}>
                                         {course.purchases.length > 0 ? t("search.continueLearning") : t("search.viewCourse")}
                                     </Link>
                                 </Button>

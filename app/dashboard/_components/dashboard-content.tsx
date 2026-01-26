@@ -294,7 +294,7 @@ export const DashboardContent = ({
                     variant="default"
                     asChild
                   >
-                    <Link href={course.chapters.length > 0 ? `/courses/${course.id}/chapters/${course.chapters[0].id}` : `/courses/${course.id}`}>
+                    <Link href={`/courses/${course.id}`}>
                       {t("dashboard.continueLearning")}
                     </Link>
                   </Button>

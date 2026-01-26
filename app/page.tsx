@@ -420,10 +420,7 @@ export default function HomePage() {
                             router.push("/sign-in");
                             return;
                           }
-                          const courseUrl = course.chapters && course.chapters.length > 0 
-                            ? `/courses/${course.id}/chapters/${course.chapters[0].id}` 
-                            : `/courses/${course.id}`;
-                          router.push(courseUrl);
+                          router.push(`/courses/${course.id}`);
                         }}
                       >
                         {t("homepage.viewCourse")}
