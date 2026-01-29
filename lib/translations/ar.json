@@ -1399,7 +1399,7 @@
         "title": "تغيير كلمة المرور",
         "subtitle": "تحديث كلمة مرور حسابك",
         "currentPassword": "كلمة المرور الحالية",
-        "currentPasswordPlaceholder": "أدخل كلمة المرور الحالية (اختياري إذا لم تكن هناك كلمة مرور)",
+        "currentPasswordPlaceholder": "أدخل كلمة المرور الحالية",
         "newPassword": "كلمة المرور الجديدة",
         "newPasswordPlaceholder": "أدخل كلمة المرور الجديدة",
         "confirmPassword": "تأكيد كلمة المرور",

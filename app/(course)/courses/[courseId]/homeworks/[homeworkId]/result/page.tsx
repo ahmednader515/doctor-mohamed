@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, CheckCircle, XCircle, Award } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, XCircle, Award, ChevronRight, ChevronLeft } from "lucide-react";
 import { parseQuizOptions } from "@/lib/utils";
 
 interface HomeworkAnswer {
@@ -49,6 +49,7 @@ export default function HomeworkResultPage({
     const [homework, setHomework] = useState<Homework | null>(null);
     const [loading, setLoading] = useState(true);
     const [willRedirectToDashboard, setWillRedirectToDashboard] = useState(false);
+    const [previousContent, setPreviousContent] = useState<{ id: string; type: string } | null>(null);
 
     useEffect(() => {
         fetchResult();
@@ -156,6 +157,17 @@ export default function HomeworkResultPage({
                     content.id === homeworkId && content.type === 'homework'
                 );
                 
+                // Check for previous content
+                if (currentIndex > 0) {
+                    const prevContent = allContent[currentIndex - 1];
+                    setPreviousContent({
+                        id: prevContent.id,
+                        type: prevContent.type
+                    });
+                } else {
+                    setPreviousContent(null);
+                }
+                
                 // If no next content, set flag to show dashboard button
                 if (currentIndex === -1 || currentIndex >= allContent.length - 1) {
                     setWillRedirectToDashboard(true);
@@ -202,6 +214,18 @@ export default function HomeworkResultPage({
             console.error("Error navigating to next chapter:", error);
             // Fallback to dashboard
             router.push(`/dashboard`);
+        }
+    };
+
+    const handlePreviousContent = () => {
+        if (!previousContent) return;
+        
+        if (previousContent.type === 'chapter') {
+            router.push(`/courses/${courseId}/chapters/${previousContent.id}`);
+        } else if (previousContent.type === 'quiz') {
+            router.push(`/courses/${courseId}/quizzes/${previousContent.id}`);
+        } else if (previousContent.type === 'homework') {
+            router.push(`/courses/${courseId}/homeworks/${previousContent.id}`);
         }
     };
 
@@ -475,13 +499,26 @@ export default function HomeworkResultPage({
                         </CardContent>
                     </Card>
 
-                    <div className="flex justify-center gap-4">
+                    <div className="flex justify-between items-center gap-4">
                         <Button
                             onClick={handleNextChapter}
-                            className="bg-primary hover:bg-primary/90"
+                            className="bg-primary hover:bg-primary/90 flex items-center gap-2"
                         >
+                            {!willRedirectToDashboard && <ChevronRight className="h-4 w-4 rotate-180" />}
                             {willRedirectToDashboard ? "الصفحة الرئيسية" : "الدرس التالي"}
                         </Button>
+                        {previousContent ? (
+                            <Button
+                                onClick={handlePreviousContent}
+                                variant="outline"
+                                className="flex items-center gap-2"
+                            >
+                                الدرس السابق
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                        ) : (
+                            <div></div>
+                        )}
                     </div>
                 </div>
             </div>

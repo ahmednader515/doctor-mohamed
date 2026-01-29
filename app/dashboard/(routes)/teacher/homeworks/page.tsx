@@ -207,8 +207,12 @@ const HomeworksPage = () => {
                                                         if (response.ok) {
                                                             toast.success(homework.isPublished ? t("teacher.homeworks.unpublishSuccess") : t("teacher.homeworks.publishSuccess"));
                                                             fetchHomeworks();
+                                                        } else {
+                                                            const errorText = await response.text();
+                                                            toast.error(errorText || t("teacher.homeworks.publishError"));
                                                         }
                                                     } catch (error) {
+                                                        console.error("Error publishing/unpublishing homework:", error);
                                                         toast.error(t("teacher.homeworks.publishError"));
                                                     }
                                                 }}

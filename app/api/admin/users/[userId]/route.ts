@@ -19,7 +19,7 @@ export async function PATCH(
             return new NextResponse("Forbidden", { status: 403 });
         }
 
-        const { fullName, phoneNumber, parentPhoneNumber, role } = await req.json();
+        const { fullName, phoneNumber, parentPhoneNumber, role, grade, semester, subject } = await req.json();
 
         // Check if user exists
         const existingUser = await db.user.findUnique({
@@ -79,8 +79,11 @@ export async function PATCH(
             data: {
                 ...(fullName && { fullName }),
                 ...(phoneNumber && { phoneNumber }),
-                ...(parentPhoneNumber && { parentPhoneNumber }),
-                ...(role && { role })
+                ...(parentPhoneNumber !== undefined && { parentPhoneNumber }),
+                ...(role && { role }),
+                ...(grade !== undefined && { grade }),
+                ...(semester !== undefined && { semester }),
+                ...(subject !== undefined && { subject })
             }
         });
 

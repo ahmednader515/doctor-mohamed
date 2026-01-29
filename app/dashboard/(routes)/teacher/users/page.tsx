@@ -39,6 +39,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Label } from "@/components/ui/label";
 
 interface User {
@@ -70,6 +71,32 @@ interface EditUserData {
     subject?: string | null;
 }
 
+// Utility function to format phone numbers: remove +2 prefix, convert Arabic numerals to English, and ensure LTR direction
+const formatPhoneNumber = (phone: string | null | undefined): string => {
+    if (!phone) return "";
+    // Remove +2 prefix if present
+    let formatted = phone.startsWith("+2") ? phone.substring(2) : phone;
+    
+    // Convert Arabic numerals (٠١٢٣٤٥٦٧٨٩) to English numerals (0123456789)
+    const arabicToEnglish: { [key: string]: string } = {
+        "٠": "0",
+        "١": "1",
+        "٢": "2",
+        "٣": "3",
+        "٤": "4",
+        "٥": "5",
+        "٦": "6",
+        "٧": "7",
+        "٨": "8",
+        "٩": "9"
+    };
+    
+    // Replace each Arabic numeral with its English equivalent
+    formatted = formatted.split("").map(char => arabicToEnglish[char] || char).join("");
+    
+    return formatted;
+};
+
 const UsersPage = () => {
     const { t } = useLanguage();
     const [users, setUsers] = useState<User[]>([]);
@@ -87,6 +114,7 @@ const UsersPage = () => {
     });
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [subjects, setSubjects] = useState<string[]>([]); // For MultiSelect component
     // Pagination state for each grade
     const [grade1DisplayCount, setGrade1DisplayCount] = useState(25);
     const [grade2DisplayCount, setGrade2DisplayCount] = useState(25);
@@ -124,6 +152,9 @@ const UsersPage = () => {
 
     const handleEditUser = (user: User) => {
         setEditingUser(user);
+        // Convert comma-separated subject string to array for MultiSelect
+        const subjectsArray = user.subject ? user.subject.split(",").map(s => s.trim()).filter(s => s) : [];
+        setSubjects(subjectsArray);
         setEditData({
             fullName: user.fullName,
             phoneNumber: user.phoneNumber,
@@ -139,13 +170,20 @@ const UsersPage = () => {
     const handleSaveUser = async () => {
         if (!editingUser) return;
 
+        // Convert subjects array to comma-separated string for database
+        const subjectString = subjects.length > 0 ? subjects.join(",") : null;
+        const dataToSave = {
+            ...editData,
+            subject: subjectString
+        };
+
         try {
             const response = await fetch(`/api/teacher/users/${editingUser.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(editData),
+                body: JSON.stringify(dataToSave),
             });
 
             if (response.ok) {
@@ -315,8 +353,8 @@ const UsersPage = () => {
                                         <TableCell className="font-medium">
                                             {user.fullName}
                                         </TableCell>
-                                        <TableCell>{user.phoneNumber}</TableCell>
-                                        <TableCell>{user.parentPhoneNumber}</TableCell>
+                                        <TableCell dir="ltr" className="text-left">{formatPhoneNumber(user.phoneNumber)}</TableCell>
+                                        <TableCell dir="ltr" className="text-left">{formatPhoneNumber(user.parentPhoneNumber)}</TableCell>
                                         <TableCell>
                                             <Badge 
                                                 variant="secondary"
@@ -504,8 +542,8 @@ const UsersPage = () => {
                                         <TableCell className="font-medium">
                                             {user.fullName}
                                         </TableCell>
-                                        <TableCell>{user.phoneNumber}</TableCell>
-                                        <TableCell>{user.parentPhoneNumber}</TableCell>
+                                        <TableCell dir="ltr" className="text-left">{formatPhoneNumber(user.phoneNumber)}</TableCell>
+                                        <TableCell dir="ltr" className="text-left">{formatPhoneNumber(user.parentPhoneNumber)}</TableCell>
                                         <TableCell>
                                             <Badge 
                                                 variant="secondary"
@@ -648,31 +686,53 @@ const UsersPage = () => {
                                                                 <Label htmlFor="subject" className="text-right">
                                                                     {t("auth.subject")}
                                                                 </Label>
-                                                                <Select
-                                                                    value={editData.subject || ""}
-                                                                    onValueChange={(value) => setEditData({...editData, subject: value || null})}
-                                                                    disabled={!editData.grade}
-                                                                >
-                                                                    <SelectTrigger className="col-span-3">
-                                                                        <SelectValue placeholder={t("auth.subjectPlaceholder")} />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        {editData.grade === "الصف الاول الثانوي" ? (
+                                                                {editData.grade === "الصف الاول الثانوي" ? (
+                                                                    <Select
+                                                                        value={editData.subject || ""}
+                                                                        onValueChange={(value) => setEditData({...editData, subject: value || null})}
+                                                                        disabled={!editData.grade}
+                                                                    >
+                                                                        <SelectTrigger className="col-span-3">
+                                                                            <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
                                                                             <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
-                                                                        ) : editData.grade === "الصف الثاني الثانوي" || editData.grade === "الصف الثالث الثانوي" ? (
-                                                                            <>
-                                                                                <SelectItem value="كيمياء">كيمياء</SelectItem>
-                                                                                <SelectItem value="فيزياء">فيزياء</SelectItem>
-                                                                            </>
-                                                                        ) : (
-                                                                            <>
-                                                                                <SelectItem value="كيمياء">كيمياء</SelectItem>
-                                                                                <SelectItem value="فيزياء">فيزياء</SelectItem>
-                                                                                <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
-                                                                            </>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                ) : editData.grade === "الصف الثاني الثانوي" || editData.grade === "الصف الثالث الثانوي" ? (
+                                                                    <div className="col-span-3">
+                                                                        <MultiSelect
+                                                                            options={[
+                                                                                { label: "كيمياء", value: "كيمياء" },
+                                                                                { label: "فيزياء", value: "فيزياء" },
+                                                                            ]}
+                                                                            selected={subjects}
+                                                                            onChange={(selected) => {
+                                                                                setSubjects(selected);
+                                                                            }}
+                                                                            placeholder={t("auth.subjectPlaceholder")}
+                                                                            disabled={!editData.grade}
+                                                                        />
+                                                                        {subjects.length === 0 && (
+                                                                            <p className="text-sm text-destructive mt-1">{t("auth.errors.selectAtLeastOneSubject") || "Please select at least one subject"}</p>
                                                                         )}
-                                                                    </SelectContent>
-                                                                </Select>
+                                                                    </div>
+                                                                ) : (
+                                                                    <Select
+                                                                        value={editData.subject || ""}
+                                                                        onValueChange={(value) => setEditData({...editData, subject: value || null})}
+                                                                        disabled={!editData.grade}
+                                                                    >
+                                                                        <SelectTrigger className="col-span-3">
+                                                                            <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="كيمياء">كيمياء</SelectItem>
+                                                                            <SelectItem value="فيزياء">فيزياء</SelectItem>
+                                                                            <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                )}
                                                             </div>
                                                             <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="role" className="text-right">
@@ -801,8 +861,8 @@ const UsersPage = () => {
                                                     <TableCell className="font-medium">
                                                         {user.fullName}
                                                     </TableCell>
-                                                    <TableCell>{user.phoneNumber}</TableCell>
-                                                    <TableCell>{user.parentPhoneNumber}</TableCell>
+                                                    <TableCell dir="ltr" className="text-left">{formatPhoneNumber(user.phoneNumber)}</TableCell>
+                                                    <TableCell dir="ltr" className="text-left">{formatPhoneNumber(user.parentPhoneNumber)}</TableCell>
                                                     <TableCell>
                                                         <Badge 
                                                             variant="secondary"
@@ -945,31 +1005,53 @@ const UsersPage = () => {
                                                                             <Label htmlFor="subject" className="text-right">
                                                                                 {t("auth.subject")}
                                                                             </Label>
-                                                                            <Select
-                                                                                value={editData.subject || ""}
-                                                                                onValueChange={(value) => setEditData({...editData, subject: value || null})}
-                                                                                disabled={!editData.grade}
-                                                                            >
-                                                                                <SelectTrigger className="col-span-3">
-                                                                                    <SelectValue placeholder={t("auth.subjectPlaceholder")} />
-                                                                                </SelectTrigger>
-                                                                                <SelectContent>
-                                                                                    {editData.grade === "الصف الاول الثانوي" ? (
+                                                                            {editData.grade === "الصف الاول الثانوي" ? (
+                                                                                <Select
+                                                                                    value={editData.subject || ""}
+                                                                                    onValueChange={(value) => setEditData({...editData, subject: value || null})}
+                                                                                    disabled={!editData.grade}
+                                                                                >
+                                                                                    <SelectTrigger className="col-span-3">
+                                                                                        <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
                                                                                         <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
-                                                                                    ) : editData.grade === "الصف الثاني الثانوي" || editData.grade === "الصف الثالث الثانوي" ? (
-                                                                                        <>
-                                                                                            <SelectItem value="كيمياء">كيمياء</SelectItem>
-                                                                                            <SelectItem value="فيزياء">فيزياء</SelectItem>
-                                                                                        </>
-                                                                                    ) : (
-                                                                                        <>
-                                                                                            <SelectItem value="كيمياء">كيمياء</SelectItem>
-                                                                                            <SelectItem value="فيزياء">فيزياء</SelectItem>
-                                                                                            <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
-                                                                                        </>
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            ) : editData.grade === "الصف الثاني الثانوي" || editData.grade === "الصف الثالث الثانوي" ? (
+                                                                                <div className="col-span-3">
+                                                                                    <MultiSelect
+                                                                                        options={[
+                                                                                            { label: "كيمياء", value: "كيمياء" },
+                                                                                            { label: "فيزياء", value: "فيزياء" },
+                                                                                        ]}
+                                                                                        selected={subjects}
+                                                                                        onChange={(selected) => {
+                                                                                            setSubjects(selected);
+                                                                                        }}
+                                                                                        placeholder={t("auth.subjectPlaceholder")}
+                                                                                        disabled={!editData.grade}
+                                                                                    />
+                                                                                    {subjects.length === 0 && (
+                                                                                        <p className="text-sm text-destructive mt-1">{t("auth.errors.selectAtLeastOneSubject") || "Please select at least one subject"}</p>
                                                                                     )}
-                                                                                </SelectContent>
-                                                                            </Select>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <Select
+                                                                                    value={editData.subject || ""}
+                                                                                    onValueChange={(value) => setEditData({...editData, subject: value || null})}
+                                                                                    disabled={!editData.grade}
+                                                                                >
+                                                                                    <SelectTrigger className="col-span-3">
+                                                                                        <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        <SelectItem value="كيمياء">كيمياء</SelectItem>
+                                                                                        <SelectItem value="فيزياء">فيزياء</SelectItem>
+                                                                                        <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            )}
                                                                         </div>
                                                                         <div className="grid grid-cols-4 items-center gap-4">
                                                                             <Label htmlFor="role" className="text-right">
@@ -1098,8 +1180,8 @@ const UsersPage = () => {
                                                     <TableCell className="font-medium">
                                                         {user.fullName}
                                                     </TableCell>
-                                                    <TableCell>{user.phoneNumber}</TableCell>
-                                                    <TableCell>{user.parentPhoneNumber}</TableCell>
+                                                    <TableCell dir="ltr" className="text-left">{formatPhoneNumber(user.phoneNumber)}</TableCell>
+                                                    <TableCell dir="ltr" className="text-left">{formatPhoneNumber(user.parentPhoneNumber)}</TableCell>
                                                     <TableCell>
                                                         <Badge 
                                                             variant="secondary"
@@ -1242,31 +1324,53 @@ const UsersPage = () => {
                                                                             <Label htmlFor="subject" className="text-right">
                                                                                 {t("auth.subject")}
                                                                             </Label>
-                                                                            <Select
-                                                                                value={editData.subject || ""}
-                                                                                onValueChange={(value) => setEditData({...editData, subject: value || null})}
-                                                                                disabled={!editData.grade}
-                                                                            >
-                                                                                <SelectTrigger className="col-span-3">
-                                                                                    <SelectValue placeholder={t("auth.subjectPlaceholder")} />
-                                                                                </SelectTrigger>
-                                                                                <SelectContent>
-                                                                                    {editData.grade === "الصف الاول الثانوي" ? (
+                                                                            {editData.grade === "الصف الاول الثانوي" ? (
+                                                                                <Select
+                                                                                    value={editData.subject || ""}
+                                                                                    onValueChange={(value) => setEditData({...editData, subject: value || null})}
+                                                                                    disabled={!editData.grade}
+                                                                                >
+                                                                                    <SelectTrigger className="col-span-3">
+                                                                                        <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
                                                                                         <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
-                                                                                    ) : editData.grade === "الصف الثاني الثانوي" || editData.grade === "الصف الثالث الثانوي" ? (
-                                                                                        <>
-                                                                                            <SelectItem value="كيمياء">كيمياء</SelectItem>
-                                                                                            <SelectItem value="فيزياء">فيزياء</SelectItem>
-                                                                                        </>
-                                                                                    ) : (
-                                                                                        <>
-                                                                                            <SelectItem value="كيمياء">كيمياء</SelectItem>
-                                                                                            <SelectItem value="فيزياء">فيزياء</SelectItem>
-                                                                                            <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
-                                                                                        </>
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            ) : editData.grade === "الصف الثاني الثانوي" || editData.grade === "الصف الثالث الثانوي" ? (
+                                                                                <div className="col-span-3">
+                                                                                    <MultiSelect
+                                                                                        options={[
+                                                                                            { label: "كيمياء", value: "كيمياء" },
+                                                                                            { label: "فيزياء", value: "فيزياء" },
+                                                                                        ]}
+                                                                                        selected={subjects}
+                                                                                        onChange={(selected) => {
+                                                                                            setSubjects(selected);
+                                                                                        }}
+                                                                                        placeholder={t("auth.subjectPlaceholder")}
+                                                                                        disabled={!editData.grade}
+                                                                                    />
+                                                                                    {subjects.length === 0 && (
+                                                                                        <p className="text-sm text-destructive mt-1">{t("auth.errors.selectAtLeastOneSubject") || "Please select at least one subject"}</p>
                                                                                     )}
-                                                                                </SelectContent>
-                                                                            </Select>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <Select
+                                                                                    value={editData.subject || ""}
+                                                                                    onValueChange={(value) => setEditData({...editData, subject: value || null})}
+                                                                                    disabled={!editData.grade}
+                                                                                >
+                                                                                    <SelectTrigger className="col-span-3">
+                                                                                        <SelectValue placeholder={t("auth.subjectPlaceholder")} />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        <SelectItem value="كيمياء">كيمياء</SelectItem>
+                                                                                        <SelectItem value="فيزياء">فيزياء</SelectItem>
+                                                                                        <SelectItem value="علوم متكاملة">علوم متكاملة</SelectItem>
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            )}
                                                                         </div>
                                                                         <div className="grid grid-cols-4 items-center gap-4">
                                                                             <Label htmlFor="role" className="text-right">
