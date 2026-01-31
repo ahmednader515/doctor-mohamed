@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, CheckCircle, XCircle, Award } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Award, ChevronRight, ChevronLeft } from "lucide-react";
 import { parseQuizOptions } from "@/lib/utils";
 
 interface QuizAnswer {
@@ -53,6 +53,7 @@ export default function QuizResultPage({
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [loading, setLoading] = useState(true);
     const [willRedirectToDashboard, setWillRedirectToDashboard] = useState(false);
+    const [previousContent, setPreviousContent] = useState<{ id: string; type: string } | null>(null);
 
     useEffect(() => {
         fetchResult();
@@ -70,6 +71,17 @@ export default function QuizResultPage({
                 const currentIndex = allContent.findIndex((content: any) => 
                     content.id === quizId && content.type === 'quiz'
                 );
+                
+                // Check for previous content
+                if (currentIndex > 0) {
+                    const prevContent = allContent[currentIndex - 1];
+                    setPreviousContent({
+                        id: prevContent.id,
+                        type: prevContent.type
+                    });
+                } else {
+                    setPreviousContent(null);
+                }
                 
                 // If no next content, set flag to show dashboard button
                 if (currentIndex === -1 || currentIndex >= allContent.length - 1) {
@@ -147,7 +159,7 @@ export default function QuizResultPage({
 
     const handleNextChapter = async () => {
         try {
-            // Get all course content (chapters and quizzes) sorted by position
+            // Get all course content (chapters, quizzes, and homeworks) sorted by position
             const contentResponse = await fetch(`/api/courses/${courseId}/content`);
             if (contentResponse.ok) {
                 const allContent = await contentResponse.json();
@@ -157,28 +169,40 @@ export default function QuizResultPage({
                     content.id === quizId && content.type === 'quiz'
                 );
                 
-                                 if (currentIndex !== -1 && currentIndex < allContent.length - 1) {
-                     const nextContent = allContent[currentIndex + 1];
-                     if (nextContent.type === 'chapter') {
-                         router.push(`/courses/${courseId}/chapters/${nextContent.id}`);
-                     } else if (nextContent.type === 'quiz') {
-                         router.push(`/courses/${courseId}/quizzes/${nextContent.id}`);
-                     } else if (nextContent.type === 'homework') {
-                         router.push(`/courses/${courseId}/homeworks/${nextContent.id}`);
-                     }
-                 } else {
-                     // If no next content, go to dashboard
-                     router.push(`/dashboard`);
-                 }
-                         } else {
-                 // Fallback to dashboard
-                 router.push(`/dashboard`);
-             }
-         } catch (error) {
-             console.error("Error navigating to next chapter:", error);
-             // Fallback to dashboard
-             router.push(`/dashboard`);
-         }
+                if (currentIndex !== -1 && currentIndex < allContent.length - 1) {
+                    const nextContent = allContent[currentIndex + 1];
+                    if (nextContent.type === 'chapter') {
+                        router.push(`/courses/${courseId}/chapters/${nextContent.id}`);
+                    } else if (nextContent.type === 'quiz') {
+                        router.push(`/courses/${courseId}/quizzes/${nextContent.id}`);
+                    } else if (nextContent.type === 'homework') {
+                        router.push(`/courses/${courseId}/homeworks/${nextContent.id}`);
+                    }
+                } else {
+                    // If no next content, go to dashboard
+                    router.push(`/dashboard`);
+                }
+            } else {
+                // Fallback to dashboard
+                router.push(`/dashboard`);
+            }
+        } catch (error) {
+            console.error("Error navigating to next chapter:", error);
+            // Fallback to dashboard
+            router.push(`/dashboard`);
+        }
+    };
+
+    const handlePreviousContent = () => {
+        if (!previousContent) return;
+        
+        if (previousContent.type === 'chapter') {
+            router.push(`/courses/${courseId}/chapters/${previousContent.id}`);
+        } else if (previousContent.type === 'quiz') {
+            router.push(`/courses/${courseId}/quizzes/${previousContent.id}`);
+        } else if (previousContent.type === 'homework') {
+            router.push(`/courses/${courseId}/homeworks/${previousContent.id}`);
+        }
     };
 
     const canRetakeQuiz = quiz && result && (result.attemptNumber < quiz.maxAttempts);
@@ -417,7 +441,19 @@ export default function QuizResultPage({
                     </Card>
 
                     {/* Actions */}
-                    <div className="flex justify-center gap-4">
+                    <div className="flex justify-between items-center gap-4">
+                        {previousContent ? (
+                            <Button
+                                onClick={handlePreviousContent}
+                                variant="outline"
+                                className="flex items-center gap-2"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                                الدرس السابق
+                            </Button>
+                        ) : (
+                            <div></div>
+                        )}
                         {canRetakeQuiz ? (
                             <Button
                                 onClick={handleTryAgain}
@@ -428,9 +464,10 @@ export default function QuizResultPage({
                         ) : (
                             <Button
                                 onClick={handleNextChapter}
-                                className="bg-primary hover:bg-primary/90"
+                                className="bg-primary hover:bg-primary/90 flex items-center gap-2"
                             >
                                 {willRedirectToDashboard ? "الصفحة الرئيسية" : "الدرس التالي"}
+                                {!willRedirectToDashboard && <ChevronLeft className="h-4 w-4" />}
                             </Button>
                         )}
                     </div>

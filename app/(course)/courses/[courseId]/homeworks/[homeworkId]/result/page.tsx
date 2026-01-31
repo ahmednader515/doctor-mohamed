@@ -500,25 +500,25 @@ export default function HomeworkResultPage({
                     </Card>
 
                     <div className="flex justify-between items-center gap-4">
-                        <Button
-                            onClick={handleNextChapter}
-                            className="bg-primary hover:bg-primary/90 flex items-center gap-2"
-                        >
-                            {!willRedirectToDashboard && <ChevronRight className="h-4 w-4 rotate-180" />}
-                            {willRedirectToDashboard ? "الصفحة الرئيسية" : "الدرس التالي"}
-                        </Button>
                         {previousContent ? (
                             <Button
                                 onClick={handlePreviousContent}
                                 variant="outline"
                                 className="flex items-center gap-2"
                             >
+                                <ChevronRight className="h-4 w-4" />
                                 الدرس السابق
-                                <ChevronLeft className="h-4 w-4" />
                             </Button>
                         ) : (
                             <div></div>
                         )}
+                        <Button
+                            onClick={handleNextChapter}
+                            className="bg-primary hover:bg-primary/90 flex items-center gap-2"
+                        >
+                            {willRedirectToDashboard ? "الصفحة الرئيسية" : "الدرس التالي"}
+                            {!willRedirectToDashboard && <ChevronLeft className="h-4 w-4" />}
+                        </Button>
                     </div>
                 </div>
             </div>
