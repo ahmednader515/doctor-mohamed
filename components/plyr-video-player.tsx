@@ -26,6 +26,7 @@ export const PlyrVideoPlayer = ({
   const playerRef = useRef<any>(null);
   const callbacksRef = useRef({ onEnded, onTimeUpdate });
   const isDestroyingRef = useRef(false);
+  const isInitializingRef = useRef(false);
 
   // Keep callbacks ref updated without causing re-renders
   useEffect(() => {
@@ -50,20 +51,30 @@ export const PlyrVideoPlayer = ({
     if (playerRef.current) {
       try {
         isDestroyingRef.current = true;
-        // Get the original element before destroy
-        const media = playerRef.current.media;
         
+        // Destroy Plyr instance
         if (typeof playerRef.current.destroy === "function") {
           playerRef.current.destroy();
         }
         
-        // Restore original element if Plyr modified it
-        if (media && containerRef.current && !containerRef.current.contains(media)) {
-          try {
-            containerRef.current.appendChild(media);
-          } catch (e) {
-            // Element might already be in the right place or removed
-          }
+        // Aggressively clean up ALL Plyr elements and wrappers
+        if (containerRef.current) {
+          // Remove all Plyr wrapper divs except the original media element
+          const allPlyrElements = containerRef.current.querySelectorAll('.plyr');
+          const originalMedia = videoType === "YOUTUBE" 
+            ? youtubeEmbedRef.current 
+            : html5VideoRef.current;
+          
+          allPlyrElements.forEach((el) => {
+            // Remove if it's not the original element and doesn't contain it
+            if (el !== originalMedia && !el.contains(originalMedia)) {
+              el.remove();
+            }
+          });
+
+          // Remove any Plyr post elements
+          const plyrPosts = containerRef.current.querySelectorAll('.plyr__poster');
+          plyrPosts.forEach((el) => el.remove());
         }
       } catch (error) {
         console.warn("Error destroying player:", error);
@@ -114,6 +125,11 @@ export const PlyrVideoPlayer = ({
     let timeoutId: NodeJS.Timeout | null = null;
 
     async function setupPlayer() {
+      // Prevent multiple simultaneous initializations
+      if (isInitializingRef.current) {
+        return;
+      }
+
       const targetEl =
         videoType === "YOUTUBE" ? youtubeEmbedRef.current : html5VideoRef.current;
       
@@ -126,21 +142,20 @@ export const PlyrVideoPlayer = ({
         return;
       }
 
+      isInitializingRef.current = true;
+
       // Small delay to ensure DOM is ready, especially for YouTube embeds
       await new Promise(resolve => {
         timeoutId = setTimeout(resolve, 100);
       });
 
-      if (isCancelled) return;
+      if (isCancelled) {
+        isInitializingRef.current = false;
+        return;
+      }
 
       // Destroy any previous instance first
       destroyPlayer();
-
-      if (isCancelled) return;
-
-      // Dynamically import Plyr to be SSR-safe
-      const plyrModule: any = await import("plyr");
-      const Plyr: any = plyrModule.default ?? plyrModule;
 
       if (isCancelled) return;
 
@@ -150,6 +165,49 @@ export const PlyrVideoPlayer = ({
         : html5VideoRef.current;
       
       if (!currentTargetEl || isCancelled) return;
+
+      // Aggressively clean up ALL Plyr elements and wrappers
+      if (containerRef.current) {
+        // Remove all Plyr wrapper divs
+        const allPlyrElements = containerRef.current.querySelectorAll('.plyr');
+        allPlyrElements.forEach((el) => {
+          // If it's not the original video/div element, remove it
+          if (el !== currentTargetEl && !el.contains(currentTargetEl)) {
+            el.remove();
+          }
+        });
+
+        // Remove any Plyr post elements (Plyr sometimes adds these)
+        const plyrPosts = containerRef.current.querySelectorAll('.plyr__poster');
+        plyrPosts.forEach((el) => el.remove());
+
+        // Find and restore the original video element if it was wrapped
+        if (videoType !== "YOUTUBE" && html5VideoRef.current) {
+          const originalVideo = html5VideoRef.current;
+          // If video is inside a Plyr wrapper, unwrap it
+          const plyrWrapper = originalVideo.closest('.plyr');
+          if (plyrWrapper && plyrWrapper !== containerRef.current) {
+            // Move video back to container
+            containerRef.current.appendChild(originalVideo);
+            plyrWrapper.remove();
+          }
+        }
+      }
+
+      // Check if Plyr is already initialized on this element
+      if ((currentTargetEl as any).plyr) {
+        try {
+          (currentTargetEl as any).plyr.destroy();
+        } catch (e) {
+          // Ignore errors during cleanup
+        }
+      }
+
+      // Dynamically import Plyr to be SSR-safe
+      const plyrModule: any = await import("plyr");
+      const Plyr: any = plyrModule.default ?? plyrModule;
+
+      if (isCancelled) return;
 
       try {
         const player = new Plyr(currentTargetEl, {
@@ -196,6 +254,8 @@ export const PlyrVideoPlayer = ({
         disableYoutubeOverlay();
       } catch (error) {
         console.error("Error initializing Plyr:", error);
+      } finally {
+        isInitializingRef.current = false;
       }
     }
 
@@ -203,9 +263,11 @@ export const PlyrVideoPlayer = ({
 
     return () => {
       isCancelled = true;
+      isInitializingRef.current = false;
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
+      destroyPlayer();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoUrl, youtubeVideoId, videoType, disableYoutubeOverlay]);
@@ -240,7 +302,14 @@ export const PlyrVideoPlayer = ({
           playsInline 
           crossOrigin="anonymous"
         >
-          {videoUrl ? <source src={videoUrl} type="video/mp4" /> : null}
+          {videoUrl ? (
+            <>
+              <source src={videoUrl} type="video/mp4" />
+              <source src={videoUrl} type="video/webm" />
+              <source src={videoUrl} type="video/ogg" />
+              Your browser does not support the video tag.
+            </>
+          ) : null}
         </video>
       )}
     </div>

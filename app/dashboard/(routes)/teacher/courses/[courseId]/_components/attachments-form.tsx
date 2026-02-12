@@ -6,7 +6,8 @@ import { File, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import axios from "axios";
-import { UploadButton } from "@/lib/uploadthing";
+import { R2FileUpload } from "@/components/r2-file-upload";
+import { useState } from "react";
 
 interface AttachmentsFormProps {
     initialData: {
@@ -25,6 +26,7 @@ export const AttachmentsForm = ({
     courseId
 }: AttachmentsFormProps) => {
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const router = useRouter();
 
     const onDelete = async (id: string) => {
@@ -49,26 +51,33 @@ export const AttachmentsForm = ({
                         الملفات والمرفقات
                     </h2>
                 </div>
-                <UploadButton
-                    endpoint="courseAttachment"
-                    onClientUploadComplete={async (res) => {
-                        if (res && res[0]) {
-                            try {
-                                await axios.post(`/api/courses/${courseId}/attachments`, {
-                                    url: res[0].url,
-                                    name: res[0].name
-                                });
-                                toast.success("تم رفع الملف");
-                                router.refresh();
-                            } catch {
-                                toast.error("حدث خطأ");
+                <div className="relative">
+                    <R2FileUpload
+                        endpoint="courseAttachment"
+                        onChange={async (res) => {
+                            if (res) {
+                                try {
+                                    setIsUploading(true);
+                                    await axios.post(`/api/courses/${courseId}/attachments`, {
+                                        url: res.url,
+                                        name: res.name
+                                    });
+                                    toast.success("تم رفع الملف");
+                                    router.refresh();
+                                } catch {
+                                    toast.error("حدث خطأ");
+                                } finally {
+                                    setIsUploading(false);
+                                }
                             }
-                        }
-                    }}
-                    onUploadError={(error: Error) => {
-                        toast.error(`حدث خطأ: ${error.message}`);
-                    }}
-                />
+                        }}
+                    />
+                    {isUploading && (
+                        <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-md">
+                            <p className="text-sm text-muted-foreground">جاري الرفع...</p>
+                        </div>
+                    )}
+                </div>
             </div>
             {initialData.attachments.length === 0 && (
                 <div className="flex items-center justify-center h-60 bg-muted rounded-md mt-4">

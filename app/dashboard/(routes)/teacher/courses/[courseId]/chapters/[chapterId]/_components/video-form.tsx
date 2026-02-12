@@ -41,6 +41,8 @@ export const VideoForm = ({
     const onSubmitUpload = async (url: string) => {
         try {
             setIsSubmitting(true);
+            console.log("[CHAPTER_VIDEO] Uploading video with URL:", url);
+            
             const response = await fetch(`/api/courses/${courseId}/chapters/${chapterId}/upload`, {
                 method: 'POST',
                 headers: {
@@ -50,12 +52,24 @@ export const VideoForm = ({
             });
 
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error("[CHAPTER_VIDEO] Upload failed:", errorText);
                 throw new Error('Failed to upload video');
             }
 
+            const result = await response.json();
+            console.log("[CHAPTER_VIDEO] Upload successful:", result);
+
             toast.success(t("teacher.chapterEdit.uploadSuccess"));
             setIsEditing(false);
+            
+            // Force a hard refresh to ensure the video shows
             router.refresh();
+            
+            // Also try to update the local state if possible
+            setTimeout(() => {
+                router.refresh();
+            }, 500);
         } catch (error) {
             console.error("[CHAPTER_VIDEO]", error);
             toast.error(t("teacher.chapterEdit.uploadError"));

@@ -12,7 +12,7 @@ import { Plus, Trash2, GripVertical, X, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { UploadDropzone } from "@/lib/uploadthing";
+import { R2FileUpload } from "@/components/r2-file-upload";
 import { useLanguage } from "@/lib/contexts/language-context";
 
 interface Course {
@@ -764,21 +764,14 @@ const EditHomeworkPage = () => {
                                             </div>
                                         ) : (
                                             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                                                <UploadDropzone
+                                                <R2FileUpload
                                                     endpoint="courseAttachment"
-                                                    onClientUploadComplete={(res) => {
-                                                        if (res && res[0]) {
-                                                            updateQuestion(index, "imageUrl", res[0].url);
+                                                    onChange={(res) => {
+                                                        if (res) {
+                                                            updateQuestion(index, "imageUrl", res.url);
                                                             toast.success(t("teacher.homeworks.create.questions.imageUploadSuccess") || "تم رفع الصورة بنجاح");
                                                         }
                                                         setUploadingImages(prev => ({ ...prev, [index]: false }));
-                                                    }}
-                                                    onUploadError={(error: Error) => {
-                                                        toast.error(t("teacher.homeworks.create.questions.imageUploadError", { error: error.message }) || `حدث خطأ أثناء رفع الصورة: ${error.message}`);
-                                                        setUploadingImages(prev => ({ ...prev, [index]: false }));
-                                                    }}
-                                                    onUploadBegin={() => {
-                                                        setUploadingImages(prev => ({ ...prev, [index]: true }));
                                                     }}
                                                 />
                                             </div>

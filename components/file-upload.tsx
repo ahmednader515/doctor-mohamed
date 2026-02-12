@@ -1,12 +1,10 @@
 "use client";
 
-import { UploadDropzone } from "@/lib/uploadthing";
-import { ourFileRouter } from "@/lib/uploadthing/core";
-import toast from "react-hot-toast";
+import { R2FileUpload } from "@/components/r2-file-upload";
 
 interface FileUploadProps {
     onChange: (res?: { url: string; name: string }) => void;
-    endpoint: keyof typeof ourFileRouter;
+    endpoint?: "courseImage" | "courseAttachment" | "chapterVideo";
 }
 
 export const FileUpload = ({
@@ -14,19 +12,9 @@ export const FileUpload = ({
     endpoint,
 }: FileUploadProps) => {
     return (
-        <UploadDropzone
+        <R2FileUpload
             endpoint={endpoint}
-            onClientUploadComplete={(res) => {
-                if (res && res[0]) {
-                    onChange({
-                        url: res[0].ufsUrl,
-                        name: res[0].name
-                    });
-                }
-            }}
-            onUploadError={(error: Error) => {
-                toast.error(`${error?.message}`);
-            }}
+            onChange={onChange}
         />
     )
 }

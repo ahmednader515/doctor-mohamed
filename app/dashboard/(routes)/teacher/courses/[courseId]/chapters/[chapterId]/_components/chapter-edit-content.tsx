@@ -17,6 +17,8 @@ interface Chapter {
     title: string | null;
     description: string | null;
     videoUrl: string | null;
+    videoType: string | null;
+    youtubeVideoId: string | null;
     isPublished: boolean;
 }
 
