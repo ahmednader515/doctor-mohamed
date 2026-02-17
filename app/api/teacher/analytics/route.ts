@@ -31,9 +31,9 @@ export async function GET() {
       },
       include: {
         purchases: {
-                  include: {
-          user: true,
-        },
+          include: {
+            user: true,
+          },
         },
         chapters: {
           where: {
@@ -88,12 +88,14 @@ export async function GET() {
     // Calculate analytics for each course
     const courseAnalytics = courses.map((course) => {
       try {
-        // Calculate revenue for this course (using course price for each purchase)
-        const courseRevenue = course.purchases.reduce((total: number, purchase) => {
-          if (purchase.status === "ACTIVE") {
-            return total + (course.price || 0);
-          }
-          return total;
+        // Filter out purchases made via codes (purchaseCodeId is not null)
+        const paidPurchases = course.purchases.filter(
+          (purchase) => purchase.status === "ACTIVE" && !purchase.purchaseCodeId
+        );
+
+        // Calculate revenue for this course (only from paid purchases, not codes)
+        const courseRevenue = paidPurchases.reduce((total: number) => {
+          return total + (course.price || 0);
         }, 0);
 
         // Calculate completion rate
@@ -117,7 +119,7 @@ export async function GET() {
         return {
           id: course.id,
           title: course.title,
-          sales: course.purchases.length,
+          sales: paidPurchases.length, // Only count paid purchases, not code redemptions
           revenue: courseRevenue,
           completionRate,
         };
