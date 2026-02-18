@@ -68,16 +68,69 @@ interface QuizAnswer {
     pointsEarned: number;
 }
 
+interface Homework {
+    id: string;
+    title: string;
+    courseId: string;
+    course: {
+        title: string;
+    };
+}
+
+interface HomeworkResult {
+    id: string;
+    studentId: string;
+    user: {
+        fullName: string;
+        phoneNumber: string;
+        grade: string | null;
+    };
+    homeworkId: string;
+    homework: {
+        title: string;
+        course: {
+            id: string;
+            title: string;
+        };
+    };
+    score: number;
+    totalPoints: number;
+    percentage: number;
+    submittedAt: string;
+    answers: HomeworkAnswer[];
+}
+
+interface HomeworkAnswer {
+    questionId: string;
+    question: {
+        text: string;
+        type: string;
+        points: number;
+        imageUrl?: string | null;
+        options?: string[] | null;
+    };
+    studentAnswer: string;
+    correctAnswer: string;
+    isCorrect: boolean;
+    pointsEarned: number;
+}
+
+// Unified result type for display
+type ResultItem = (QuizResult & { type: 'quiz' }) | (HomeworkResult & { type: 'homework' });
+
 const GradesPage = () => {
     const { t } = useLanguage();
     const [courses, setCourses] = useState<Course[]>([]);
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+    const [homeworks, setHomeworks] = useState<Homework[]>([]);
     const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
+    const [homeworkResults, setHomeworkResults] = useState<HomeworkResult[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCourse, setSelectedCourse] = useState<string>("");
     const [selectedQuiz, setSelectedQuiz] = useState<string>("");
-    const [selectedResult, setSelectedResult] = useState<QuizResult | null>(null);
+    const [selectedHomework, setSelectedHomework] = useState<string>("");
+    const [selectedResult, setSelectedResult] = useState<ResultItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     // Pagination state for each grade
     const [grade1DisplayCount, setGrade1DisplayCount] = useState(25);
@@ -91,7 +144,9 @@ const GradesPage = () => {
     useEffect(() => {
         fetchCourses();
         fetchQuizzes();
+        fetchHomeworks();
         fetchQuizResults();
+        fetchHomeworkResults();
     }, []);
 
     const fetchCourses = async () => {
@@ -118,6 +173,18 @@ const GradesPage = () => {
         }
     };
 
+    const fetchHomeworks = async () => {
+        try {
+            const response = await fetch("/api/teacher/homeworks");
+            if (response.ok) {
+                const data = await response.json();
+                setHomeworks(data);
+            }
+        } catch (error) {
+            console.error("Error fetching homeworks:", error);
+        }
+    };
+
     const fetchQuizResults = async () => {
         try {
             const response = await fetch("/api/teacher/quiz-results");
@@ -127,26 +194,49 @@ const GradesPage = () => {
             }
         } catch (error) {
             console.error("Error fetching quiz results:", error);
+        }
+    };
+
+    const fetchHomeworkResults = async () => {
+        try {
+            const response = await fetch("/api/teacher/homework-results");
+            if (response.ok) {
+                const data = await response.json();
+                setHomeworkResults(data);
+            }
+        } catch (error) {
+            console.error("Error fetching homework results:", error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleViewResult = (result: QuizResult) => {
+    const handleViewResult = (result: ResultItem) => {
         setSelectedResult(result);
         setIsDialogOpen(true);
     };
 
-    const filteredResults = quizResults.filter(result => {
+    // Combine quiz and homework results with type indicators
+    const allResults: ResultItem[] = [
+        ...quizResults.map(r => ({ ...r, type: 'quiz' as const })),
+        ...homeworkResults.map(r => ({ ...r, type: 'homework' as const }))
+    ];
+
+    const filteredResults = allResults.filter(result => {
+        const isQuiz = result.type === 'quiz';
+        const title = isQuiz ? result.quiz.title : result.homework.title;
+        const course = isQuiz ? result.quiz.course : result.homework.course;
+        
         const matchesSearch = 
             result.user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            result.quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            result.quiz.course.title.toLowerCase().includes(searchTerm.toLowerCase());
+            title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            course.title.toLowerCase().includes(searchTerm.toLowerCase());
         
-        const matchesCourse = !selectedCourse || selectedCourse === "all" || result.quiz.course.id === selectedCourse;
-        const matchesQuiz = !selectedQuiz || selectedQuiz === "all" || result.quizId === selectedQuiz;
+        const matchesCourse = !selectedCourse || selectedCourse === "all" || course.id === selectedCourse;
+        const matchesQuiz = !selectedQuiz || selectedQuiz === "all" || (isQuiz && result.quizId === selectedQuiz);
+        const matchesHomework = !selectedHomework || selectedHomework === "all" || (!isQuiz && result.homeworkId === selectedHomework);
         
-        return matchesSearch && matchesCourse && matchesQuiz;
+        return matchesSearch && matchesCourse && (matchesQuiz || matchesHomework);
     });
 
     // Group results by student grade
@@ -155,21 +245,36 @@ const GradesPage = () => {
     const grade3ResultsAll = filteredResults.filter(result => isThirdGrade(result.user.grade));
 
     // Apply search filters for each grade table
-    const grade1Results = grade1ResultsAll.filter(result => 
-        result.user.fullName.toLowerCase().includes(grade1SearchTerm.toLowerCase()) ||
-        result.quiz.title.toLowerCase().includes(grade1SearchTerm.toLowerCase()) ||
-        result.quiz.course.title.toLowerCase().includes(grade1SearchTerm.toLowerCase())
-    );
-    const grade2Results = grade2ResultsAll.filter(result => 
-        result.user.fullName.toLowerCase().includes(grade2SearchTerm.toLowerCase()) ||
-        result.quiz.title.toLowerCase().includes(grade2SearchTerm.toLowerCase()) ||
-        result.quiz.course.title.toLowerCase().includes(grade2SearchTerm.toLowerCase())
-    );
-    const grade3Results = grade3ResultsAll.filter(result => 
-        result.user.fullName.toLowerCase().includes(grade3SearchTerm.toLowerCase()) ||
-        result.quiz.title.toLowerCase().includes(grade3SearchTerm.toLowerCase()) ||
-        result.quiz.course.title.toLowerCase().includes(grade3SearchTerm.toLowerCase())
-    );
+    const grade1Results = grade1ResultsAll.filter(result => {
+        const isQuiz = result.type === 'quiz';
+        const title = isQuiz ? result.quiz.title : result.homework.title;
+        const course = isQuiz ? result.quiz.course : result.homework.course;
+        return (
+            result.user.fullName.toLowerCase().includes(grade1SearchTerm.toLowerCase()) ||
+            title.toLowerCase().includes(grade1SearchTerm.toLowerCase()) ||
+            course.title.toLowerCase().includes(grade1SearchTerm.toLowerCase())
+        );
+    });
+    const grade2Results = grade2ResultsAll.filter(result => {
+        const isQuiz = result.type === 'quiz';
+        const title = isQuiz ? result.quiz.title : result.homework.title;
+        const course = isQuiz ? result.quiz.course : result.homework.course;
+        return (
+            result.user.fullName.toLowerCase().includes(grade2SearchTerm.toLowerCase()) ||
+            title.toLowerCase().includes(grade2SearchTerm.toLowerCase()) ||
+            course.title.toLowerCase().includes(grade2SearchTerm.toLowerCase())
+        );
+    });
+    const grade3Results = grade3ResultsAll.filter(result => {
+        const isQuiz = result.type === 'quiz';
+        const title = isQuiz ? result.quiz.title : result.homework.title;
+        const course = isQuiz ? result.quiz.course : result.homework.course;
+        return (
+            result.user.fullName.toLowerCase().includes(grade3SearchTerm.toLowerCase()) ||
+            title.toLowerCase().includes(grade3SearchTerm.toLowerCase()) ||
+            course.title.toLowerCase().includes(grade3SearchTerm.toLowerCase())
+        );
+    });
 
     // Paginated results
     const grade1ResultsPaginated = grade1Results.slice(0, grade1DisplayCount);
@@ -217,7 +322,7 @@ const GradesPage = () => {
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.totalStudents")}</p>
                                 <p className="text-2xl font-bold">
-                                    {new Set(quizResults.map(r => r.studentId)).size}
+                                    {new Set(allResults.map(r => r.studentId)).size}
                                 </p>
                             </div>
                         </div>
@@ -230,8 +335,8 @@ const GradesPage = () => {
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.averageScore")}</p>
                                 <p className="text-2xl font-bold">
-                                    {quizResults.length > 0 
-                                        ? (quizResults.reduce((sum, r) => sum + r.percentage, 0) / quizResults.length).toFixed(1)
+                                    {allResults.length > 0 
+                                        ? (allResults.reduce((sum, r) => sum + r.percentage, 0) / allResults.length).toFixed(1)
                                         : "0.0"}%
                                 </p>
                             </div>
@@ -245,8 +350,8 @@ const GradesPage = () => {
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.highestScore")}</p>
                                 <p className="text-2xl font-bold">
-                                    {quizResults.length > 0 
-                                        ? Math.max(...quizResults.map(r => r.percentage)).toFixed(1)
+                                    {allResults.length > 0 
+                                        ? Math.max(...allResults.map(r => r.percentage)).toFixed(1)
                                         : "0.0"}%
                                 </p>
                             </div>
@@ -259,7 +364,7 @@ const GradesPage = () => {
                             <FileText className="h-8 w-8 text-orange-600" />
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.totalQuizzes")}</p>
-                                <p className="text-2xl font-bold">{quizResults.length}</p>
+                                <p className="text-2xl font-bold">{allResults.length}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -272,7 +377,7 @@ const GradesPage = () => {
                     <CardTitle>{t("teacher.grades.filters.title")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium">{t("teacher.grades.filters.search")}</label>
                             <div className="flex items-center space-x-2">
@@ -316,6 +421,22 @@ const GradesPage = () => {
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">الواجب</label>
+                            <Select value={selectedHomework} onValueChange={setSelectedHomework}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="جميع الواجبات" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">جميع الواجبات</SelectItem>
+                                    {homeworks.map((homework) => (
+                                        <SelectItem key={homework.id} value={homework.id}>
+                                            {homework.title}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -347,6 +468,7 @@ const GradesPage = () => {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.student")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">النوع</TableHead>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.quiz")}</TableHead>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.course")}</TableHead>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.score")}</TableHead>
@@ -358,17 +480,25 @@ const GradesPage = () => {
                                         <TableBody>
                                             {grade1ResultsPaginated.map((result) => {
                                                 const gradeBadge = getGradeBadge(result.percentage);
+                                                const isQuiz = result.type === 'quiz';
+                                                const title = isQuiz ? result.quiz.title : result.homework.title;
+                                                const course = isQuiz ? result.quiz.course : result.homework.course;
                                                 return (
-                                                    <TableRow key={result.id}>
+                                                    <TableRow key={`${result.type}-${result.id}`}>
                                                         <TableCell className="font-medium">
                                                             {result.user.fullName}
                                                         </TableCell>
                                                         <TableCell>
-                                                            {result.quiz.title}
+                                                            <Badge variant={isQuiz ? "default" : "secondary"}>
+                                                                {isQuiz ? "امتحان" : "واجب"}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {title}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Badge variant="outline">
-                                                                {result.quiz.course.title}
+                                                                {course.title}
                                                             </Badge>
                                                         </TableCell>
                                                         <TableCell>
@@ -444,6 +574,7 @@ const GradesPage = () => {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.student")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">النوع</TableHead>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.quiz")}</TableHead>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.course")}</TableHead>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.score")}</TableHead>
@@ -455,17 +586,25 @@ const GradesPage = () => {
                                         <TableBody>
                                             {grade2ResultsPaginated.map((result) => {
                                                 const gradeBadge = getGradeBadge(result.percentage);
+                                                const isQuiz = result.type === 'quiz';
+                                                const title = isQuiz ? result.quiz.title : result.homework.title;
+                                                const course = isQuiz ? result.quiz.course : result.homework.course;
                                                 return (
-                                                    <TableRow key={result.id}>
+                                                    <TableRow key={`${result.type}-${result.id}`}>
                                                         <TableCell className="font-medium">
                                                             {result.user.fullName}
                                                         </TableCell>
                                                         <TableCell>
-                                                            {result.quiz.title}
+                                                            <Badge variant={isQuiz ? "default" : "secondary"}>
+                                                                {isQuiz ? "امتحان" : "واجب"}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {title}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Badge variant="outline">
-                                                                {result.quiz.course.title}
+                                                                {course.title}
                                                             </Badge>
                                                         </TableCell>
                                                         <TableCell>
@@ -541,6 +680,7 @@ const GradesPage = () => {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.student")}</TableHead>
+                                                <TableHead className="rtl:text-right ltr:text-left">النوع</TableHead>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.quiz")}</TableHead>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.course")}</TableHead>
                                                 <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.score")}</TableHead>
@@ -552,17 +692,25 @@ const GradesPage = () => {
                                         <TableBody>
                                             {grade3ResultsPaginated.map((result) => {
                                                 const gradeBadge = getGradeBadge(result.percentage);
+                                                const isQuiz = result.type === 'quiz';
+                                                const title = isQuiz ? result.quiz.title : result.homework.title;
+                                                const course = isQuiz ? result.quiz.course : result.homework.course;
                                                 return (
-                                                    <TableRow key={result.id}>
+                                                    <TableRow key={`${result.type}-${result.id}`}>
                                                         <TableCell className="font-medium">
                                                             {result.user.fullName}
                                                         </TableCell>
                                                         <TableCell>
-                                                            {result.quiz.title}
+                                                            <Badge variant={isQuiz ? "default" : "secondary"}>
+                                                                {isQuiz ? "امتحان" : "واجب"}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {title}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Badge variant="outline">
-                                                                {result.quiz.course.title}
+                                                                {course.title}
                                                             </Badge>
                                                         </TableCell>
                                                         <TableCell>
@@ -620,6 +768,11 @@ const GradesPage = () => {
                     <DialogHeader>
                         <DialogTitle>
                             {t("teacher.grades.details.title", { name: selectedResult?.user.fullName || "" })}
+                            {selectedResult && (
+                                <Badge variant={selectedResult.type === 'quiz' ? "default" : "secondary"} className="mr-2">
+                                    {selectedResult.type === 'quiz' ? "امتحان" : "واجب"}
+                                </Badge>
+                            )}
                         </DialogTitle>
                     </DialogHeader>
                     {selectedResult && (
@@ -691,6 +844,24 @@ const GradesPage = () => {
                                                             alt="Question" 
                                                             className="max-w-full h-auto max-h-64 rounded-lg border shadow-sm"
                                                         />
+                                                    </div>
+                                                )}
+
+                                                {/* Show options for multiple choice questions */}
+                                                {answer.question.options && Array.isArray(answer.question.options) && answer.question.options.length > 0 && (
+                                                    <div className="mb-3">
+                                                        <p className="text-sm font-medium mb-1">الخيارات:</p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {answer.question.options.map((option: string, optIndex: number) => (
+                                                                <Badge 
+                                                                    key={optIndex}
+                                                                    variant={option === answer.correctAnswer ? "default" : "outline"}
+                                                                    className={option === answer.correctAnswer ? "bg-green-600" : ""}
+                                                                >
+                                                                    {option}
+                                                                </Badge>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 )}
                                                 
