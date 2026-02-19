@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useLanguage } from "@/lib/contexts/language-context";
 import { isFirstGrade, isSecondGrade, isThirdGrade } from "@/lib/utils/grade-utils";
+import { parseQuizOptions } from "@/lib/utils";
 
 interface Course {
     id: string;
@@ -61,6 +62,8 @@ interface QuizAnswer {
         type: string;
         points: number;
         imageUrl?: string | null;
+        options?: string[] | null;
+        correctAnswer?: string | null;
     };
     studentAnswer: string;
     correctAnswer: string;
@@ -127,11 +130,13 @@ const GradesPage = () => {
     const [homeworkResults, setHomeworkResults] = useState<HomeworkResult[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedType, setSelectedType] = useState<"all" | "quiz" | "homework">("all");
     const [selectedCourse, setSelectedCourse] = useState<string>("");
     const [selectedQuiz, setSelectedQuiz] = useState<string>("");
     const [selectedHomework, setSelectedHomework] = useState<string>("");
     const [selectedResult, setSelectedResult] = useState<ResultItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [loadingDetails, setLoadingDetails] = useState(false);
     // Pagination state for each grade
     const [grade1DisplayCount, setGrade1DisplayCount] = useState(25);
     const [grade2DisplayCount, setGrade2DisplayCount] = useState(25);
@@ -211,8 +216,54 @@ const GradesPage = () => {
         }
     };
 
-    const handleViewResult = (result: ResultItem) => {
-        setSelectedResult(result);
+    const handleViewResult = async (result: ResultItem) => {
+        // Check if answers are missing or empty
+        if (!result.answers || result.answers.length === 0) {
+            // Try to fetch full details from the API
+            setLoadingDetails(true);
+            try {
+                const endpoint = result.type === 'quiz' 
+                    ? `/api/teacher/quiz-results/${result.id}`
+                    : `/api/teacher/homework-results/${result.id}`;
+                
+                const response = await fetch(endpoint);
+                if (response.ok) {
+                    const fullResult = await response.json();
+                    // Parse options if needed for homework
+                    if (result.type === 'homework' && fullResult.answers) {
+                        fullResult.answers = fullResult.answers.map((answer: any) => ({
+                            ...answer,
+                            question: {
+                                ...answer.question,
+                                options: answer.question.options ? parseQuizOptions(answer.question.options) : null
+                            }
+                        }));
+                    }
+                    // Parse options for quiz results if needed
+                    if (result.type === 'quiz' && fullResult.answers) {
+                        fullResult.answers = fullResult.answers.map((answer: any) => ({
+                            ...answer,
+                            question: {
+                                ...answer.question,
+                                options: answer.question.options ? parseQuizOptions(answer.question.options) : null
+                            }
+                        }));
+                    }
+                    setSelectedResult({ ...fullResult, type: result.type });
+                } else {
+                    // If fetch fails, use the original result
+                    setSelectedResult(result);
+                }
+            } catch (error) {
+                console.error("Error fetching result details:", error);
+                // If fetch fails, use the original result
+                setSelectedResult(result);
+            } finally {
+                setLoadingDetails(false);
+            }
+        } else {
+            setSelectedResult(result);
+        }
         setIsDialogOpen(true);
     };
 
@@ -227,6 +278,11 @@ const GradesPage = () => {
         const title = isQuiz ? result.quiz.title : result.homework.title;
         const course = isQuiz ? result.quiz.course : result.homework.course;
         
+        // Filter by type first
+        const matchesType = selectedType === "all" || 
+            (selectedType === "quiz" && isQuiz) || 
+            (selectedType === "homework" && !isQuiz);
+        
         const matchesSearch = 
             result.user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -236,7 +292,7 @@ const GradesPage = () => {
         const matchesQuiz = !selectedQuiz || selectedQuiz === "all" || (isQuiz && result.quizId === selectedQuiz);
         const matchesHomework = !selectedHomework || selectedHomework === "all" || (!isQuiz && result.homeworkId === selectedHomework);
         
-        return matchesSearch && matchesCourse && (matchesQuiz || matchesHomework);
+        return matchesType && matchesSearch && matchesCourse && (matchesQuiz || matchesHomework);
     });
 
     // Group results by student grade
@@ -322,7 +378,7 @@ const GradesPage = () => {
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.totalStudents")}</p>
                                 <p className="text-2xl font-bold">
-                                    {new Set(allResults.map(r => r.studentId)).size}
+                                    {new Set(filteredResults.map(r => r.studentId)).size}
                                 </p>
                             </div>
                         </div>
@@ -335,8 +391,8 @@ const GradesPage = () => {
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.averageScore")}</p>
                                 <p className="text-2xl font-bold">
-                                    {allResults.length > 0 
-                                        ? (allResults.reduce((sum, r) => sum + r.percentage, 0) / allResults.length).toFixed(1)
+                                    {filteredResults.length > 0 
+                                        ? (filteredResults.reduce((sum, r) => sum + r.percentage, 0) / filteredResults.length).toFixed(1)
                                         : "0.0"}%
                                 </p>
                             </div>
@@ -350,8 +406,8 @@ const GradesPage = () => {
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.highestScore")}</p>
                                 <p className="text-2xl font-bold">
-                                    {allResults.length > 0 
-                                        ? Math.max(...allResults.map(r => r.percentage)).toFixed(1)
+                                    {filteredResults.length > 0 
+                                        ? Math.max(...filteredResults.map(r => r.percentage)).toFixed(1)
                                         : "0.0"}%
                                 </p>
                             </div>
@@ -364,7 +420,7 @@ const GradesPage = () => {
                             <FileText className="h-8 w-8 text-orange-600" />
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.totalQuizzes")}</p>
-                                <p className="text-2xl font-bold">{allResults.length}</p>
+                                <p className="text-2xl font-bold">{filteredResults.length}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -377,7 +433,28 @@ const GradesPage = () => {
                     <CardTitle>{t("teacher.grades.filters.title")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">النوع</label>
+                            <Select value={selectedType} onValueChange={(value: "all" | "quiz" | "homework") => {
+                                setSelectedType(value);
+                                // Reset quiz/homework filters when type changes
+                                if (value === "quiz") {
+                                    setSelectedHomework("all");
+                                } else if (value === "homework") {
+                                    setSelectedQuiz("all");
+                                }
+                            }}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="جميع الأنواع" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">جميع الأنواع</SelectItem>
+                                    <SelectItem value="quiz">امتحانات</SelectItem>
+                                    <SelectItem value="homework">واجبات</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">{t("teacher.grades.filters.search")}</label>
                             <div className="flex items-center space-x-2">
@@ -407,7 +484,11 @@ const GradesPage = () => {
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">{t("teacher.grades.filters.quiz")}</label>
-                            <Select value={selectedQuiz} onValueChange={setSelectedQuiz}>
+                            <Select 
+                                value={selectedQuiz} 
+                                onValueChange={setSelectedQuiz}
+                                disabled={selectedType === "homework"}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder={t("teacher.grades.filters.allQuizzes")} />
                                 </SelectTrigger>
@@ -423,7 +504,11 @@ const GradesPage = () => {
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">الواجب</label>
-                            <Select value={selectedHomework} onValueChange={setSelectedHomework}>
+                            <Select 
+                                value={selectedHomework} 
+                                onValueChange={setSelectedHomework}
+                                disabled={selectedType === "quiz"}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="جميع الواجبات" />
                                 </SelectTrigger>
@@ -775,7 +860,11 @@ const GradesPage = () => {
                             )}
                         </DialogTitle>
                     </DialogHeader>
-                    {selectedResult && (
+                    {loadingDetails ? (
+                        <div className="text-center py-8">
+                            <div className="text-muted-foreground">جاري تحميل التفاصيل...</div>
+                        </div>
+                    ) : selectedResult ? (
                         <div className="space-y-6">
                             {/* Summary */}
                             <Card>
@@ -798,13 +887,13 @@ const GradesPage = () => {
                                         </div>
                                         <div className="text-center">
                                             <div className="text-2xl font-bold text-green-600">
-                                                {selectedResult.answers.filter(a => a.isCorrect).length}
+                                                {selectedResult.answers?.filter(a => a.isCorrect).length || 0}
                                             </div>
                                             <div className="text-sm text-muted-foreground">{t("teacher.grades.details.summary.correctAnswers")}</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-2xl font-bold text-red-600">
-                                                {selectedResult.answers.filter(a => !a.isCorrect).length}
+                                                {selectedResult.answers?.filter(a => !a.isCorrect).length || 0}
                                             </div>
                                             <div className="text-sm text-muted-foreground">{t("teacher.grades.details.summary.wrongAnswers")}</div>
                                         </div>
@@ -825,8 +914,9 @@ const GradesPage = () => {
                                     <CardTitle>{t("teacher.grades.details.answers.title")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-4">
-                                        {selectedResult.answers.map((answer, index) => (
+                                    {selectedResult.answers && selectedResult.answers.length > 0 ? (
+                                        <div className="space-y-4">
+                                            {selectedResult.answers.map((answer, index) => (
                                             <div key={answer.questionId} className="border rounded-lg p-4">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <h4 className="font-medium">{t("teacher.grades.details.answers.questionNumber", { number: index + 1 })}</h4>
@@ -883,9 +973,18 @@ const GradesPage = () => {
                                                 </div>
                                             </div>
                                         ))}
-                                    </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                            لا توجد تفاصيل الإجابات متاحة لهذه النتيجة
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                            لا توجد تفاصيل متاحة
                         </div>
                     )}
                 </DialogContent>

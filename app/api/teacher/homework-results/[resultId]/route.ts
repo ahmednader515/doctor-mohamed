@@ -3,27 +3,23 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { parseQuizOptions } from "@/lib/utils";
 
-export async function GET(req: Request) {
+export async function GET(
+    req: Request,
+    { params }: { params: Promise<{ resultId: string }> }
+) {
     try {
         const { userId } = await auth();
-        const { searchParams } = new URL(req.url);
-        const quizId = searchParams.get('quizId');
+        const resolvedParams = await params;
 
         if (!userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // Build the where clause (all teachers can see all quiz results)
-        const whereClause: any = {};
-
-        // Add quizId filter if provided
-        if (quizId) {
-            whereClause.quizId = quizId;
-        }
-
-        // Get all quiz results
-        const quizResults = await db.quizResult.findMany({
-            where: whereClause,
+        // Get the homework result (all teachers can see all homework results)
+        const homeworkResult = await db.homeworkResult.findFirst({
+            where: {
+                id: resolvedParams.resultId
+            },
             include: {
                 user: {
                     select: {
@@ -32,7 +28,7 @@ export async function GET(req: Request) {
                         grade: true
                     }
                 },
-                quiz: {
+                homework: {
                     select: {
                         title: true,
                         course: {
@@ -63,27 +59,29 @@ export async function GET(req: Request) {
                         }
                     }
                 }
-            },
-            orderBy: {
-                submittedAt: "desc"
             }
         });
 
+        if (!homeworkResult) {
+            return new NextResponse("Homework result not found", { status: 404 });
+        }
+
         // Parse options for multiple choice questions
-        const parsedResults = quizResults.map((result: any) => ({
-            ...result,
-            answers: result.answers.map((answer: any) => ({
+        const parsedResult = {
+            ...homeworkResult,
+            answers: homeworkResult.answers.map((answer: any) => ({
                 ...answer,
                 question: {
                     ...answer.question,
                     options: answer.question.options ? parseQuizOptions(answer.question.options) : null
                 }
             }))
-        }));
+        };
 
-        return NextResponse.json(parsedResults);
+        return NextResponse.json(parsedResult);
     } catch (error) {
-        console.log("[TEACHER_QUIZ_RESULTS_GET]", error);
+        console.log("[TEACHER_HOMEWORK_RESULT_GET]", error);
         return new NextResponse("Internal Error", { status: 500 });
     }
-} 
+}
+
