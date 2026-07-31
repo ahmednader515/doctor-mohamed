@@ -188,7 +188,7 @@ export async function POST(req: Request) {
                         }
                         
                         return {
-                            text: question.text,
+                            text: question.text?.trim() || "",
                             type: question.type,
                             options: question.type === "MULTIPLE_CHOICE" ? stringifyQuizOptions(question.options) : null,
                             correctAnswer: correctAnswerValue,
@@ -238,7 +238,7 @@ export async function POST(req: Request) {
                     }
                     
                     return {
-                        text: question.text,
+                        text: question.text?.trim() || "",
                         type: question.type,
                         options: question.type === "MULTIPLE_CHOICE" ? stringifyQuizOptions(question.options) : null,
                         correctAnswer: correctAnswerValue,

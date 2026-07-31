@@ -365,7 +365,7 @@
           "addQuestion": "إضافة سؤال",
           "questionNumber": "السؤال {number}",
           "incomplete": "غير مكتمل",
-          "questionText": "نص السؤال",
+          "questionText": "نص السؤال (اختياري)",
           "listening": "جاري الاستماع...",
           "startRecording": "بدء التسجيل الصوتي",
           "stopRecording": "إيقاف التسجيل الصوتي",
@@ -389,6 +389,7 @@
         "errors": {
           "requiredFields": "يرجى إدخال جميع البيانات المطلوبة",
           "questionTextRequired": "السؤال {number}: نص السؤال مطلوب",
+          "questionTextOrImageRequired": "السؤال {number}: نص السؤال أو الصورة مطلوبة",
           "questionOptionsRequired": "السؤال {number}: يجب إضافة خيار واحد على الأقل",
           "questionCorrectAnswerRequired": "السؤال {number}: يجب اختيار إجابة صحيحة",
           "questionCorrectAnswerTextRequired": "السؤال {number}: الإجابة الصحيحة مطلوبة",

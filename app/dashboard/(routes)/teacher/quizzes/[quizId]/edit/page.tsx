@@ -302,9 +302,9 @@ const EditQuizPage = () => {
         for (let i = 0; i < questions.length; i++) {
             const question = questions[i];
             
-            // Validate question text - optional if image is uploaded
+            // Question text is optional when an image is provided (need text or image)
             if ((!question.text || question.text.trim() === "") && (!question.imageUrl || question.imageUrl.trim() === "")) {
-                validationErrors.push(`السؤال ${i + 1}: نص السؤال مطلوب`);
+                validationErrors.push(`السؤال ${i + 1}: نص السؤال أو الصورة مطلوبة`);
                 continue;
             }
 
@@ -661,7 +661,7 @@ const EditQuizPage = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <CardTitle className="text-lg">السؤال {index + 1}</CardTitle>
-                                        {(!question.text.trim() || 
+                                        {((!question.text.trim() && !question.imageUrl) || 
                                             (question.type === "MULTIPLE_CHOICE" && 
                                              (!question.options || question.options.filter(opt => opt.trim() !== "").length === 0)) ||
                                             (question.type === "TRUE_FALSE" && 
@@ -687,10 +687,7 @@ const EditQuizPage = () => {
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <Label>
-                                            نص السؤال
-                                            {question.imageUrl && (
-                                                <span className="text-muted-foreground text-xs font-normal"> (اختياري)</span>
-                                            )}
+                                            نص السؤال (اختياري)
                                         </Label>
                                         <div className="flex items-center gap-2">
                                             {listeningQuestionId === question.id && (

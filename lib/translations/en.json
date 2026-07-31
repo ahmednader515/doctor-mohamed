@@ -365,7 +365,7 @@
           "addQuestion": "Add Question",
           "questionNumber": "Question {number}",
           "incomplete": "Incomplete",
-          "questionText": "Question Text",
+          "questionText": "Question Text (optional)",
           "listening": "Listening...",
           "startRecording": "Start Voice Recording",
           "stopRecording": "Stop Voice Recording",
@@ -389,6 +389,7 @@
         "errors": {
           "requiredFields": "Please enter all required fields",
           "questionTextRequired": "Question {number}: Question text is required",
+          "questionTextOrImageRequired": "Question {number}: Question text or image is required",
           "questionOptionsRequired": "Question {number}: At least one option must be added",
           "questionCorrectAnswerRequired": "Question {number}: Correct answer must be selected",
           "questionCorrectAnswerTextRequired": "Question {number}: Correct answer is required",

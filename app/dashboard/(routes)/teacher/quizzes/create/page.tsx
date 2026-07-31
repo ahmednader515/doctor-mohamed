@@ -277,9 +277,9 @@ const CreateQuizPage = () => {
         for (let i = 0; i < questions.length; i++) {
             const question = questions[i];
             
-            // Validate question text - optional if image is uploaded
+            // Question text is optional when an image is provided (need text or image)
             if ((!question.text || question.text.trim() === "") && (!question.imageUrl || question.imageUrl.trim() === "")) {
-                validationErrors.push(t("teacher.quizzes.create.errors.questionTextRequired", { number: i + 1 }));
+                validationErrors.push(t("teacher.quizzes.create.errors.questionTextOrImageRequired", { number: i + 1 }));
                 continue;
             }
 
@@ -609,7 +609,7 @@ const CreateQuizPage = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <CardTitle className="text-lg">{t("teacher.quizzes.create.questions.questionNumber", { number: index + 1 })}</CardTitle>
-                                        {(!question.text.trim() || !question.correctAnswer.toString().trim() || 
+                                        {((!question.text.trim() && !question.imageUrl) || !question.correctAnswer.toString().trim() || 
                                           (question.type === "MULTIPLE_CHOICE" && 
                                            (!question.options || question.options.filter(opt => opt.trim() !== "").length < 2))) && (
                                             <Badge variant="destructive" className="text-xs">
@@ -632,9 +632,6 @@ const CreateQuizPage = () => {
                                     <div className="flex items-center justify-between">
                                         <Label>
                                             {t("teacher.quizzes.create.questions.questionText")}
-                                            {question.imageUrl && (
-                                                <span className="text-muted-foreground text-xs font-normal"> ({t("common.optional") || "اختياري"})</span>
-                                            )}
                                         </Label>
                                         <div className="flex items-center gap-2">
                                             {listeningQuestionId === question.id && (
