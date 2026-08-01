@@ -926,7 +926,7 @@
       "downloadOpened": "File opened in new tab for download",
       "documentUploaded": "Document uploaded successfully",
       "documentDeleted": "Document deleted successfully",
-      "addDocumentsHint": "Add additional documents that students may need to better understand the chapter.",
+      "addDocumentsHint": "Add additional documents that students may need to better understand the chapter. Maximum file size is 100MB.",
       "published": "Chapter Published",
       "unpublished": "Chapter Unpublished",
       "publishedDescription": "Students can view this chapter now. You can unpublish to hide it temporarily.",
@@ -1317,7 +1317,17 @@
     "showMore": "Show More",
     "switchToEnglish": "Switch to English",
     "arabic": "Arabic",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "fileSizeExceeded": "File size exceeds the {size}MB limit",
+    "uploadSuccess": "File uploaded successfully!",
+    "uploadFailed": "Failed to upload file",
+    "uploading": "Uploading...",
+    "clickToUpload": "Click to upload",
+    "orDragAndDrop": "or drag and drop",
+    "anyFileTypeMax": "Any file type (max {size}MB)",
+    "imageFilesMax": "Image files (max {size}MB)",
+    "videoFilesMax": "Video files (max {size}MB)",
+    "selectAFile": "Select a file"
   },
   "student": {
     "quizzes": {

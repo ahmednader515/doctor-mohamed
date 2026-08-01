@@ -3,6 +3,11 @@ import { auth } from "@/lib/auth";
 import { Upload } from "@aws-sdk/lib-storage";
 import { r2Client, R2_BUCKET_NAME, R2_PUBLIC_URL } from "@/lib/r2/config";
 import { generateR2Key, getFolderByType } from "@/lib/r2/upload";
+import {
+  COURSE_ATTACHMENT_MAX_SIZE,
+  formatMaxSizeMB,
+  getDefaultMaxSize,
+} from "@/lib/r2/limits";
 
 export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
@@ -21,12 +26,32 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const folder = formData.get("folder") as string | null;
+    const endpoint = formData.get("endpoint") as
+      | "courseImage"
+      | "courseAttachment"
+      | "chapterVideo"
+      | null;
 
     if (!file) {
       return new Response(JSON.stringify({ error: "No file provided" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    const maxSize =
+      getDefaultMaxSize(endpoint ?? undefined) ?? COURSE_ATTACHMENT_MAX_SIZE;
+
+    if (file.size > maxSize) {
+      return new Response(
+        JSON.stringify({
+          error: `File size exceeds the ${formatMaxSizeMB(maxSize)}MB limit`,
+        }),
+        {
+          status: 413,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     // 3. Create ReadableStream for SSE

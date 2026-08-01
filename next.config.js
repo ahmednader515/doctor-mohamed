@@ -2,8 +2,11 @@
 const nextConfig = {
   output: 'standalone',
   experimental: {
+    // Allow large attachment uploads through the Next.js proxy / route handlers
+    proxyClientMaxBodySize: '100mb',
     serverActions: {
       allowedOrigins: ['localhost:3000'],
+      bodySizeLimit: '100mb',
     },
   },
   typescript: {

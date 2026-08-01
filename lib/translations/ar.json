@@ -926,7 +926,7 @@
       "downloadOpened": "تم فتح الملف في تبويب جديد للتحميل",
       "documentUploaded": "تم رفع المستند بنجاح",
       "documentDeleted": "تم حذف المستند بنجاح",
-      "addDocumentsHint": "أضف مستندات إضافية قد يحتاجها الطلاب لفهم الدرس بشكل أفضل.",
+      "addDocumentsHint": "أضف مستندات إضافية قد يحتاجها الطلاب لفهم الدرس بشكل أفضل. الحد الأقصى لحجم الملف 100 ميجابايت.",
       "published": "الدرس منشور",
       "unpublished": "الدرس غير منشور",
       "publishedDescription": "يمكن للطلاب مشاهدة هذا الدرس الآن. يمكنك إلغاء النشر لإخفائه مؤقتًا.",
@@ -1316,7 +1316,17 @@
     "showMore": "عرض المزيد",
     "switchToEnglish": "التبديل إلى العربي",
     "arabic": "عربي",
-    "saving": "جاري الحفظ..."
+    "saving": "جاري الحفظ...",
+    "fileSizeExceeded": "حجم الملف يتجاوز الحد المسموح ({size} ميجابايت)",
+    "uploadSuccess": "تم رفع الملف بنجاح",
+    "uploadFailed": "فشل رفع الملف",
+    "uploading": "جاري الرفع...",
+    "clickToUpload": "اضغط للرفع",
+    "orDragAndDrop": "أو اسحب وأفلت",
+    "anyFileTypeMax": "أي نوع ملف (الحد الأقصى {size} ميجابايت)",
+    "imageFilesMax": "ملفات الصور (الحد الأقصى {size} ميجابايت)",
+    "videoFilesMax": "ملفات الفيديو (الحد الأقصى {size} ميجابايت)",
+    "selectAFile": "اختر ملفًا"
   },
   "student": {
     "quizzes": {

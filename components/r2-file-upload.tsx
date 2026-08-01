@@ -2,10 +2,11 @@
 
 import { useState, useRef } from "react";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { getFolderByType } from "@/lib/r2/upload";
+import { formatMaxSizeMB, getDefaultMaxSize } from "@/lib/r2/limits";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface FileUploadProps {
   onChange: (res?: { url: string; name: string }) => void;
@@ -22,16 +23,23 @@ export const R2FileUpload = ({
   accept,
   maxSize,
 }: FileUploadProps) => {
+  const { t } = useLanguage();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileName, setFileName] = useState<string>("");
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const effectiveMaxSize = maxSize ?? getDefaultMaxSize(endpoint);
+
   const uploadFile = async (file: File) => {
-    // Validate file size
-    if (maxSize && file.size > maxSize) {
-      toast.error(`File size exceeds ${(maxSize / 1024 / 1024).toFixed(0)}MB limit`);
+    if (effectiveMaxSize && file.size > effectiveMaxSize) {
+      toast.error(
+        t("common.fileSizeExceeded", { size: formatMaxSizeMB(effectiveMaxSize) })
+      );
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       return;
     }
 
@@ -42,8 +50,7 @@ export const R2FileUpload = ({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      
-      // Determine folder based on endpoint or file type
+
       let uploadFolder = folder;
       if (!uploadFolder && endpoint) {
         if (endpoint === "courseImage") {
@@ -54,30 +61,39 @@ export const R2FileUpload = ({
           uploadFolder = getFolderByType(file.name, file.type);
         }
       }
-      
+
       if (uploadFolder) {
         formData.append("folder", uploadFolder);
       }
 
-      // Use fetch with SSE
+      if (endpoint) {
+        formData.append("endpoint", endpoint);
+      }
+
       const response = await fetch("/api/r2/upload", {
         method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error(`Upload failed: ${response.statusText}`);
+        let message = t("common.uploadFailed");
+        try {
+          const errorBody = await response.json();
+          if (errorBody?.error) message = errorBody.error;
+        } catch {
+          // ignore parse errors
+        }
+        throw new Error(message);
       }
 
       if (!response.body) {
-        throw new Error("No response body");
+        throw new Error(t("common.uploadFailed"));
       }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
 
-      // Parse SSE stream
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -88,33 +104,38 @@ export const R2FileUpload = ({
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
+            let data: any;
             try {
-              const data = JSON.parse(line.slice(6));
-
-              if (data.progress !== undefined) {
-                setUploadProgress(data.progress);
-              } else if (data.done) {
-                setUploadProgress(100);
-                onChange({
-                  url: data.url,
-                  name: data.name,
-                });
-                toast.success("File uploaded successfully!");
-              } else if (data.error) {
-                throw new Error(data.error);
-              }
+              data = JSON.parse(line.slice(6));
             } catch (parseError) {
               console.error("Error parsing SSE data:", parseError);
+              continue;
+            }
+
+            if (data.progress !== undefined) {
+              setUploadProgress(data.progress);
+            } else if (data.done) {
+              setUploadProgress(100);
+              onChange({
+                url: data.url,
+                name: data.name,
+              });
+              toast.success(t("common.uploadSuccess"));
+            } else if (data.error) {
+              throw new Error(data.error);
             }
           }
         }
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to upload file");
+      toast.error(error.message || t("common.uploadFailed"));
       setUploadProgress(0);
     } finally {
       setUploading(false);
       setFileName("");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -155,6 +176,26 @@ export const R2FileUpload = ({
     return "*/*";
   };
 
+  const getHintText = () => {
+    if (!endpoint) return t("common.selectAFile");
+    if (endpoint === "courseImage") {
+      return t("common.imageFilesMax", {
+        size: formatMaxSizeMB(effectiveMaxSize ?? getDefaultMaxSize("courseImage")!),
+      });
+    }
+    if (endpoint === "chapterVideo") {
+      return t("common.videoFilesMax", {
+        size: formatMaxSizeMB(effectiveMaxSize ?? getDefaultMaxSize("chapterVideo")!),
+      });
+    }
+    if (endpoint === "courseAttachment") {
+      return t("common.anyFileTypeMax", {
+        size: formatMaxSizeMB(effectiveMaxSize ?? getDefaultMaxSize("courseAttachment")!),
+      });
+    }
+    return t("common.selectAFile");
+  };
+
   return (
     <div className="w-full">
       {uploading ? (
@@ -166,7 +207,7 @@ export const R2FileUpload = ({
           <Progress value={uploadProgress} className="w-full" />
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Uploading...</span>
+            <span>{t("common.uploading")}</span>
           </div>
         </div>
       ) : (
@@ -192,19 +233,13 @@ export const R2FileUpload = ({
           <div className="flex flex-col items-center gap-2">
             <Upload className="h-10 w-10 text-muted-foreground" />
             <div className="text-sm">
-              <span className="text-primary font-medium">Click to upload</span>{" "}
-              or drag and drop
+              <span className="text-primary font-medium">{t("common.clickToUpload")}</span>{" "}
+              {t("common.orDragAndDrop")}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {endpoint === "courseImage" && "Image files (max 4MB)"}
-              {endpoint === "chapterVideo" && "Video files (max 512MB)"}
-              {endpoint === "courseAttachment" && "Any file type"}
-              {!endpoint && "Select a file"}
-            </p>
+            <p className="text-xs text-muted-foreground">{getHintText()}</p>
           </div>
         </div>
       )}
     </div>
   );
 };
-
