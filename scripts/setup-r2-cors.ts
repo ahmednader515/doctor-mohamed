@@ -16,9 +16,10 @@ async function setupCORS() {
       CORSConfiguration: {
         CORSRules: [
           {
+            // GET/HEAD for playback & downloads; PUT for browser direct uploads
             AllowedHeaders: ["*"],
-            AllowedMethods: ["GET", "HEAD"],
-            AllowedOrigins: ["*"], // In production, use your domain
+            AllowedMethods: ["GET", "HEAD", "PUT"],
+            AllowedOrigins: ["*"], // Prefer locking this to your production domain
             ExposeHeaders: [
               "ETag",
               "Content-Length",

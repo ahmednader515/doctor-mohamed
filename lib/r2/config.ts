@@ -9,6 +9,9 @@ export const r2Client = new S3Client({
     accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
   },
+  // Required for browser direct uploads via presigned URLs (avoids checksum headers browsers can't send)
+  requestChecksumCalculation: "WHEN_REQUIRED",
+  responseChecksumValidation: "WHEN_REQUIRED",
 });
 
 export const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || "";

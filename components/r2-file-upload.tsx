@@ -32,6 +32,37 @@ export const R2FileUpload = ({
 
   const effectiveMaxSize = maxSize ?? getDefaultMaxSize(endpoint);
 
+  const uploadToR2 = (
+    file: File,
+    uploadUrl: string,
+    contentType: string
+  ): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", uploadUrl);
+      xhr.setRequestHeader("Content-Type", contentType);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(t("common.uploadFailed")));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error(t("common.uploadFailed")));
+      xhr.onabort = () => reject(new Error(t("common.uploadFailed")));
+      xhr.send(file);
+    });
+  };
+
   const uploadFile = async (file: File) => {
     if (effectiveMaxSize && file.size > effectiveMaxSize) {
       toast.error(
@@ -48,9 +79,6 @@ export const R2FileUpload = ({
     setFileName(file.name);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
       let uploadFolder = folder;
       if (!uploadFolder && endpoint) {
         if (endpoint === "courseImage") {
@@ -62,23 +90,23 @@ export const R2FileUpload = ({
         }
       }
 
-      if (uploadFolder) {
-        formData.append("folder", uploadFolder);
-      }
-
-      if (endpoint) {
-        formData.append("endpoint", endpoint);
-      }
-
-      const response = await fetch("/api/r2/upload", {
+      // Ask the server for a short-lived signed URL (tiny JSON request — avoids Vercel 413)
+      const presignResponse = await fetch("/api/r2/presign", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileSize: file.size,
+          contentType: file.type,
+          endpoint,
+          folder: uploadFolder,
+        }),
       });
 
-      if (!response.ok) {
+      if (!presignResponse.ok) {
         let message = t("common.uploadFailed");
         try {
-          const errorBody = await response.json();
+          const errorBody = await presignResponse.json();
           if (errorBody?.error) message = errorBody.error;
         } catch {
           // ignore parse errors
@@ -86,47 +114,18 @@ export const R2FileUpload = ({
         throw new Error(message);
       }
 
-      if (!response.body) {
-        throw new Error(t("common.uploadFailed"));
-      }
+      const { uploadUrl, publicUrl, name, contentType } =
+        await presignResponse.json();
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
+      // Upload the file directly to Cloudflare R2 (bypasses Vercel body limit)
+      await uploadToR2(file, uploadUrl, contentType);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            let data: any;
-            try {
-              data = JSON.parse(line.slice(6));
-            } catch (parseError) {
-              console.error("Error parsing SSE data:", parseError);
-              continue;
-            }
-
-            if (data.progress !== undefined) {
-              setUploadProgress(data.progress);
-            } else if (data.done) {
-              setUploadProgress(100);
-              onChange({
-                url: data.url,
-                name: data.name,
-              });
-              toast.success(t("common.uploadSuccess"));
-            } else if (data.error) {
-              throw new Error(data.error);
-            }
-          }
-        }
-      }
+      setUploadProgress(100);
+      onChange({
+        url: publicUrl,
+        name: name || file.name,
+      });
+      toast.success(t("common.uploadSuccess"));
     } catch (error: any) {
       toast.error(error.message || t("common.uploadFailed"));
       setUploadProgress(0);
