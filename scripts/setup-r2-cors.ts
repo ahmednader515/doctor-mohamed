@@ -11,15 +11,24 @@ async function setupCORS() {
     console.log("🔧 Setting up CORS configuration for R2 bucket...");
     console.log(`   Bucket: ${R2_BUCKET_NAME}`);
 
+    const allowedOrigins = [
+      "https://www.doctor-mohamed-mahmoud.com",
+      "https://doctor-mohamed-mahmoud.com",
+      "http://localhost:3000",
+      ...(process.env.R2_CORS_ORIGINS
+        ? process.env.R2_CORS_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean)
+        : []),
+    ];
+
     const command = new PutBucketCorsCommand({
       Bucket: R2_BUCKET_NAME,
       CORSConfiguration: {
         CORSRules: [
           {
-            // GET/HEAD for playback & downloads; PUT for browser direct uploads
+            // Browser direct uploads need PUT + preflight OPTIONS headers
             AllowedHeaders: ["*"],
-            AllowedMethods: ["GET", "HEAD", "PUT"],
-            AllowedOrigins: ["*"], // Prefer locking this to your production domain
+            AllowedMethods: ["GET", "HEAD", "PUT", "POST"],
+            AllowedOrigins: allowedOrigins,
             ExposeHeaders: [
               "ETag",
               "Content-Length",
@@ -32,6 +41,9 @@ async function setupCORS() {
         ],
       },
     });
+
+    console.log("   Allowed origins:");
+    allowedOrigins.forEach((origin) => console.log(`   - ${origin}`));
 
     await r2Client.send(command);
     console.log("✅ CORS configuration applied successfully!");

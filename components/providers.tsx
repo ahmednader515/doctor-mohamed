@@ -40,7 +40,9 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
                 defaultTheme="light"
                 forcedTheme="light"
                 enableSystem={false}
+                enableColorScheme={false}
                 disableTransitionOnChange
+                storageKey="theme"
               >
                 <NavigationProvider>
                   <ToastProvider />

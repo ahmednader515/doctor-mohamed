@@ -29,15 +29,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning lang="ar" dir="rtl" className={`${geistSans.variable} ${geistMono.variable} ${cairo.variable} ${roboto.variable}`}>
+    <html
+      suppressHydrationWarning
+      lang="ar"
+      dir="rtl"
+      className={`light ${geistSans.variable} ${geistMono.variable} ${cairo.variable} ${roboto.variable}`}
+    >
       <body suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                if (document.documentElement) {
-                  document.documentElement.style.setProperty('--brand', '${theme.brand}');
-                }
+                try {
+                  var root = document.documentElement;
+                  root.classList.remove('dark');
+                  root.classList.add('light');
+                  root.style.colorScheme = 'light';
+                  root.style.setProperty('--brand', '${theme.brand}');
+                  localStorage.setItem('theme', 'light');
+                } catch (e) {}
               })();
             `,
           }}

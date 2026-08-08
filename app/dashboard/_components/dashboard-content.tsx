@@ -179,7 +179,14 @@ export const DashboardContent = ({
                 <p className="text-2xl font-bold">{studentStats.totalChapters}</p>
               </div>
             </div>
-            <Progress value={(studentStats.completedChapters / Math.max(studentStats.totalChapters, 1)) * 100} className="h-2" />
+            <Progress
+              value={
+                studentStats.totalChapters > 0
+                  ? (studentStats.completedChapters / studentStats.totalChapters) * 100
+                  : 0
+              }
+              className="h-2"
+            />
             <p className="text-sm text-muted-foreground mt-2">
               {t("dashboard.completedOf", { completed: studentStats.completedChapters.toString(), total: studentStats.totalChapters.toString() })}
             </p>
@@ -195,7 +202,14 @@ export const DashboardContent = ({
                 <p className="text-2xl font-bold">{studentStats.completedQuizzes}</p>
               </div>
             </div>
-            <Progress value={(studentStats.completedQuizzes / Math.max(studentStats.totalQuizzes, 1)) * 100} className="h-2" />
+            <Progress
+              value={
+                studentStats.totalQuizzes > 0
+                  ? (studentStats.completedQuizzes / studentStats.totalQuizzes) * 100
+                  : 0
+              }
+              className="h-2"
+            />
             <p className="text-sm text-muted-foreground mt-2">
               {t("dashboard.completedOf", { completed: studentStats.completedQuizzes.toString(), total: studentStats.totalQuizzes.toString() })}
             </p>
@@ -211,7 +225,14 @@ export const DashboardContent = ({
                 <p className="text-2xl font-bold">{studentStats.completedHomeworks}</p>
               </div>
             </div>
-            <Progress value={(studentStats.completedHomeworks / Math.max(studentStats.totalHomeworks, 1)) * 100} className="h-2" />
+            <Progress
+              value={
+                studentStats.totalHomeworks > 0
+                  ? (studentStats.completedHomeworks / studentStats.totalHomeworks) * 100
+                  : 0
+              }
+              className="h-2"
+            />
             <p className="text-sm text-muted-foreground mt-2">
               {t("dashboard.completedOf", { completed: studentStats.completedHomeworks.toString(), total: studentStats.totalHomeworks.toString() })}
             </p>
